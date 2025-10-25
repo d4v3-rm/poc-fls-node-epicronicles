@@ -26,7 +26,7 @@ export const DebugConsole = () => {
               speed: session.clock.speedMultiplier,
               running: session.clock.isRunning,
               elapsedMs: session.clock.elapsedMs,
-              systems: session.galaxy.systemCount,
+              systems: session.galaxy.systems.length,
             },
             null,
             2,

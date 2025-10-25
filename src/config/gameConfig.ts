@@ -12,7 +12,8 @@ export const gameConfig: GameConfig = {
   ticksPerSecond: 1,
   defaultGalaxy: {
     seed: 'debug-seed',
-    systemCount: 12,
+    systemCount: 18,
+    galaxyRadius: 260,
   },
   debug: {
     autoStart: false,

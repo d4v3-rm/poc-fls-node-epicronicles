@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
+import { GalaxyOverview } from './GalaxyOverview';
 
 const speedOptions = [0.5, 1, 2, 4];
 
@@ -86,11 +87,12 @@ export const GameScreen = () => {
             <dd>{clock.isRunning ? 'Running' : 'Paused'}</dd>
           </div>
           <div>
-            <dt>Systems</dt>
-            <dd>{galaxy.systemCount}</dd>
+            <dt>Sistemi</dt>
+            <dd>{galaxy.systems.length}</dd>
           </div>
         </dl>
       </section>
+      <GalaxyOverview />
       <DebugConsole />
     </div>
   );

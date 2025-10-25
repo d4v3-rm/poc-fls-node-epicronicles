@@ -157,3 +157,58 @@ body {
   max-height: 240px;
   font-size: 0.85rem;
 }
+
+.galaxy-overview {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.galaxy-overview__map {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(4, 10, 25, 0.9);
+  padding: 0.5rem;
+}
+
+.galaxy-overview__map svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.galaxy-overview__label {
+  font-size: 0.65rem;
+  fill: rgba(255, 255, 255, 0.75);
+}
+
+.galaxy-overview__list {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(4, 10, 25, 0.9);
+  padding: 1rem;
+  overflow: auto;
+  max-height: 360px;
+}
+
+.galaxy-overview__list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.galaxy-overview__list th {
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.galaxy-overview__list td {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}

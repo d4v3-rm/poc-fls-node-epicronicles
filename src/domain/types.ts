@@ -8,9 +8,24 @@ export interface SimulationClock {
   lastUpdate: number | null;
 }
 
+export type StarClass = 'mainSequence' | 'giant' | 'dwarf';
+
+export interface Vector2 {
+  x: number;
+  y: number;
+}
+
+export interface StarSystem {
+  id: string;
+  name: string;
+  position: Vector2;
+  starClass: StarClass;
+  discovered: boolean;
+}
+
 export interface GalaxyState {
   seed: string;
-  systemCount: number;
+  systems: StarSystem[];
 }
 
 export interface GameSession {

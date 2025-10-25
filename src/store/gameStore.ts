@@ -30,7 +30,14 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   startNewSession: (args) => {
     const cfg = get().config;
     const seed = args?.seed ?? cfg.defaultGalaxy.seed;
-    const session = createSession({ seed, label: args?.label });
+    const session = createSession({
+      seed,
+      label: args?.label,
+      galaxyOverrides: {
+        systemCount: cfg.defaultGalaxy.systemCount,
+        galaxyRadius: cfg.defaultGalaxy.galaxyRadius,
+      },
+    });
     set({ session, view: 'simulation' });
   },
   returnToMenu: () => set({ view: 'mainMenu', session: null }),
