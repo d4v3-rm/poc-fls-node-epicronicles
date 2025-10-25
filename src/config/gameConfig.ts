@@ -1,4 +1,5 @@
 import type { GalaxyGenerationParams } from '../domain/galaxy';
+import type { EconomyConfig } from '../domain/economy';
 
 export interface GameConfig {
   ticksPerSecond: number;
@@ -10,6 +11,7 @@ export interface GameConfig {
     travelTicks: number;
     surveyTicks: number;
   };
+  economy: EconomyConfig;
 }
 
 export const gameConfig: GameConfig = {
@@ -25,5 +27,28 @@ export const gameConfig: GameConfig = {
   exploration: {
     travelTicks: 3,
     surveyTicks: 2,
+  },
+  economy: {
+    startingResources: {
+      energy: 100,
+      minerals: 80,
+      food: 60,
+      research: 0,
+    },
+    homeworld: {
+      name: 'Aurora Prime',
+      kind: 'terrestrial',
+      size: 18,
+      population: 4,
+      baseProduction: {
+        energy: 6,
+        minerals: 5,
+        food: 7,
+        research: 3,
+      },
+      upkeep: {
+        food: 4,
+      },
+    },
   },
 };

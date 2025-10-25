@@ -38,6 +38,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         systemCount: cfg.defaultGalaxy.systemCount,
         galaxyRadius: cfg.defaultGalaxy.galaxyRadius,
       },
+      economyConfig: cfg.economy,
     });
     set({ session, view: 'simulation' });
   },

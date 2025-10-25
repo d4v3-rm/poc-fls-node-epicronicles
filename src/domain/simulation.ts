@@ -1,6 +1,7 @@
 import type { GameSession } from './types';
 import type { GameConfig } from '../config/gameConfig';
 import { advanceExploration } from './exploration';
+import { advanceEconomy } from './economy';
 
 export const advanceSimulation = (
   session: GameSession,
@@ -19,11 +20,13 @@ export const advanceSimulation = (
       updatedSession.scienceShips,
       config.exploration,
     );
+    const { economy } = advanceEconomy(updatedSession.economy, config.economy);
 
     updatedSession = {
       ...updatedSession,
       galaxy,
       scienceShips,
+      economy,
     };
   }
 

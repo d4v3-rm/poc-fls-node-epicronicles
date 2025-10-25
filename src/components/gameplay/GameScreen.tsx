@@ -3,6 +3,8 @@ import { useGameStore } from '../../store/gameStore';
 import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
 import { GalaxyOverview } from './GalaxyOverview';
+import { ResourceBar } from './ResourceBar';
+import { PlanetList } from './PlanetList';
 
 const speedOptions = [0.5, 1, 2, 4];
 
@@ -45,6 +47,7 @@ export const GameScreen = () => {
 
   return (
     <div className="game-screen">
+      <ResourceBar />
       <header className="game-screen__header">
         <div>
           <h2>{session.label}</h2>
@@ -115,6 +118,7 @@ export const GameScreen = () => {
         </dl>
       </section>
       <GalaxyOverview />
+      <PlanetList />
       <DebugConsole />
     </div>
   );

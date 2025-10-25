@@ -14,6 +14,16 @@ export type SystemVisibility = 'unknown' | 'revealed' | 'surveyed';
 
 export type ScienceShipStatus = 'idle' | 'traveling' | 'surveying';
 
+export type ResourceType = 'energy' | 'minerals' | 'food' | 'research';
+
+export interface ResourceLedger {
+  amount: number;
+  income: number;
+  upkeep: number;
+}
+
+export type PlanetKind = 'terrestrial' | 'desert' | 'tundra';
+
 export interface Vector2 {
   x: number;
   y: number;
@@ -37,6 +47,22 @@ export interface ScienceShip {
   autoExplore: boolean;
 }
 
+export interface Planet {
+  id: string;
+  name: string;
+  systemId: string;
+  kind: PlanetKind;
+  size: number;
+  population: number;
+  baseProduction: Partial<Record<ResourceType, number>>;
+  upkeep: Partial<Record<ResourceType, number>>;
+}
+
+export interface EconomyState {
+  resources: Record<ResourceType, ResourceLedger>;
+  planets: Planet[];
+}
+
 export interface GalaxyState {
   seed: string;
   systems: StarSystem[];
@@ -49,4 +75,5 @@ export interface GameSession {
   galaxy: GalaxyState;
   clock: SimulationClock;
   scienceShips: ScienceShip[];
+  economy: EconomyState;
 }
