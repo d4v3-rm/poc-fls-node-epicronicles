@@ -111,6 +111,18 @@ const createOrbitGroup = (
 const materialCache = {
   friendly: new THREE.MeshStandardMaterial({ color: 0x74b0ff }),
   hostile: new THREE.MeshStandardMaterial({ color: 0xff6b6b }),
+  revealed: new THREE.MeshStandardMaterial({
+    color: 0x4c5e82,
+    emissive: 0x05070d,
+    transparent: true,
+    opacity: 0.8,
+  }),
+  fogged: new THREE.MeshStandardMaterial({
+    color: 0x1a2132,
+    emissive: 0x05070d,
+    transparent: true,
+    opacity: 0.5,
+  }),
   ship: new THREE.MeshBasicMaterial({ color: 0xffffff }),
 };
 
@@ -278,6 +290,10 @@ export const GalaxyMap = ({
         return;
       }
 
+      if (targetNode.userData.visibility === 'unknown') {
+        onClearFocus?.();
+        return;
+      }
       const worldPos = new THREE.Vector3();
       targetNode.getWorldPosition(worldPos);
       const currentOffset = systemGroup.position.clone();
@@ -433,6 +449,7 @@ export const GalaxyMap = ({
       const node = new THREE.Group();
       node.name = system.id;
       node.userData.systemId = system.id;
+      node.userData.visibility = system.visibility;
       const pos = toMapPosition(system);
       node.position.set(pos.x, pos.y, pos.z);
 
@@ -441,29 +458,39 @@ export const GalaxyMap = ({
         dwarf: 1.2,
         giant: 3.1,
       };
+      const baseSize = starSizes[system.starClass] ?? 1.8;
+      const sizeMultiplier = system.visibility === 'unknown' ? 0.55 : 1;
       const geometry = new THREE.SphereGeometry(
-        starSizes[system.starClass] ?? 1.8,
+        baseSize * sizeMultiplier,
         20,
         20,
       );
 
+      const isRevealed = system.visibility !== 'unknown';
+      const isSurveyed = system.visibility === 'surveyed';
+      const starMaterial = !isRevealed
+        ? materialCache.fogged
+        : system.hostilePower && system.hostilePower > 0
+          ? materialCache.hostile
+          : isSurveyed
+            ? materialCache.friendly
+            : materialCache.revealed;
+
       const starMesh = new THREE.Mesh(
         geometry,
-        system.hostilePower && system.hostilePower > 0
-          ? materialCache.hostile
-          : materialCache.friendly,
+        starMaterial,
       );
       starMesh.userData.systemId = system.id;
       starMesh.castShadow = false;
       starMesh.receiveShadow = false;
       node.add(starMesh);
 
-      const label = createLabelSprite(system.name);
+      const label = isRevealed ? createLabelSprite(system.name) : null;
       if (label) {
         node.add(label);
       }
 
-      if (system.orbitingPlanets.length > 0) {
+      if (isSurveyed && system.orbitingPlanets.length > 0) {
         const orbitGroup = createOrbitGroup(
           system.orbitingPlanets,
           system.id.charCodeAt(0),
