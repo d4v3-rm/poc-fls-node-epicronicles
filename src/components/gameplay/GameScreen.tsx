@@ -2,15 +2,15 @@ import { useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
-import { GalaxyOverview } from './GalaxyOverview';
-import { ResourceBar } from './ResourceBar';
+import { GalaxyMap } from './GalaxyMap';
 import { PlanetList } from './PlanetList';
 import { ColonizationPanel } from './ColonizationPanel';
 import { ShipyardPanel } from './ShipyardPanel';
 import { FleetPanel } from './FleetPanel';
 import { CombatLogPanel } from './CombatLogPanel';
-
-const speedOptions = [0.5, 1, 2, 4];
+import { HudTopBar } from './HudTopBar';
+import { HudBottomBar } from './HudBottomBar';
+import { DraggablePanel } from '../ui/DraggablePanel';
 
 export const GameScreen = () => {
   useGameLoop();
@@ -20,7 +20,6 @@ export const GameScreen = () => {
   const setSimulationRunning = useGameStore(
     (state) => state.setSimulationRunning,
   );
-  const setSpeedMultiplier = useGameStore((state) => state.setSpeedMultiplier);
 
   if (!session) {
     return (
@@ -33,14 +32,6 @@ export const GameScreen = () => {
     );
   }
 
-  const { clock, galaxy, scienceShips } = session;
-  const revealedCount = galaxy.systems.filter(
-    (system) => system.visibility !== 'unknown',
-  ).length;
-  const surveyedCount = galaxy.systems.filter(
-    (system) => system.visibility === 'surveyed',
-  ).length;
-
   useEffect(() => {
     if (!sessionId) {
       return;
@@ -49,85 +40,36 @@ export const GameScreen = () => {
     setSimulationRunning(true, Date.now());
   }, [sessionId, setSimulationRunning]);
 
+  const viewportWidth =
+    typeof window !== 'undefined' ? window.innerWidth : 1200;
+
   return (
-    <div className="game-screen">
-      <ResourceBar />
-      <header className="game-screen__header">
-        <div>
-          <h2>{session.label}</h2>
-          <p>Galaxy seed: {galaxy.seed}</p>
-        </div>
-
-        <div className="game-screen__controls">
-          <button
-            className="panel__action"
-            onClick={() => setSimulationRunning(!clock.isRunning, Date.now())}
-          >
-            {clock.isRunning ? 'Pause' : 'Resume'}
-          </button>
-          <span>Speed:</span>
-          <div className="speed-options">
-            {speedOptions.map((option) => (
-              <button
-                key={option}
-                className={`panel__action ${
-                  option === clock.speedMultiplier ? 'is-active' : ''
-                }`}
-                onClick={() => setSpeedMultiplier(option)}
-              >
-                {option}x
-              </button>
-            ))}
-          </div>
-          <button className="panel__action" onClick={returnToMenu}>
-            Quit to menu
-          </button>
-        </div>
-      </header>
-
-      <section className="game-screen__status">
-        <dl>
-          <div>
-            <dt>Tick</dt>
-            <dd>{clock.tick}</dd>
-          </div>
-          <div>
-            <dt>Elapsed (ms)</dt>
-            <dd>{clock.elapsedMs.toFixed(0)}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>{clock.isRunning ? 'Running' : 'Paused'}</dd>
-          </div>
-          <div>
-            <dt>Sistemi totali</dt>
-            <dd>{galaxy.systems.length}</dd>
-          </div>
-          <div>
-            <dt>Rivelati</dt>
-            <dd>
-              {revealedCount}/{galaxy.systems.length}
-            </dd>
-          </div>
-          <div>
-            <dt>Sondati</dt>
-            <dd>
-              {surveyedCount}/{galaxy.systems.length}
-            </dd>
-          </div>
-          <div>
-            <dt>Navi scientifiche</dt>
-            <dd>{scienceShips.length}</dd>
-          </div>
-        </dl>
-      </section>
-      <GalaxyOverview />
-      <PlanetList />
-      <ColonizationPanel />
-      <ShipyardPanel />
-      <FleetPanel />
-      <CombatLogPanel />
-      <DebugConsole />
+    <div className="game-layout">
+      <HudTopBar />
+      <div className="game-map-layer">
+        <GalaxyMap />
+      </div>
+      <HudBottomBar />
+      <div className="floating-panels">
+        <DraggablePanel title="Pianeti" initialX={20} initialY={120}>
+          <PlanetList />
+        </DraggablePanel>
+        <DraggablePanel title="Colonizzazione" initialX={20} initialY={360}>
+          <ColonizationPanel />
+        </DraggablePanel>
+        <DraggablePanel title="Cantieri" initialX={viewportWidth - 360} initialY={120}>
+          <ShipyardPanel />
+        </DraggablePanel>
+        <DraggablePanel title="Flotte" initialX={viewportWidth - 360} initialY={360}>
+          <FleetPanel />
+        </DraggablePanel>
+        <DraggablePanel title="Battaglie" initialX={viewportWidth - 360} initialY={600}>
+          <CombatLogPanel />
+        </DraggablePanel>
+        <DraggablePanel title="Debug" initialX={20} initialY={600}>
+          <DebugConsole />
+        </DraggablePanel>
+      </div>
     </div>
   );
 };
