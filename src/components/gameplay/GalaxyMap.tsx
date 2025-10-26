@@ -1,41 +1,89 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '../../store/gameStore';
-import type { StarClass, SystemVisibility } from '../../domain/types';
+import type { OrbitingPlanet, StarSystem } from '../../domain/types';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
-type GalaxySystem = {
-  id: string;
-  name: string;
-  position: { x: number; y: number };
-  visibility: SystemVisibility;
-  starClass: StarClass;
-  hostilePower?: number;
-};
-
-const buildPositions = (systems: GalaxySystem[]) => {
-  if (systems.length === 0) {
-    return [];
+const createLabelSprite = (text: string) => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return null;
   }
 
-  const xs = systems.map((system) => system.position.x);
-  const ys = systems.map((system) => system.position.y);
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
-  const spanX = maxX - minX || 1;
-  const spanY = maxY - minY || 1;
+  const fontSize = 48;
+  ctx.font = `600 ${fontSize}px Inter`;
+  const textWidth = ctx.measureText(text).width + 40;
+  canvas.width = textWidth;
+  canvas.height = fontSize * 1.8;
 
-  return systems.map((system) => ({
-    ...system,
-    x: ((system.position.x - minX) / spanX - 0.5) * 200,
-    y: ((system.position.y - minY) / spanY - 0.5) * 200,
-    z: (Math.random() - 0.5) * 20,
-  }));
+  ctx.font = `600 ${fontSize}px Inter`;
+  ctx.fillStyle = 'rgba(7, 10, 18, 0.75)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#e5ecff';
+  ctx.fillText(text, 20, fontSize);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.userData.baseWidth = canvas.width / 30;
+  sprite.userData.baseHeight = canvas.height / 30;
+  sprite.scale.set(sprite.userData.baseWidth, sprite.userData.baseHeight, 1);
+  sprite.position.set(0, 8, 0);
+  sprite.name = 'label';
+  return sprite;
 };
+
+const createOrbitGroup = (planets: OrbitingPlanet[], seed: number) => {
+  const group = new THREE.Group();
+  group.name = 'orbits';
+  const speedBase = 0.002 + (seed % 5) * 0.0004;
+
+  planets.forEach((planet) => {
+    const planetMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(planet.size, 16, 16),
+      new THREE.MeshStandardMaterial({ color: planet.color }),
+    );
+    planetMesh.position.set(planet.orbitRadius, 0, 0);
+    group.add(planetMesh);
+
+    const orbitRing = new THREE.Mesh(
+      new THREE.RingGeometry(planet.orbitRadius - 0.1, planet.orbitRadius + 0.1, 32),
+      new THREE.MeshBasicMaterial({
+        color: '#345',
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.3,
+      }),
+    );
+    orbitRing.rotation.x = Math.PI / 2;
+    group.add(orbitRing);
+  });
+
+  group.userData.speed = speedBase;
+  group.visible = false;
+  return group;
+};
+
+const materialCache = {
+  friendly: new THREE.MeshStandardMaterial({ color: 0x74b0ff }),
+  hostile: new THREE.MeshStandardMaterial({ color: 0xff6b6b }),
+  ship: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+};
+
+const toMapPosition = (system: StarSystem) => ({
+  x: system.mapPosition?.x ?? system.position.x,
+  y: system.mapPosition?.y ?? system.position.y,
+  z: system.mapPosition?.z ?? 0,
+});
 
 export const GalaxyMap = () => {
   const systems = useGameStore((state) => state.session?.galaxy.systems ?? []);
@@ -61,17 +109,17 @@ export const GalaxyMap = () => {
       0.1,
       1000,
     );
-    camera.position.set(0, 0, 160);
+    camera.position.set(0, 0, 170);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-    const light = new THREE.PointLight(0xffffff, 1.2);
-    light.position.set(50, 50, 100);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    const keyLight = new THREE.PointLight(0xffffff, 1.2);
+    keyLight.position.set(60, 60, 100);
     scene.add(ambient);
-    scene.add(light);
+    scene.add(keyLight);
 
     const systemGroup = new THREE.Group();
     systemGroupRef.current = systemGroup;
@@ -91,8 +139,8 @@ export const GalaxyMap = () => {
       event.preventDefault();
       camera.position.z = clamp(
         camera.position.z + event.deltaY * 0.1,
-        40,
-        400,
+        35,
+        320,
       );
     };
 
@@ -125,6 +173,30 @@ export const GalaxyMap = () => {
     const renderLoop = () => {
       systemGroup.rotation.y = rotation.x;
       systemGroup.rotation.x = rotation.y;
+
+      const showOrbits = camera.position.z < 110;
+      const labelScale = THREE.MathUtils.clamp(150 / camera.position.z, 0.4, 2.5);
+
+      systemGroup.children.forEach((node) => {
+        const label = node.getObjectByName('label') as THREE.Sprite;
+        if (label) {
+          label.visible = camera.position.z < 260;
+          label.scale.set(
+            label.userData.baseWidth * labelScale,
+            label.userData.baseHeight * labelScale,
+            1,
+          );
+        }
+
+        const orbitGroup = node.getObjectByName('orbits') as THREE.Group;
+        if (orbitGroup) {
+          orbitGroup.visible = showOrbits;
+          if (showOrbits) {
+            orbitGroup.rotation.y += orbitGroup.userData.speed;
+          }
+        }
+      });
+
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(renderLoop);
     };
@@ -152,40 +224,59 @@ export const GalaxyMap = () => {
     }
 
     group.clear();
-    const converted = buildPositions(systems);
-    const material = new THREE.MeshStandardMaterial({ color: 0x74b0ff });
-    const hostileMaterial = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
-    const shipGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+    const positions = new Map<string, THREE.Vector3>();
 
-    converted.forEach((system) => {
-      const geometry = new THREE.SphereGeometry(
-        system.visibility === 'surveyed' ? 2 : 1.2,
-        16,
-        16,
-      );
-      const mesh = new THREE.Mesh(
+    const starGeometryMap = {
+      surveyed: new THREE.SphereGeometry(2.1, 20, 20),
+      other: new THREE.SphereGeometry(1.4, 16, 16),
+    };
+
+    systems.forEach((system) => {
+      const node = new THREE.Group();
+      node.name = system.id;
+      const pos = toMapPosition(system);
+      node.position.set(pos.x, pos.y, pos.z);
+      positions.set(system.id, node.position);
+
+      const geometry =
+        system.visibility === 'surveyed' ? starGeometryMap.surveyed : starGeometryMap.other;
+
+      const starMesh = new THREE.Mesh(
         geometry,
         system.hostilePower && system.hostilePower > 0
-          ? hostileMaterial
-          : material,
+          ? materialCache.hostile
+          : materialCache.friendly,
       );
-      mesh.position.set(system.x, system.y, system.z);
-      mesh.userData = { id: system.id, name: system.name };
-      group.add(mesh);
+      starMesh.castShadow = false;
+      starMesh.receiveShadow = false;
+      node.add(starMesh);
+
+      const label = createLabelSprite(system.name);
+      if (label) {
+        node.add(label);
+      }
+
+      if (system.orbitingPlanets.length > 0) {
+        const orbitGroup = createOrbitGroup(
+          system.orbitingPlanets,
+          system.id.charCodeAt(0),
+        );
+        node.add(orbitGroup);
+      }
+
+      group.add(node);
     });
 
     const shipGroup = new THREE.Group();
     shipGroup.name = 'ships';
+    const shipGeometry = new THREE.SphereGeometry(0.8, 16, 16);
     scienceShips.forEach((ship) => {
-      const system = converted.find((entry) => entry.id === ship.currentSystemId);
-      if (!system) {
+      const position = positions.get(ship.currentSystemId);
+      if (!position) {
         return;
       }
-      const shipMesh = new THREE.Mesh(
-        shipGeometry,
-        new THREE.MeshBasicMaterial({ color: 0xffffff }),
-      );
-      shipMesh.position.set(system.x, system.y, system.z + 3);
+      const shipMesh = new THREE.Mesh(shipGeometry, materialCache.ship);
+      shipMesh.position.set(position.x, position.y, position.z + 4);
       shipGroup.add(shipMesh);
     });
     group.add(shipGroup);

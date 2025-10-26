@@ -16,9 +16,11 @@ export const AppShell = () => {
     }
   }, [autoStart, hasSession, startNewSession]);
 
+  const isMenu = view === 'mainMenu';
+
   return (
-    <div className="app-shell">
-      {view === 'mainMenu' ? <MainMenu /> : <GameScreen />}
+    <div className={`app-shell ${isMenu ? 'app-shell--menu' : ''}`}>
+      {isMenu ? <MainMenu /> : <GameScreen />}
     </div>
   );
 };

@@ -1,11 +1,13 @@
 import type {
   GalaxyState,
   HabitableWorldTemplate,
+  OrbitingPlanet,
   PlanetKind,
   ResourceType,
   StarClass,
   StarSystem,
   SystemVisibility,
+  Vector3,
 } from './types';
 
 export interface GalaxyGenerationParams {
@@ -70,6 +72,32 @@ const createHabitableWorld = (
   };
 };
 
+const orbitPalette = ['#72fcd5', '#f9d976', '#f58ef6', '#8ec5ff', '#c7ddff'];
+
+const createOrbitingPlanets = (
+  random: () => number,
+  systemName: string,
+): OrbitingPlanet[] => {
+  const count = 2 + Math.floor(random() * 3);
+  return Array.from({ length: count }, (_, index) => ({
+    id: `${systemName}-ORB-${index}`,
+    name: `${systemName}-${String.fromCharCode(65 + index)}`,
+    orbitRadius: 8 + index * 5 + random() * 3,
+    size: 0.6 + random() * 0.8,
+    color: orbitPalette[Math.floor(random() * orbitPalette.length)],
+  }));
+};
+
+const createMapPosition = (
+  x: number,
+  y: number,
+  random: () => number,
+): Vector3 => ({
+  x,
+  y,
+  z: (random() - 0.5) * 40,
+});
+
 const createStarSystem = (
   random: () => number,
   index: number,
@@ -90,8 +118,14 @@ const createStarSystem = (
       x: Math.cos(angle) * radius,
       y: Math.sin(angle) * radius,
     },
+    mapPosition: createMapPosition(
+      Math.cos(angle) * radius,
+      Math.sin(angle) * radius,
+      random,
+    ),
     visibility,
     habitableWorld: createHabitableWorld(random, name),
+    orbitingPlanets: createOrbitingPlanets(random, name),
     hostilePower:
       index === 0 || random() > 0.35 ? 0 : Math.round(6 + random() * 10),
   };

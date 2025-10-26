@@ -43,6 +43,10 @@ export interface Vector2 {
   y: number;
 }
 
+export interface Vector3 extends Vector2 {
+  z: number;
+}
+
 export interface HabitableWorldTemplate {
   name: string;
   kind: PlanetKind;
@@ -51,14 +55,24 @@ export interface HabitableWorldTemplate {
   upkeep: ResourceCost;
 }
 
+export interface OrbitingPlanet {
+  id: string;
+  name: string;
+  orbitRadius: number;
+  size: number;
+  color: string;
+}
+
 export interface StarSystem {
   id: string;
   name: string;
   position: Vector2;
+  mapPosition: Vector3;
   starClass: StarClass;
   visibility: SystemVisibility;
   habitableWorld?: HabitableWorldTemplate;
   hostilePower?: number;
+  orbitingPlanets: OrbitingPlanet[];
 }
 
 export interface ScienceShip {
