@@ -90,10 +90,10 @@ const toMapPosition = (system: StarSystem) => ({
 });
 
 interface GalaxyMapProps {
-  onSystemFocus?: (payload: { systemId: string; screenX: number; screenY: number }) => void;
+  onSystemSelect?: (systemId: string) => void;
 }
 
-export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
+export const GalaxyMap = ({ onSystemSelect }: GalaxyMapProps) => {
   const systems = useGameStore((state) => state.session?.galaxy.systems ?? []);
   const scienceShips = useGameStore(
     (state) => state.session?.scienceShips ?? [],
@@ -104,6 +104,7 @@ export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
   const animationRef = useRef<number | null>(null);
   const offsetTargetRef = useRef(new THREE.Vector3(0, 0, 0));
   const zoomTargetRef = useRef(170);
+  const orbitPhaseRef = useRef(new Map<string, number>());
 
   useEffect(() => {
     const container = containerRef.current;
@@ -242,16 +243,7 @@ export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
         0,
       );
       zoomTargetRef.current = 90;
-      if (onSystemFocus) {
-        const projected = worldPos.clone().project(camera);
-        const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
-        const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
-        onSystemFocus({
-          systemId: targetNode.userData.systemId as string,
-          screenX: anchorX,
-          screenY: anchorY,
-        });
-      }
+      onSystemSelect?.(targetNode.userData.systemId as string);
     };
 
     renderer.domElement.addEventListener('click', handleClick);
@@ -280,6 +272,7 @@ export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
         if (orbitGroup) {
           orbitGroup.visible = showOrbits;
           orbitGroup.rotation.y += orbitGroup.userData.speed;
+          orbitPhaseRef.current.set(node.name, orbitGroup.rotation.y);
         }
       });
 
@@ -311,6 +304,12 @@ export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
       return;
     }
 
+    group.children.forEach((child) => {
+      const orbit = child.getObjectByName('orbits') as THREE.Group | null;
+      if (orbit) {
+        orbitPhaseRef.current.set(child.name, orbit.rotation.y);
+      }
+    });
     group.clear();
     const positions = new Map<string, THREE.Vector3>();
 
@@ -353,6 +352,10 @@ export const GalaxyMap = ({ onSystemFocus }: GalaxyMapProps) => {
           system.id.charCodeAt(0),
           orbitBaseSpeed,
         );
+        const phase =
+          orbitPhaseRef.current.get(system.id) ?? Math.random() * Math.PI * 2;
+        orbitGroup.rotation.y = phase;
+        orbitPhaseRef.current.set(system.id, phase);
         orbitGroup.userData.systemId = system.id;
         orbitGroup.traverse((child) => {
           child.userData = child.userData ?? {};

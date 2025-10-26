@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { resourceLabels } from '../../domain/resourceMetadata';
-import type { ShipClassId } from '../../domain/types';
+import type { ShipClassId, StarSystem } from '../../domain/types';
 
 const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
@@ -10,7 +10,11 @@ const buildMessages = {
   INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
 } as const;
 
-export const ShipyardPanel = () => {
+interface ShipyardPanelProps {
+  system?: StarSystem;
+}
+
+export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
   const session = useGameStore((state) => state.session);
   const designs = useGameStore((state) => state.config.military.shipDesigns);
   const queueLimit = useGameStore(
@@ -66,6 +70,13 @@ export const ShipyardPanel = () => {
         <h3>Cantieri</h3>
         <span className="text-muted">Coda: {queueUsage}</span>
       </header>
+      {system ? (
+        <div className="shipyard-panel__summary">
+          <strong>{system.name}</strong>
+          <span>Classe: {system.starClass}</span>
+          <span>Pianeti orbitanti: {system.orbitingPlanets.length}</span>
+        </div>
+      ) : null}
       {message ? <p className="panel-message">{message}</p> : null}
       <div className="shipyard-panel__designs">
         {designs.map((design) => {

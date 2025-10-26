@@ -162,10 +162,32 @@ body {
   gap: 0.8rem;
 }
 
-.hud-top-bar__session-info {
+.hud-session-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(5, 9, 20, 0.85);
+  border: 1px solid rgba(120, 140, 200, 0.25);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.hud-session-pill__label {
+  font-weight: 600;
+  display: block;
+}
+
+.hud-session-pill__seed {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.hud-session-pill__elapsed {
   display: flex;
   flex-direction: column;
-  font-size: 0.85rem;
+  align-items: flex-start;
+  min-width: 120px;
 }
 
 .hud-top-bar__controls {
@@ -175,15 +197,8 @@ body {
   font-size: 0.75rem;
 }
 
-.hud-top-bar__elapsed {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.hud-top-bar__pause {
   min-width: 90px;
-}
-
-.hud-top-bar__elapsed strong {
-  font-family: 'Roboto Mono', monospace;
 }
 
 .hud-bottom-bar {
@@ -320,23 +335,37 @@ body {
   padding: 0.1rem 0.3rem;
 }
 
-.shipyard-popover {
-  position: absolute;
-  transform: translate(-50%, -110%);
-  background: rgba(5, 9, 18, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 0.75rem;
-  min-width: 320px;
+.shipyard-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 5;
   pointer-events: auto;
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
 }
 
-.shipyard-popover__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.4rem;
+.shipyard-modal__content {
+  width: min(540px, 90vw);
+  max-height: 80vh;
+  background: rgba(5, 9, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow: auto;
+  position: relative;
+}
+
+.shipyard-modal__close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  background: transparent;
+  border: none;
+  color: #f6f7ff;
+  font-size: 1.1rem;
+  cursor: pointer;
 }
 
 .text-muted {
@@ -447,6 +476,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+}
+
+.shipyard-panel__summary {
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .shipyard-panel__card {

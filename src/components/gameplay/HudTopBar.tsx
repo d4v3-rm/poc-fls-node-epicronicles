@@ -22,37 +22,36 @@ export const HudTopBar = () => {
         <ResourceBar />
       </div>
       <div className="hud-top-bar__right">
-        <div className="hud-top-bar__controls">
-          <div className="hud-top-bar__elapsed">
+        <div className="hud-session-pill">
+          <div>
+            <span className="hud-session-pill__label">{label}</span>
+            <span className="hud-session-pill__seed">Seed: {galaxy.seed}</span>
+          </div>
+          <div className="hud-session-pill__elapsed">
             <span>Elapsed</span>
             <strong>{clock.elapsedMs.toFixed(0)} ms</strong>
           </div>
-          <button
-            className="panel__action panel__action--compact"
-            onClick={() => setSimulationRunning(!clock.isRunning, Date.now())}
-          >
-            {clock.isRunning ? 'Pausa' : 'Play'}
-          </button>
-          <div className="hud-top-bar__speed">
-            <span>Speed</span>
-            <div className="speed-options">
-              {speedOptions.map((option) => (
-                <button
-                  key={option}
-                  className={`panel__action panel__action--compact ${
-                    option === clock.speedMultiplier ? 'is-active' : ''
-                  }`}
-                  onClick={() => setSpeedMultiplier(option)}
-                >
-                  {option}x
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
-        <div className="hud-top-bar__session-info">
-          <strong>{label}</strong>
-          <span>Seed: {galaxy.seed}</span>
+
+        <button
+          className="panel__action panel__action--compact hud-top-bar__pause"
+          onClick={() => setSimulationRunning(!clock.isRunning, Date.now())}
+        >
+          {clock.isRunning ? 'Pausa' : 'Play'}
+        </button>
+
+        <div className="speed-options">
+          {speedOptions.map((option) => (
+            <button
+              key={option}
+              className={`panel__action panel__action--compact ${
+                option === clock.speedMultiplier ? 'is-active' : ''
+              }`}
+              onClick={() => setSpeedMultiplier(option)}
+            >
+              {option}x
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { FleetAndCombatPanel } from './FleetAndCombatPanel';
 import { HudTopBar } from './HudTopBar';
 import { HudBottomBar } from './HudBottomBar';
 import { DraggablePanel } from '../ui/DraggablePanel';
+import type { StarSystem } from '../../domain/types';
 
 export const GameScreen = () => {
   useGameLoop();
@@ -19,11 +20,7 @@ export const GameScreen = () => {
     (state) => state.setSimulationRunning,
   );
   const [debugOpen, setDebugOpen] = useState(false);
-  const [shipyardAnchor, setShipyardAnchor] = useState<{
-    systemId: string;
-    x: number;
-    y: number;
-  } | null>(null);
+  const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
 
   if (!session) {
     return (
@@ -48,16 +45,15 @@ export const GameScreen = () => {
     typeof window !== 'undefined' ? window.innerWidth : 1200;
   const viewportHeight =
     typeof window !== 'undefined' ? window.innerHeight : 800;
+  const systems = session.galaxy.systems;
+  const shipyardSystem: StarSystem | null =
+    systems.find((system) => system.id === shipyardSystemId) ?? null;
 
   return (
     <div className="game-layout">
       <HudTopBar />
       <div className="game-map-layer">
-        <GalaxyMap
-          onSystemFocus={({ systemId, screenX, screenY }) =>
-            setShipyardAnchor({ systemId, x: screenX, y: screenY })
-          }
-        />
+        <GalaxyMap onSystemSelect={(systemId) => setShipyardSystemId(systemId)} />
       </div>
       <HudBottomBar
         onToggleDebug={() => setDebugOpen((value) => !value)}
@@ -80,24 +76,17 @@ export const GameScreen = () => {
             <DebugConsole />
           </DraggablePanel>
         ) : null}
-        {shipyardAnchor ? (
-          <div
-            className="shipyard-popover"
-            style={{
-              left: shipyardAnchor.x,
-              top: shipyardAnchor.y,
-            }}
-          >
-            <div className="shipyard-popover__header">
-              <strong>Cantieri ({shipyardAnchor.systemId})</strong>
+        {shipyardSystem ? (
+          <div className="shipyard-modal">
+            <div className="shipyard-modal__content">
               <button
-                className="draggable-panel__close"
-                onClick={() => setShipyardAnchor(null)}
+                className="shipyard-modal__close"
+                onClick={() => setShipyardSystemId(null)}
               >
                 ×
               </button>
+              <ShipyardPanel system={shipyardSystem} />
             </div>
-            <ShipyardPanel />
           </div>
         ) : null}
       </div>
