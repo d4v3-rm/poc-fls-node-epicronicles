@@ -9,6 +9,7 @@ import { FleetAndCombatPanel } from './FleetAndCombatPanel';
 import { HudTopBar } from './HudTopBar';
 import { HudBottomBar } from './HudBottomBar';
 import { DraggablePanel } from '../ui/DraggablePanel';
+import { resourceLabels } from '../../domain/resourceMetadata';
 import type { StarSystem } from '../../domain/types';
 
 export const GameScreen = () => {
@@ -20,7 +21,9 @@ export const GameScreen = () => {
     (state) => state.setSimulationRunning,
   );
   const [debugOpen, setDebugOpen] = useState(false);
+  const [focusSystemId, setFocusSystemId] = useState<string | null>(null);
   const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
+  const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
 
   if (!session) {
     return (
@@ -46,24 +49,47 @@ export const GameScreen = () => {
   const viewportHeight =
     typeof window !== 'undefined' ? window.innerHeight : 800;
   const systems = session.galaxy.systems;
-  const shipyardSystem: StarSystem | null =
-    systems.find((system) => system.id === shipyardSystemId) ?? null;
+  const shipyardSystem: StarSystem | null = shipyardSystemId
+    ? systems.find((system) => system.id === shipyardSystemId) ?? null
+    : null;
+  const selectedPlanet =
+    session.economy.planets.find((planet) => planet.id === selectedPlanetId) ?? null;
+  const selectedPlanetSystem = selectedPlanet
+    ? systems.find((system) => system.id === selectedPlanet.systemId) ?? null
+    : null;
 
   return (
     <div className="game-layout">
       <HudTopBar />
       <div className="game-map-layer">
-        <GalaxyMap onSystemSelect={(systemId) => setShipyardSystemId(systemId)} />
+        <GalaxyMap
+          focusSystemId={focusSystemId}
+          onSystemSelect={(systemId, _anchor) => {
+            setShipyardSystemId(systemId);
+            setSelectedPlanetId(null);
+            setFocusSystemId(systemId);
+          }}
+        />
       </div>
       <HudBottomBar
         onToggleDebug={() => setDebugOpen((value) => !value)}
         debugOpen={debugOpen}
       />
       <div className="floating-panels">
-        <DraggablePanel title="Colonie" initialX={20} initialY={140}>
-          <ColonyPanel />
+        <DraggablePanel title="Colonie" initialX={12} initialY={100}>
+          <ColonyPanel
+            onSelectPlanet={(planetId, systemId) => {
+              setFocusSystemId(systemId);
+              setSelectedPlanetId(planetId);
+              setShipyardSystemId(null);
+            }}
+          />
         </DraggablePanel>
-        <DraggablePanel title="Flotte & Battaglie" initialX={viewportWidth - 340} initialY={420}>
+        <DraggablePanel
+          title="Flotte & Battaglie"
+          initialX={Math.max(12, viewportWidth - 320)}
+          initialY={320}
+        >
           <FleetAndCombatPanel />
         </DraggablePanel>
         {debugOpen ? (
@@ -77,17 +103,40 @@ export const GameScreen = () => {
           </DraggablePanel>
         ) : null}
         {shipyardSystem ? (
-          <div className="shipyard-modal">
-            <div className="shipyard-modal__content">
-              <button
-                className="shipyard-modal__close"
-                onClick={() => setShipyardSystemId(null)}
-              >
-                ×
-              </button>
-              <ShipyardPanel system={shipyardSystem} />
+          <DraggablePanel
+            title={`Cantieri - ${shipyardSystem.name}`}
+            initialX={viewportWidth / 2 - 180}
+            initialY={viewportHeight / 2 - 200}
+            onClose={() => setShipyardSystemId(null)}
+          >
+            <ShipyardPanel system={shipyardSystem} />
+          </DraggablePanel>
+        ) : null}
+        {selectedPlanet && selectedPlanetSystem ? (
+          <DraggablePanel
+            title={`${selectedPlanet.name} (${selectedPlanet.id})`}
+            initialX={viewportWidth / 2 - 180}
+            initialY={viewportHeight / 2 - 140}
+            onClose={() => setSelectedPlanetId(null)}
+          >
+            <div className="planet-detail">
+              <p>Sistema: {selectedPlanetSystem.name}</p>
+              <p>Popolazione: {selectedPlanet.population}</p>
+              <p>Tipo stella: {selectedPlanetSystem.starClass}</p>
+              <div className="planet-list__yields">
+                {Object.entries(selectedPlanet.baseProduction).map(
+                  ([type, amount]) => (
+                    <div key={type} className="planet-list__yield">
+                      <span>
+                        {resourceLabels[type as keyof typeof resourceLabels]}
+                      </span>
+                      <span className="is-positive">+{amount}</span>
+                    </div>
+                  ),
+                )}
+              </div>
             </div>
-          </div>
+          </DraggablePanel>
         ) : null}
       </div>
     </div>

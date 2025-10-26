@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import { useState, useRef, useCallback } from 'react';
 
 interface DraggablePanelProps {
@@ -63,7 +63,7 @@ export const DraggablePanel = ({
             onClick={onClose}
             aria-label={`Chiudi ${title}`}
           >
-            ×
+            X
           </button>
         ) : null}
       </div>
