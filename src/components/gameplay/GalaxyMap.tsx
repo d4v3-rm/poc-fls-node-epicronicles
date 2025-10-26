@@ -93,6 +93,8 @@ export const GalaxyMap = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const systemGroupRef = useRef<THREE.Group | null>(null);
   const animationRef = useRef<number | null>(null);
+  const offsetTargetRef = useRef(new THREE.Vector3(0, 0, 0));
+  const zoomTargetRef = useRef(170);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -126,6 +128,7 @@ export const GalaxyMap = () => {
     scene.add(systemGroup);
 
     let isDragging = false;
+    let dragButton: number | null = null;
     let lastPointer = { x: 0, y: 0 };
     let rotation = { x: 0, y: 0 };
 
@@ -135,22 +138,26 @@ export const GalaxyMap = () => {
       camera.updateProjectionMatrix();
     };
 
+    const handleContextMenu = (event: MouseEvent) => event.preventDefault();
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      camera.position.z = clamp(
-        camera.position.z + event.deltaY * 0.1,
+      zoomTargetRef.current = clamp(
+        zoomTargetRef.current + event.deltaY * 0.1,
         35,
         320,
       );
     };
 
     const handleMouseDown = (event: MouseEvent) => {
-      isDragging = true;
-      lastPointer = { x: event.clientX, y: event.clientY };
+      dragButton = event.button;
+      if (event.button === 2) {
+        isDragging = true;
+        lastPointer = { x: event.clientX, y: event.clientY };
+      }
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!isDragging) {
+      if (!isDragging || dragButton !== 2) {
         return;
       }
       const deltaX = event.clientX - lastPointer.x;
@@ -160,19 +167,66 @@ export const GalaxyMap = () => {
       rotation.y = clamp(rotation.y + deltaY * 0.004, -Math.PI / 2.5, Math.PI / 2.5);
     };
 
-    const handleMouseUp = () => {
-      isDragging = false;
+    const handleMouseUp = (event: MouseEvent) => {
+      if (event.button === dragButton) {
+        isDragging = false;
+        dragButton = null;
+      }
     };
 
     window.addEventListener('resize', handleResize);
+    renderer.domElement.addEventListener('contextmenu', handleContextMenu);
     renderer.domElement.addEventListener('wheel', handleWheel, { passive: false });
     renderer.domElement.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
 
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const handleClick = (event: MouseEvent) => {
+      if (event.button !== 0 || !systemGroup.children.length) {
+        return;
+      }
+
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(systemGroup.children, true);
+      const hit = intersects.find((intersect) => {
+        let obj: THREE.Object3D | null = intersect.object;
+        while (obj && !obj.userData.systemId) {
+          obj = obj.parent;
+        }
+        return Boolean(obj?.userData.systemId);
+      });
+      if (!hit) {
+        return;
+      }
+      let targetNode: THREE.Object3D | null = hit.object;
+      while (targetNode && !targetNode.userData.systemId) {
+        targetNode = targetNode.parent;
+      }
+      if (!targetNode) {
+        return;
+      }
+
+      offsetTargetRef.current = new THREE.Vector3(
+        -targetNode.position.x,
+        -targetNode.position.y,
+        0,
+      );
+      zoomTargetRef.current = 90;
+    };
+
+    renderer.domElement.addEventListener('click', handleClick);
+
     const renderLoop = () => {
       systemGroup.rotation.y = rotation.x;
       systemGroup.rotation.x = rotation.y;
+      systemGroup.position.lerp(offsetTargetRef.current, 0.08);
+      camera.position.z += (zoomTargetRef.current - camera.position.z) * 0.08;
 
       const showOrbits = camera.position.z < 110;
       const labelScale = THREE.MathUtils.clamp(150 / camera.position.z, 0.4, 2.5);
@@ -212,8 +266,10 @@ export const GalaxyMap = () => {
       window.removeEventListener('resize', handleResize);
       renderer.domElement.removeEventListener('wheel', handleWheel);
       renderer.domElement.removeEventListener('mousedown', handleMouseDown);
+      renderer.domElement.removeEventListener('click', handleClick);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
 
@@ -234,6 +290,7 @@ export const GalaxyMap = () => {
     systems.forEach((system) => {
       const node = new THREE.Group();
       node.name = system.id;
+      node.userData.systemId = system.id;
       const pos = toMapPosition(system);
       node.position.set(pos.x, pos.y, pos.z);
       positions.set(system.id, node.position);
@@ -247,6 +304,7 @@ export const GalaxyMap = () => {
           ? materialCache.hostile
           : materialCache.friendly,
       );
+      starMesh.userData.systemId = system.id;
       starMesh.castShadow = false;
       starMesh.receiveShadow = false;
       node.add(starMesh);
