@@ -6,6 +6,7 @@ interface DraggablePanelProps {
   initialX: number;
   initialY: number;
   children: ReactNode;
+  onClose?: () => void;
 }
 
 export const DraggablePanel = ({
@@ -13,6 +14,7 @@ export const DraggablePanel = ({
   initialX,
   initialY,
   children,
+  onClose,
 }: DraggablePanelProps) => {
   const [position, setPosition] = useState({ x: initialX, y: initialY });
   const draggingRef = useRef(false);
@@ -53,7 +55,17 @@ export const DraggablePanel = ({
       style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
     >
       <div className="draggable-panel__header" onMouseDown={handleMouseDown}>
-        {title}
+        <span>{title}</span>
+        {onClose ? (
+          <button
+            className="draggable-panel__close"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={onClose}
+            aria-label={`Chiudi ${title}`}
+          >
+            ×
+          </button>
+        ) : null}
       </div>
       <div className="draggable-panel__content">{children}</div>
     </div>

@@ -63,6 +63,10 @@ body {
   font-size: 0.8rem;
 }
 
+.panel__action--inline {
+  width: auto;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -295,12 +299,25 @@ body {
   cursor: move;
   font-weight: 600;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .draggable-panel__content {
   max-height: 260px;
   overflow: auto;
   padding: 0.75rem;
+}
+
+.draggable-panel__close {
+  background: transparent;
+  border: none;
+  color: #f4f4f4;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
 }
 
 .text-muted {
@@ -461,6 +478,21 @@ body {
   font-size: 0.85rem;
 }
 
+.fleet-science {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.fleet-chip {
+  background: rgba(120, 140, 200, 0.2);
+  border: 1px solid rgba(120, 140, 200, 0.35);
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
 .combat-log__header {
   display: flex;
   justify-content: space-between;
@@ -470,4 +502,44 @@ body {
   margin: 0.4rem 0;
   color: #7fe38f;
   font-size: 0.85rem;
+}
+.panel-section {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.6rem;
+}
+
+.panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.panel-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.colony-panel,
+.fleet-combat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.panel-section ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.panel-section li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
 }

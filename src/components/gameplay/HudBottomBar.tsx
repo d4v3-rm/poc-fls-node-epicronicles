@@ -1,7 +1,11 @@
 import { useGameStore } from '../../store/gameStore';
-import { DebugConsole } from '../debug/DebugConsole';
 
-export const HudBottomBar = () => {
+interface HudBottomBarProps {
+  onToggleDebug: () => void;
+  debugOpen: boolean;
+}
+
+export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) => {
   const session = useGameStore((state) => state.session);
   const returnToMenu = useGameStore((state) => state.returnToMenu);
 
@@ -48,8 +52,16 @@ export const HudBottomBar = () => {
         <dd>{scienceShips.length}</dd>
       </div>
       <div className="hud-bottom-bar__actions">
-        <DebugConsole variant="inline" />
-        <button className="panel__action panel__action--compact" onClick={returnToMenu}>
+        <button
+          className="panel__action panel__action--inline panel__action--compact"
+          onClick={onToggleDebug}
+        >
+          {debugOpen ? 'Hide debug' : 'Debug'}
+        </button>
+        <button
+          className="panel__action panel__action--inline panel__action--compact"
+          onClick={returnToMenu}
+        >
           Quit to menu
         </button>
       </div>

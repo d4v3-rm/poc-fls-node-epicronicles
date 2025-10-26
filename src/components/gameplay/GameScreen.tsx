@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
 import { GalaxyMap } from './GalaxyMap';
 import { ColonyPanel } from './ColonyPanel';
@@ -17,6 +18,7 @@ export const GameScreen = () => {
   const setSimulationRunning = useGameStore(
     (state) => state.setSimulationRunning,
   );
+  const [debugOpen, setDebugOpen] = useState(false);
 
   if (!session) {
     return (
@@ -39,6 +41,8 @@ export const GameScreen = () => {
 
   const viewportWidth =
     typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const viewportHeight =
+    typeof window !== 'undefined' ? window.innerHeight : 800;
 
   return (
     <div className="game-layout">
@@ -46,7 +50,10 @@ export const GameScreen = () => {
       <div className="game-map-layer">
         <GalaxyMap />
       </div>
-      <HudBottomBar />
+      <HudBottomBar
+        onToggleDebug={() => setDebugOpen((value) => !value)}
+        debugOpen={debugOpen}
+      />
       <div className="floating-panels">
         <DraggablePanel title="Colonie" initialX={20} initialY={140}>
           <ColonyPanel />
@@ -57,6 +64,16 @@ export const GameScreen = () => {
         <DraggablePanel title="Flotte & Battaglie" initialX={viewportWidth - 340} initialY={420}>
           <FleetAndCombatPanel />
         </DraggablePanel>
+        {debugOpen ? (
+          <DraggablePanel
+            title="Debug"
+            initialX={viewportWidth - 420}
+            initialY={viewportHeight - 380}
+            onClose={() => setDebugOpen(false)}
+          >
+            <DebugConsole />
+          </DraggablePanel>
+        ) : null}
       </div>
     </div>
   );

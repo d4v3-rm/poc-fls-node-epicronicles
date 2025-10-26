@@ -128,7 +128,7 @@ export const GalaxyMap = () => {
     scene.add(systemGroup);
 
     let isDragging = false;
-    let dragButton: number | null = null;
+    let dragMode: 'rotate' | 'pan' | null = null;
     let lastPointer = { x: 0, y: 0 };
     let rotation = { x: 0, y: 0 };
 
@@ -149,28 +149,41 @@ export const GalaxyMap = () => {
     };
 
     const handleMouseDown = (event: MouseEvent) => {
-      dragButton = event.button;
-      if (event.button === 2) {
+      if (event.button === 0) {
+        dragMode = 'rotate';
+        isDragging = true;
+        lastPointer = { x: event.clientX, y: event.clientY };
+      } else if (event.button === 2) {
+        dragMode = 'pan';
         isDragging = true;
         lastPointer = { x: event.clientX, y: event.clientY };
       }
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      if (!isDragging || dragButton !== 2) {
+      if (!isDragging || !dragMode) {
         return;
       }
       const deltaX = event.clientX - lastPointer.x;
       const deltaY = event.clientY - lastPointer.y;
       lastPointer = { x: event.clientX, y: event.clientY };
-      rotation.x += deltaX * 0.004;
-      rotation.y = clamp(rotation.y + deltaY * 0.004, -Math.PI / 2.5, Math.PI / 2.5);
+      if (dragMode === 'rotate') {
+        rotation.x += deltaX * 0.004;
+        rotation.y = clamp(rotation.y + deltaY * 0.004, -Math.PI / 2.5, Math.PI / 2.5);
+      } else if (dragMode === 'pan') {
+        const panScale = (camera.position.z / 400) * 0.8;
+        offsetTargetRef.current.x += deltaX * -panScale;
+        offsetTargetRef.current.y += deltaY * panScale;
+      }
     };
 
     const handleMouseUp = (event: MouseEvent) => {
-      if (event.button === dragButton) {
+      if (
+        (event.button === 0 && dragMode === 'rotate') ||
+        (event.button === 2 && dragMode === 'pan')
+      ) {
         isDragging = false;
-        dragButton = null;
+        dragMode = null;
       }
     };
 
@@ -212,9 +225,11 @@ export const GalaxyMap = () => {
         return;
       }
 
+      const worldPos = new THREE.Vector3();
+      targetNode.getWorldPosition(worldPos);
       offsetTargetRef.current = new THREE.Vector3(
-        -targetNode.position.x,
-        -targetNode.position.y,
+        -worldPos.x,
+        -worldPos.y,
         0,
       );
       zoomTargetRef.current = 90;
@@ -291,6 +306,7 @@ export const GalaxyMap = () => {
       const node = new THREE.Group();
       node.name = system.id;
       node.userData.systemId = system.id;
+      node.userData.systemId = system.id;
       const pos = toMapPosition(system);
       node.position.set(pos.x, pos.y, pos.z);
       positions.set(system.id, node.position);
@@ -319,6 +335,11 @@ export const GalaxyMap = () => {
           system.orbitingPlanets,
           system.id.charCodeAt(0),
         );
+        orbitGroup.userData.systemId = system.id;
+        orbitGroup.traverse((child) => {
+          child.userData = child.userData ?? {};
+          child.userData.systemId = system.id;
+        });
         node.add(orbitGroup);
       }
 

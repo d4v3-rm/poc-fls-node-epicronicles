@@ -76,9 +76,12 @@ export const FleetAndCombatPanel = () => {
       return null;
     }
     return (
-      <div className="fleet-ships">
-        <span>Navi scientifiche:</span>{' '}
-        {ships.map((ship) => ship.name).join(', ')}
+      <div className="fleet-science">
+        {ships.map((ship) => (
+          <span key={ship.id} className="fleet-chip">
+            {ship.name}
+          </span>
+        ))}
       </div>
     );
   };
