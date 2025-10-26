@@ -33,25 +33,26 @@ export const HudTopBar = () => {
           </div>
         </div>
 
-        <button
-          className="panel__action panel__action--compact hud-top-bar__pause"
-          onClick={() => setSimulationRunning(!clock.isRunning, Date.now())}
-        >
-          {clock.isRunning ? 'Pausa' : 'Play'}
-        </button>
-
-        <div className="speed-options">
-          {speedOptions.map((option) => (
-            <button
-              key={option}
-              className={`panel__action panel__action--compact ${
-                option === clock.speedMultiplier ? 'is-active' : ''
-              }`}
-              onClick={() => setSpeedMultiplier(option)}
-            >
-              {option}x
-            </button>
-          ))}
+        <div className="hud-top-bar__controls">
+          <button
+            className="panel__action panel__action--compact hud-top-bar__pause"
+            onClick={() => setSimulationRunning(!clock.isRunning, Date.now())}
+          >
+            {clock.isRunning ? 'Pausa' : 'Play'}
+          </button>
+          <div className="speed-options">
+            {speedOptions.map((option) => (
+              <button
+                key={option}
+                className={`panel__action panel__action--compact ${
+                  option === clock.speedMultiplier ? 'is-active' : ''
+                }`}
+                onClick={() => setSpeedMultiplier(option)}
+              >
+                {option}x
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
