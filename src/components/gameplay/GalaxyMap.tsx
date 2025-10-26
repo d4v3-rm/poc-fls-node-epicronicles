@@ -272,11 +272,8 @@ export const GalaxyMap = ({ focusSystemId, onSystemSelect }: GalaxyMapProps) => 
 
       const worldPos = new THREE.Vector3();
       targetNode.getWorldPosition(worldPos);
-      offsetTargetRef.current = new THREE.Vector3(
-        -worldPos.x,
-        -worldPos.y,
-        0,
-      );
+      const currentOffset = systemGroup.position.clone();
+      offsetTargetRef.current = currentOffset.sub(worldPos);
       zoomTargetRef.current = 90;
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
@@ -369,7 +366,15 @@ export const GalaxyMap = ({ focusSystemId, onSystemSelect }: GalaxyMapProps) => 
       return;
     }
     const pos = toMapPosition(target);
-    offsetTargetRef.current = new THREE.Vector3(-pos.x, -pos.y, 0);
+    const group = systemGroupRef.current;
+    if (group) {
+      const local = new THREE.Vector3(pos.x, pos.y, pos.z);
+      const world = local.clone();
+      group.localToWorld(world);
+      offsetTargetRef.current = group.position.clone().sub(world);
+    } else {
+      offsetTargetRef.current = new THREE.Vector3(-pos.x, -pos.y, 0);
+    }
     zoomTargetRef.current = 90;
   }, [focusSystemId, systems]);
 

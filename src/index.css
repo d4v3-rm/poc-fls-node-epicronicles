@@ -165,12 +165,12 @@ body {
 
 .hud-session-pill {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.35rem 0.65rem;
-  background: rgba(5, 9, 20, 0.85);
-  border: 1px solid rgba(120, 140, 200, 0.25);
-  border-radius: 999px;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.15rem 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   font-size: 0.78rem;
 }
 
@@ -180,15 +180,24 @@ body {
 }
 
 .hud-session-pill__seed {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .hud-session-pill__elapsed {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  min-width: 100px;
+  min-width: 90px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.hud-session-pill__elapsed strong {
+  font-size: 0.78rem;
+  color: #f4f4f4;
+  font-weight: 600;
 }
 
 .hud-top-bar__controls {
@@ -244,13 +253,26 @@ body {
   padding: 0.25rem 0.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.05rem;
+  gap: 0.15rem;
+}
+
+.resource-bar__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .resource-bar__label {
   font-size: 0.65rem;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
+}
+
+.resource-bar__value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
 }
 
 .resource-bar__value {
@@ -553,6 +575,16 @@ body {
   padding: 0.15rem 0.4rem;
   border-radius: 999px;
   font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.fleet-chip small {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.04em;
 }
 
 .combat-log__header {

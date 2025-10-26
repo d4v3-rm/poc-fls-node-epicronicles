@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
-import type { ShipClassId } from '../../domain/types';
+import type { ShipClassId, ScienceShipStatus } from '../../domain/types';
 
 const fleetOrderErrors = {
   NO_SESSION: 'Nessuna sessione.',
@@ -37,7 +37,7 @@ export const FleetAndCombatPanel = () => {
     [designs],
   );
 
-  const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
+const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
     const counts = ships.reduce<Record<string, number>>((acc, ship) => {
       const key: string = ship.designId;
       acc[key] = (acc[key] ?? 0) + 1;
@@ -68,9 +68,17 @@ export const FleetAndCombatPanel = () => {
   const resolveName = (systemId: string) =>
     systems.find((system) => system.id === systemId)?.name ?? systemId;
 
-  const renderShipsList = (fleetId: string) => {
+  const scienceStatusLabel: Record<ScienceShipStatus, string> = {
+    idle: 'In stazione',
+    traveling: 'In viaggio',
+    surveying: 'Sondando',
+  };
+
+  const renderScienceShips = (fleet: (typeof fleets)[number]) => {
     const ships = scienceShips.filter(
-      (ship) => ship.currentSystemId === fleets.find((fleet) => fleet.id === fleetId)?.systemId,
+      (ship) =>
+        ship.currentSystemId === fleet.systemId ||
+        ship.targetSystemId === fleet.systemId,
     );
     if (ships.length === 0) {
       return null;
@@ -79,7 +87,8 @@ export const FleetAndCombatPanel = () => {
       <div className="fleet-science">
         {ships.map((ship) => (
           <span key={ship.id} className="fleet-chip">
-            {ship.name}
+            <span>{ship.name}</span>
+            <small>{scienceStatusLabel[ship.status]}</small>
           </span>
         ))}
       </div>
@@ -117,7 +126,7 @@ export const FleetAndCombatPanel = () => {
                   ? describeFleetShips(fleet.ships)
                   : 'Nessuna nave attiva'}
               </p>
-              {renderShipsList(fleet.id)}
+              {renderScienceShips(fleet)}
               <label className="fleet-panel__order">
                 Destinazione
                 <select

@@ -17,18 +17,22 @@ export const ResourceBar = () => {
         const isPositive = net >= 0;
         return (
           <div className="resource-bar__item" key={type}>
-            <span className="resource-bar__label">{resourceLabels[type]}</span>
-            <span className="resource-bar__value">
-              {entry.amount.toFixed(0)}
-            </span>
-            <span
-              className={`resource-bar__delta ${
-                isPositive ? 'is-positive' : 'is-negative'
-              }`}
-            >
-              {isPositive ? '+' : '-'}
-              {Math.abs(net).toFixed(1)}
-            </span>
+            <div className="resource-bar__label-row">
+              <span className="resource-bar__label">{resourceLabels[type]}</span>
+            </div>
+            <div className="resource-bar__value-row">
+              <span className="resource-bar__value">
+                {entry.amount.toFixed(0)}
+              </span>
+              <span
+                className={`resource-bar__delta ${
+                  isPositive ? 'is-positive' : 'is-negative'
+                }`}
+              >
+                {isPositive ? '+' : '-'}
+                {Math.abs(net).toFixed(1)}
+              </span>
+            </div>
           </div>
         );
       })}
