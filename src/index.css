@@ -705,6 +705,54 @@ body {
   gap: 0.25rem;
 }
 
+.galaxy-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.galaxy-overview__map {
+  flex: 0 0 auto;
+}
+
+.galaxy-overview__list {
+  flex: 1;
+  min-width: 320px;
+}
+
+.galaxy-overview__cols {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.galaxy-overview__col {
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: rgba(4, 7, 16, 0.6);
+}
+
+.galaxy-overview__colonies {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.galaxy-overview__colonies li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
 .debug-modal {
   position: absolute;
   top: 60px;

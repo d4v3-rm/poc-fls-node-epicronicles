@@ -1,12 +1,6 @@
-import { useMemo, useState } from 'react';
-import { useGameStore, type ColonizationError } from '../../store/gameStore';
-import type {
-  ResourceCost,
-  ScienceShip,
-  StarClass,
-  SystemVisibility,
-} from '../../domain/types';
-import { resourceLabels } from '../../domain/resourceMetadata';
+import { useMemo } from 'react';
+import { useGameStore } from '../../store/gameStore';
+import type { ScienceShip, StarClass, SystemVisibility } from '../../domain/types';
 
 const VIEWPORT_SIZE = 320;
 
@@ -28,35 +22,11 @@ const visibilityRadius: Record<SystemVisibility, number> = {
   surveyed: 6,
 };
 
-const visibilityLabel: Record<SystemVisibility, string> = {
-  unknown: 'Inesplorato',
-  revealed: 'Rivelato',
-  surveyed: 'Sondato',
-};
-
 const shipStatusLabel: Record<ScienceShip['status'], string> = {
   idle: 'In attesa',
   traveling: 'In viaggio',
   surveying: 'Analisi',
 };
-
-const colonizationErrors: Record<ColonizationError, string> = {
-  NO_SESSION: 'Nessuna sessione attiva.',
-  SYSTEM_NOT_FOUND: 'Sistema non trovato.',
-  SYSTEM_NOT_SURVEYED: 'Sonda prima il sistema.',
-  NO_HABITABLE_WORLD: 'Nessun mondo abitabile disponibile.',
-  ALREADY_COLONIZED: 'Sistema gia colonizzato.',
-  TASK_IN_PROGRESS: 'Colonizzazione gia in corso.',
-  INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
-};
-
-const formatCost = (cost: ResourceCost) =>
-  Object.entries(cost)
-    .filter(([, amount]) => typeof amount === 'number' && amount > 0)
-    .map(
-      ([type, amount]) => `${resourceLabels[type as keyof typeof resourceLabels]} ${amount}`,
-    )
-    .join(' | ');
 
 export const GalaxyOverview = () => {
   const systems = useGameStore((state) => state.session?.galaxy.systems ?? []);
@@ -64,17 +34,6 @@ export const GalaxyOverview = () => {
     (state) => state.session?.scienceShips ?? [],
   );
   const planets = useGameStore((state) => state.session?.economy.planets ?? []);
-  const resources = useGameStore(
-    (state) => state.session?.economy.resources ?? null,
-  );
-  const colonizationTasks = useGameStore(
-    (state) => state.session?.colonizationTasks ?? [],
-  );
-  const colonizationConfig = useGameStore(
-    (state) => state.config.colonization,
-  );
-  const startColonization = useGameStore((state) => state.startColonization);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const mappedSystems = useMemo(() => {
     if (systems.length === 0) {
@@ -105,36 +64,23 @@ export const GalaxyOverview = () => {
     return map;
   }, [mappedSystems]);
 
-  const colonizedSystems = useMemo(
-    () => new Set(planets.map((planet) => planet.systemId)),
-    [planets],
-  );
-  const pendingSystems = useMemo(
-    () => new Set(colonizationTasks.map((task) => task.systemId)),
-    [colonizationTasks],
+  const colonies = useMemo(
+    () =>
+      planets.map((planet) => ({
+        ...planet,
+        systemName:
+          systems.find((system) => system.id === planet.systemId)?.name ??
+          planet.systemId,
+      })),
+    [planets, systems],
   );
 
-  const canAffordCost = () => {
-    if (!resources) {
-      return false;
-    }
-    return Object.entries(colonizationConfig.cost).every(([type, amount]) => {
-      if (!amount || amount <= 0) {
-        return true;
-      }
-      const ledger = resources[type as keyof typeof resources];
-      return (ledger?.amount ?? 0) >= amount;
-    });
-  };
-
-  const handleColonize = (systemId: string, systemName: string) => {
-    const result = startColonization(systemId);
-    if (result.success) {
-      setActionMessage(`Colonizzazione avviata nel sistema ${systemName}.`);
-    } else {
-      setActionMessage(colonizationErrors[result.reason]);
-    }
-  };
+  const surveyedCount = systems.filter(
+    (system) => system.visibility === 'surveyed',
+  ).length;
+  const revealedCount = systems.filter(
+    (system) => system.visibility !== 'unknown',
+  ).length;
 
   return (
     <section className="galaxy-overview">
@@ -177,7 +123,6 @@ export const GalaxyOverview = () => {
             if (!currentSystem) {
               return null;
             }
-
             return (
               <g key={ship.id}>
                 <circle
@@ -193,110 +138,67 @@ export const GalaxyOverview = () => {
       </div>
       <div className="galaxy-overview__list">
         <header className="galaxy-overview__header">
-          <h3>Sistemi stellari</h3>
+          <h3>Sistemi monitorati</h3>
           <p className="galaxy-overview__hint">
-            Costo colonizzazione: {formatCost(colonizationConfig.cost)}
+            {surveyedCount}/{systems.length} sondati &middot; {revealedCount} rivelati
           </p>
-          {actionMessage ? (
-            <p className="colonization-message">{actionMessage}</p>
-          ) : null}
         </header>
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Tipo</th>
-              <th>Stato</th>
-              <th>Minaccia</th>
-              <th>Mondo</th>
-              <th>Colonizzazione</th>
-            </tr>
-          </thead>
-          <tbody>
-            {systems.map((system) => {
-              const habitable = system.habitableWorld;
-              const colonized = colonizedSystems.has(system.id);
-              const pending = pendingSystems.has(system.id);
-              const affordability = canAffordCost();
-              let disabledReason: string | null = null;
-              if (!habitable) {
-                disabledReason = 'Nessun mondo abitabile';
-              } else if (system.visibility !== 'surveyed') {
-                disabledReason = 'Esplora e sonda il sistema';
-              } else if (colonized) {
-                disabledReason = 'Già colonizzato';
-              } else if (pending) {
-                disabledReason = 'In corso';
-              } else if (!affordability) {
-                disabledReason = 'Risorse insufficienti';
-              }
-
-              return (
-                <tr key={system.id}>
-                  <td>{system.name}</td>
-                <td>{system.starClass}</td>
-                <td>{visibilityLabel[system.visibility]}</td>
-                <td>{system.hostilePower ?? 0}</td>
-                <td>{habitable ? habitable.kind : '—'}</td>
-                  <td>
-                    {habitable ? (
-                      <button
-                        className="panel__action panel__action--compact"
-                        disabled={Boolean(disabledReason)}
-                        title={disabledReason ?? 'Avvia colonizzazione'}
-                        onClick={() => handleColonize(system.id, system.name)}
-                      >
-                        {colonized
-                          ? 'Colonia attiva'
-                          : pending
-                            ? 'In corso'
-                            : 'Colonizza'}
-                      </button>
-                    ) : (
-                      <span className="text-muted">N/A</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div className="galaxy-overview__ships">
-          <h3>Navi scientifiche</h3>
-          <ul>
-            {scienceShips.map((ship) => {
-              const currentSystem = systems.find(
-                (system) => system.id === ship.currentSystemId,
-              );
-              const target = ship.targetSystemId
-                ? systems.find((system) => system.id === ship.targetSystemId)
-                : null;
-              return (
-                <li key={ship.id}>
-                  <div className="ship-row">
-                    <span className="ship-name">{ship.name}</span>
-                    <span className={`ship-status ship-status--${ship.status}`}>
-                      {shipStatusLabel[ship.status]}
+        <div className="galaxy-overview__cols">
+          <div className="galaxy-overview__col">
+            <h4>Colonie attive</h4>
+            <ul className="galaxy-overview__colonies">
+              {colonies.length === 0 ? (
+                <li className="text-muted">Nessuna colonia attiva.</li>
+              ) : (
+                colonies.map((colony) => (
+                  <li key={colony.id}>
+                    <strong>{colony.name}</strong>
+                    <span className="text-muted">
+                      Sistema: {colony.systemName}
                     </span>
-                  </div>
-                  <p>
-                    Sistema attuale: {currentSystem ? currentSystem.name : '???'}
-                  </p>
-                  {target ? (
-                    <p className="ship-target">
-                      Obiettivo: {target.name} ({ship.ticksRemaining} tick)
+                    <span className="text-muted">
+                      Popolazione: {colony.population.toFixed(1)}
+                    </span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+          <div className="galaxy-overview__col">
+            <h4>Navi scientifiche</h4>
+            <ul>
+              {scienceShips.map((ship) => {
+                const currentSystem = systems.find(
+                  (system) => system.id === ship.currentSystemId,
+                );
+                const target = ship.targetSystemId
+                  ? systems.find((system) => system.id === ship.targetSystemId)
+                  : null;
+                return (
+                  <li key={ship.id}>
+                    <div className="ship-row">
+                      <span className="ship-name">{ship.name}</span>
+                      <span className={`ship-status ship-status--${ship.status}`}>
+                        {shipStatusLabel[ship.status]}
+                      </span>
+                    </div>
+                    <p>
+                      Sistema attuale: {currentSystem ? currentSystem.name : '???'}
                     </p>
-                  ) : (
-                    <p className="ship-target">Nessun obiettivo attivo</p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                    {target ? (
+                      <p className="ship-target">
+                        Obiettivo: {target.name} ({ship.ticksRemaining} tick)
+                      </p>
+                    ) : (
+                      <p className="ship-target">Nessun obiettivo attivo</p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
   );
 };
-
-
