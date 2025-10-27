@@ -469,7 +469,7 @@ export const GalaxyMap = ({
       node.userData.systemId = system.id;
       node.userData.visibility = system.visibility;
       const pos = toMapPosition(system);
-      node.position.set(pos.x, pos.y, pos.z);
+      node.position.set(pos.x, pos.y, 0);
 
       const starSizes: Record<string, number> = {
         mainSequence: 2.1,
