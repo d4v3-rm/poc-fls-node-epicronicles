@@ -12,6 +12,7 @@ const orderErrors = {
   NO_SESSION: 'Nessuna sessione attiva.',
   SHIP_NOT_FOUND: 'Nave scientifica non trovata.',
   SYSTEM_NOT_FOUND: 'Sistema non valido.',
+  SYSTEM_UNKNOWN: 'Sistema sconosciuto: invia prima un segnale di scoperta.',
 } as const;
 
 interface SciencePanelProps {
@@ -60,6 +61,7 @@ export const SciencePanel = ({ onFocusSystem }: SciencePanelProps) => {
   const systemOptions = systems.map((system) => ({
     id: system.id,
     label: `${system.name} (${system.visibility})`,
+    disabled: system.visibility === 'unknown',
   }));
 
   return (
@@ -104,7 +106,11 @@ export const SciencePanel = ({ onFocusSystem }: SciencePanelProps) => {
                 onChange={(event) => handleOrder(ship.id, event.target.value)}
               >
                 {systemOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
+                  <option
+                    key={option.id}
+                    value={option.id}
+                    disabled={option.disabled}
+                  >
                     {option.label}
                   </option>
                 ))}

@@ -57,7 +57,8 @@ export type FleetMoveResult =
 export type ScienceShipOrderError =
   | 'NO_SESSION'
   | 'SHIP_NOT_FOUND'
-  | 'SYSTEM_NOT_FOUND';
+  | 'SYSTEM_NOT_FOUND'
+  | 'SYSTEM_UNKNOWN';
 
 export type ScienceShipOrderResult =
   | { success: true }
@@ -310,6 +311,9 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     );
     if (!targetSystem) {
       return { success: false, reason: 'SYSTEM_NOT_FOUND' };
+    }
+    if (targetSystem.visibility === 'unknown') {
+      return { success: false, reason: 'SYSTEM_UNKNOWN' };
     }
 
     const travelTicks = Math.max(1, state.config.exploration.travelTicks);

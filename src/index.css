@@ -675,6 +675,20 @@ body {
   gap: 0.5rem;
 }
 
+.system-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.65rem;
+  border-radius: 999px;
+  background: rgba(127, 227, 143, 0.15);
+  border: 1px solid rgba(127, 227, 143, 0.35);
+  color: #7fe38f;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .system-panel__planet-meta {
   display: flex;
   gap: 0.4rem;

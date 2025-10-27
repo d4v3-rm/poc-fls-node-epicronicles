@@ -135,6 +135,27 @@ const scienceMaterials: Record<
   surveying: new THREE.MeshBasicMaterial({ color: 0x4de2ff }),
 };
 
+const scienceLineMaterials: Record<
+  'idle' | 'traveling' | 'surveying',
+  THREE.LineBasicMaterial
+> = {
+  idle: new THREE.LineBasicMaterial({
+    color: 0x7fe38f,
+    transparent: true,
+    opacity: 0.35,
+  }),
+  traveling: new THREE.LineBasicMaterial({
+    color: 0xffc857,
+    transparent: true,
+    opacity: 0.45,
+  }),
+  surveying: new THREE.LineBasicMaterial({
+    color: 0x4de2ff,
+    transparent: true,
+    opacity: 0.45,
+  }),
+};
+
 const toMapPosition = (system: StarSystem) => ({
   x: system.mapPosition?.x ?? system.position.x,
   y: system.mapPosition?.y ?? system.position.y,
@@ -523,17 +544,44 @@ export const GalaxyMap = ({
     const scienceGroup = new THREE.Group();
     scienceGroup.name = 'scienceShips';
     const shipGeometry = new THREE.SphereGeometry(0.6, 12, 12);
+    const targetMarkerGeometry = new THREE.SphereGeometry(0.35, 10, 10);
+    const targetGroup = new THREE.Group();
+    targetGroup.name = 'scienceTargets';
+
     scienceShips.forEach((ship) => {
       const position = positions.get(ship.currentSystemId);
-      if (!position) {
-        return;
+      if (position) {
+        const material =
+          scienceMaterials[ship.status] ?? scienceMaterials.idle;
+        const marker = new THREE.Mesh(shipGeometry, material);
+        marker.position.set(position.x, position.y, position.z + 4);
+        scienceGroup.add(marker);
       }
-      const material =
-        scienceMaterials[ship.status] ?? scienceMaterials.idle;
-      const marker = new THREE.Mesh(shipGeometry, material);
-      marker.position.set(position.x, position.y, position.z + 4);
-      scienceGroup.add(marker);
+
+      if (ship.targetSystemId && ship.targetSystemId !== ship.currentSystemId) {
+        const from = positions.get(ship.currentSystemId);
+        const to = positions.get(ship.targetSystemId);
+        if (from && to) {
+          const points = [
+            new THREE.Vector3(from.x, from.y, from.z + 0.5),
+            new THREE.Vector3(to.x, to.y, to.z + 0.5),
+          ];
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const lineMaterial =
+            scienceLineMaterials[ship.status] ?? scienceLineMaterials.idle;
+          const line = new THREE.Line(geometry, lineMaterial);
+          targetGroup.add(line);
+
+          const targetMarker = new THREE.Mesh(
+            targetMarkerGeometry,
+            scienceMaterials[ship.status] ?? scienceMaterials.idle,
+          );
+          targetMarker.position.set(to.x, to.y, to.z + 1.5);
+          targetGroup.add(targetMarker);
+        }
+      }
     });
+    group.add(targetGroup);
     group.add(scienceGroup);
 
   }, [systems, orbitBaseSpeed, scienceShips]);

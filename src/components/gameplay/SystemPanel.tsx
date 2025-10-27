@@ -25,6 +25,17 @@ export const SystemPanel = ({
     return session.galaxy.systems.find((entry) => entry.id === systemId) ?? null;
   }, [session, systemId]);
 
+  const colonizedPlanets = useMemo(() => {
+    if (!session) {
+      return new Set<string>();
+    }
+    return new Set(
+      session.economy.planets
+        .filter((planet) => planet.systemId === systemId)
+        .map((planet) => planet.id),
+    );
+  }, [session, systemId]);
+
   if (!system) {
     return <p className="text-muted">Seleziona un sistema sulla mappa.</p>;
   }
@@ -55,25 +66,31 @@ export const SystemPanel = ({
         <h4>Pianeti</h4>
         {isSurveyed ? (
           <ul className="system-panel__planets">
-            {system.orbitingPlanets.map((planet) => (
-              <li key={planet.id}>
-                <div>
-                  <strong>{planet.name}</strong>
-                  <span className="text-muted">
-                    Orbita: {planet.orbitRadius.toFixed(1)} AU
-                  </span>
-                </div>
-                <div className="system-panel__planet-meta">
-                  <span>Diametro: {planet.size.toFixed(1)}</span>
-                  <button
-                    className="panel__action panel__action--compact"
-                    onClick={() => onFocusPlanet(planet.id)}
-                  >
-                    Focus
-                  </button>
-                </div>
-              </li>
-            ))}
+            {system.orbitingPlanets.map((planet) => {
+              const colonized = colonizedPlanets.has(planet.id);
+              return (
+                <li key={planet.id}>
+                  <div>
+                    <strong>{planet.name}</strong>
+                    <span className="text-muted">
+                      Orbita: {planet.orbitRadius.toFixed(1)} AU
+                    </span>
+                    {colonized ? (
+                      <span className="system-panel__badge">Colonia</span>
+                    ) : null}
+                  </div>
+                  <div className="system-panel__planet-meta">
+                    <span>Diametro: {planet.size.toFixed(1)}</span>
+                    <button
+                      className="panel__action panel__action--compact"
+                      onClick={() => onFocusPlanet(planet.id)}
+                    >
+                      Focus
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
             {system.orbitingPlanets.length === 0 ? (
               <li className="text-muted">Nessun pianeta registrato.</li>
             ) : null}
