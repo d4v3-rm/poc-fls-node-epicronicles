@@ -325,12 +325,16 @@ body {
 
 .draggable-panel {
   position: absolute;
-  width: 280px;
+  min-width: 240px;
+  min-height: 160px;
   background: rgba(3, 8, 20, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .draggable-panel__header {
@@ -345,7 +349,7 @@ body {
 }
 
 .draggable-panel__content {
-  max-height: 220px;
+  flex: 1;
   overflow: auto;
   padding: 0.75rem;
 }
@@ -357,6 +361,18 @@ body {
   font-size: 1rem;
   cursor: pointer;
   padding: 0.1rem 0.3rem;
+}
+
+.draggable-panel__resize {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: 4px;
+  bottom: 4px;
+  cursor: se-resize;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  pointer-events: auto;
 }
 
 .shipyard-modal {
@@ -751,6 +767,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+
+.galaxy-overview__focus {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-dasharray: 4;
+  pointer-events: auto;
 }
 
 .debug-modal {

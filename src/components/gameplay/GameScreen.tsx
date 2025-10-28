@@ -102,7 +102,13 @@ export const GameScreen = () => {
         debugOpen={debugOpen}
       />
       <div className="floating-panels">
-        <DraggablePanel title="Colonie" initialX={12} initialY={80}>
+        <DraggablePanel
+          title="Colonie"
+          initialX={12}
+          initialY={80}
+          initialHeight={320}
+          initialWidth={320}
+        >
           <ColonyPanel
             onSelectPlanet={(planetId, systemId) => {
               setFocusSystemId(systemId);
@@ -116,7 +122,13 @@ export const GameScreen = () => {
             }}
           />
         </DraggablePanel>
-        <DraggablePanel title="Panoramica galassia" initialX={12} initialY={300}>
+        <DraggablePanel
+          title="Panoramica galassia"
+          initialX={12}
+          initialY={340}
+          initialWidth={360}
+          initialHeight={280}
+        >
           <GalaxyOverview
             onFocusSystem={(systemId) => {
               setFocusSystemId(systemId);
@@ -124,7 +136,13 @@ export const GameScreen = () => {
             }}
           />
         </DraggablePanel>
-        <DraggablePanel title="Navi scientifiche" initialX={12} initialY={560}>
+        <DraggablePanel
+          title="Navi scientifiche"
+          initialX={Math.max(12, viewportWidth - 360)}
+          initialY={80}
+          initialWidth={320}
+          initialHeight={260}
+        >
           <SciencePanel
             onFocusSystem={(systemId) => {
               setFocusSystemId(systemId);
