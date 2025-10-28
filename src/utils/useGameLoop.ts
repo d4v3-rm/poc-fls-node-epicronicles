@@ -4,8 +4,16 @@ import { useGameStore } from '../store/gameStore';
 export const useGameLoop = () => {
   const advanceClockBy = useGameStore((state) => state.advanceClockBy);
   const sessionId = useGameStore((state) => state.session?.id);
+  const isRunning = useGameStore(
+    (state) => state.session?.clock.isRunning ?? false,
+  );
   const frameRef = useRef<number | null>(null);
   const previousTimestampRef = useRef<number | null>(null);
+  const isRunningRef = useRef(isRunning);
+
+  useEffect(() => {
+    isRunningRef.current = isRunning;
+  }, [isRunning]);
 
   useEffect(() => {
     if (!sessionId) {
@@ -16,7 +24,9 @@ export const useGameLoop = () => {
       const previous = previousTimestampRef.current ?? timestamp;
       const elapsed = timestamp - previous;
       previousTimestampRef.current = timestamp;
-      advanceClockBy(elapsed, Date.now());
+      if (isRunningRef.current) {
+        advanceClockBy(elapsed, Date.now());
+      }
       frameRef.current = requestAnimationFrame(loop);
     };
 
