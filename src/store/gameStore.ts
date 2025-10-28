@@ -1,7 +1,17 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  type AnyAction,
+  type ThunkAction,
+} from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+import { useMemo } from 'react';
 import { gameConfig, type GameConfig } from '../config/gameConfig';
-import { advanceClock, setClockRunning, setClockSpeed } from '../domain/clock';
+import {
+  advanceClock,
+  setClockRunning,
+  setClockSpeed,
+} from '../domain/clock';
 import { createSession } from '../domain/session';
 import type {
   GameSession,
@@ -65,36 +75,68 @@ export type ScienceShipOrderResult =
   | { success: true }
   | { success: false; reason: ScienceShipOrderError };
 
-interface GameStoreState {
+interface GameSliceState {
   view: GameView;
   config: GameConfig;
   session: GameSession | null;
-  startNewSession: (args?: StartSessionArgs) => void;
-  returnToMenu: () => void;
-  setSimulationRunning: (isRunning: boolean, now?: number) => void;
-  setSpeedMultiplier: (speed: number) => void;
-  advanceClockBy: (elapsedMs: number, now: number) => void;
-  startColonization: (systemId: string) => StartColonizationResult;
-  queueShipBuild: (designId: ShipClassId) => QueueShipBuildResult;
-  orderFleetMove: (fleetId: string, systemId: string) => FleetMoveResult;
-  orderScienceShip: (
-    shipId: string,
-    systemId: string,
-  ) => ScienceShipOrderResult;
-  setScienceAutoExplore: (shipId: string, auto: boolean) => void;
 }
+
+const initialState: GameSliceState = {
+  view: 'mainMenu',
+  config: gameConfig,
+  session: null,
+};
+
+const gameSlice = createSlice({
+  name: 'game',
+  initialState,
+  reducers: {
+    startSessionSuccess(state, action: PayloadAction<GameSession>) {
+      state.session = action.payload;
+      state.view = 'simulation';
+    },
+    returnToMenu(state) {
+      state.session = null;
+      state.view = 'mainMenu';
+    },
+    setSessionState(state, action: PayloadAction<GameSession | null>) {
+      state.session = action.payload;
+    },
+  },
+});
+
+export const store = configureStore({
+  reducer: {
+    game: gameSlice.reducer,
+  },
+  devTools: import.meta.env.DEV,
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  AnyAction
+>;
+
+export const useAppDispatch: () => AppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 const tickDurationMs = (cfg: GameConfig) =>
   Math.max(16, Math.round(1000 / cfg.ticksPerSecond));
 
-export const useGameStore = create<GameStoreState>()(
-  devtools(
-    (set, get) => ({
-      view: 'mainMenu',
-  config: gameConfig,
-  session: null,
-  startNewSession: (args) => {
-    const cfg = get().config;
+const setSession = (session: GameSession | null): PayloadAction<GameSession | null> =>
+  gameSlice.actions.setSessionState(session);
+
+const startSessionSuccess = gameSlice.actions.startSessionSuccess;
+export const returnToMenu = gameSlice.actions.returnToMenu;
+
+export const startNewSession =
+  (args?: StartSessionArgs): AppThunk<void> =>
+  (dispatch, getState) => {
+    const cfg = getState().game.config;
     const seed = args?.seed ?? cfg.defaultGalaxy.seed;
     const session = createSession({
       seed,
@@ -106,67 +148,71 @@ export const useGameStore = create<GameStoreState>()(
       economyConfig: cfg.economy,
       militaryConfig: cfg.military,
     });
-    set({ session, view: 'simulation' });
-  },
-  returnToMenu: () => set({ view: 'mainMenu', session: null }),
-  setSimulationRunning: (isRunning, now = Date.now()) =>
-    set((state) => {
-      if (!state.session) {
-        return state;
-      }
+    dispatch(startSessionSuccess(session));
+  };
 
-      return {
-        ...state,
-        session: {
-          ...state.session,
-          clock: setClockRunning(state.session.clock, isRunning, now),
-        },
-      };
-    }),
-  setSpeedMultiplier: (speed) =>
-    set((state) => {
-      if (!state.session) {
-        return state;
-      }
+export const setSimulationRunning =
+  (isRunning: boolean, now = Date.now()): AppThunk<void> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return;
+    }
+    const updated: GameSession = {
+      ...session,
+      clock: setClockRunning(session.clock, isRunning, now),
+    };
+    dispatch(setSession(updated));
+  };
 
-      return {
-        ...state,
-        session: {
-          ...state.session,
-          clock: setClockSpeed(state.session.clock, speed),
-        },
-      };
-    }),
-  advanceClockBy: (elapsedMs, now) =>
-    set((state) => {
-      if (!state.session) {
-        return state;
-      }
+export const setSpeedMultiplier =
+  (speed: number): AppThunk<void> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return;
+    }
+    const updated: GameSession = {
+      ...session,
+      clock: setClockSpeed(session.clock, speed),
+    };
+    dispatch(setSession(updated));
+  };
 
-      const cfg = state.config;
-      const updatedClock = advanceClock({
-        clock: state.session.clock,
-        elapsedMs,
-        tickDurationMs: tickDurationMs(cfg),
-        now,
-      });
+export const advanceClockBy =
+  (elapsedMs: number, now: number): AppThunk<void> =>
+  (dispatch, getState) => {
+    const state = getState().game;
+    const session = state.session;
+    if (!session) {
+      return;
+    }
 
-      const ticksAdvanced = updatedClock.tick - state.session.clock.tick;
-      const simulatedSession =
-        ticksAdvanced > 0
-          ? advanceSimulation(state.session, ticksAdvanced, cfg)
-          : state.session;
+    const updatedClock = advanceClock({
+      clock: session.clock,
+      elapsedMs,
+      tickDurationMs: tickDurationMs(state.config),
+      now,
+    });
 
-      return {
-        ...state,
-        session: {
-          ...simulatedSession,
-          clock: updatedClock,
-        },
-      };
-    }),
-  startColonization: (systemId) => {
-    const state = get();
+    const ticksAdvanced = updatedClock.tick - session.clock.tick;
+    const simulatedSession =
+      ticksAdvanced > 0
+        ? advanceSimulation(session, ticksAdvanced, state.config)
+        : session;
+
+    dispatch(
+      setSession({
+        ...simulatedSession,
+        clock: updatedClock,
+      }),
+    );
+  };
+
+export const startColonization =
+  (systemId: string): AppThunk<StartColonizationResult> =>
+  (dispatch, getState) => {
+    const state = getState().game;
     const session = state.session;
     if (!session) {
       return { success: false, reason: 'NO_SESSION' };
@@ -202,19 +248,21 @@ export const useGameStore = create<GameStoreState>()(
 
     const updatedEconomy = spendResources(session.economy, cost);
     const task = createColonizationTask(system, state.config.colonization);
-
-    set({
-      session: {
+    dispatch(
+      setSession({
         ...session,
         economy: updatedEconomy,
         colonizationTasks: [...session.colonizationTasks, task],
-      },
-    });
+      }),
+    );
 
     return { success: true };
-  },
-  queueShipBuild: (designId) => {
-    const state = get();
+  };
+
+export const queueShipBuild =
+  (designId: ShipClassId): AppThunk<QueueShipBuildResult> =>
+  (dispatch, getState) => {
+    const state = getState().game;
     const session = state.session;
     if (!session) {
       return { success: false, reason: 'NO_SESSION' };
@@ -240,18 +288,21 @@ export const useGameStore = create<GameStoreState>()(
     const updatedEconomy = spendResources(session.economy, design.buildCost);
     const task = createShipyardTask(design.id, design.buildTime);
 
-    set({
-      session: {
+    dispatch(
+      setSession({
         ...session,
         economy: updatedEconomy,
         shipyardQueue: [...session.shipyardQueue, task],
-      },
-    });
+      }),
+    );
 
     return { success: true };
-  },
-  orderFleetMove: (fleetId, systemId) => {
-    const state = get();
+  };
+
+export const orderFleetMove =
+  (fleetId: string, systemId: string): AppThunk<FleetMoveResult> =>
+  (dispatch, getState) => {
+    const state = getState().game;
     const session = state.session;
     if (!session) {
       return { success: false, reason: 'NO_SESSION' };
@@ -280,8 +331,8 @@ export const useGameStore = create<GameStoreState>()(
       state.config,
     );
 
-    set({
-      session: {
+    dispatch(
+      setSession({
         ...session,
         fleets: session.fleets.map((entry) =>
           entry.id === fleetId
@@ -292,13 +343,16 @@ export const useGameStore = create<GameStoreState>()(
               }
             : entry,
         ),
-      },
-    });
+      }),
+    );
 
     return { success: true };
-  },
-  orderScienceShip: (shipId, systemId) => {
-    const state = get();
+  };
+
+export const orderScienceShip =
+  (shipId: string, systemId: string): AppThunk<ScienceShipOrderResult> =>
+  (dispatch, getState) => {
+    const state = getState().game;
     const session = state.session;
     if (!session) {
       return { success: false, reason: 'NO_SESSION' };
@@ -332,7 +386,7 @@ export const useGameStore = create<GameStoreState>()(
         : ship,
     );
 
-    const visibilityRank: Record<'unknown' | 'revealed' | 'surveyed', number> = {
+    const visibilityRank: Record<SystemVisibility, number> = {
       unknown: 0,
       revealed: 1,
       surveyed: 2,
@@ -350,21 +404,24 @@ export const useGameStore = create<GameStoreState>()(
       };
     });
 
-    set({
-      session: {
+    dispatch(
+      setSession({
         ...session,
         scienceShips: updatedShips,
         galaxy:
           updatedSystems === session.galaxy.systems
             ? session.galaxy
             : { ...session.galaxy, systems: updatedSystems },
-      },
-    });
+      }),
+    );
 
     return { success: true };
-  },
-  setScienceAutoExplore: (shipId, auto) => {
-    const session = get().session;
+  };
+
+export const setScienceAutoExplore =
+  (shipId: string, auto: boolean): AppThunk<void> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
     if (!session) {
       return;
     }
@@ -376,24 +433,59 @@ export const useGameStore = create<GameStoreState>()(
           }
         : ship,
     );
-    set({
-      session: {
+    dispatch(
+      setSession({
         ...session,
         scienceShips: updatedShips,
-      },
-    });
-  },
-    }),
-    { name: 'GameStore' },
-  ),
-);
+      }),
+    );
+  };
 
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  import('simple-zustand-devtools')
-    .then(({ mountStoreDevtool }) => {
-      mountStoreDevtool('GameStore', useGameStore);
-    })
-    .catch(() => {
-      /* ignore */
-    });
+interface HookState extends GameSliceState {
+  startNewSession: (args?: StartSessionArgs) => void;
+  returnToMenu: () => void;
+  setSimulationRunning: (isRunning: boolean, now?: number) => void;
+  setSpeedMultiplier: (speed: number) => void;
+  advanceClockBy: (elapsedMs: number, now: number) => void;
+  startColonization: (systemId: string) => StartColonizationResult;
+  queueShipBuild: (designId: ShipClassId) => QueueShipBuildResult;
+  orderFleetMove: (fleetId: string, systemId: string) => FleetMoveResult;
+  orderScienceShip: (
+    shipId: string,
+    systemId: string,
+  ) => ScienceShipOrderResult;
+  setScienceAutoExplore: (shipId: string, auto: boolean) => void;
 }
+
+export const useGameStore = <T>(
+  selector: (state: HookState) => T,
+): T => {
+  const dispatch = useAppDispatch();
+  const state = useAppSelector((root) => root.game);
+  const actions = useMemo(
+    () => ({
+      startNewSession: (args?: StartSessionArgs) =>
+        dispatch(startNewSession(args)),
+      returnToMenu: () => dispatch(returnToMenu()),
+      setSimulationRunning: (isRunning: boolean, now?: number) =>
+        dispatch(setSimulationRunning(isRunning, now)),
+      setSpeedMultiplier: (speed: number) =>
+        dispatch(setSpeedMultiplier(speed)),
+      advanceClockBy: (elapsed: number, now: number) =>
+        dispatch(advanceClockBy(elapsed, now)),
+      startColonization: (systemId: string) =>
+        dispatch(startColonization(systemId)),
+      queueShipBuild: (designId: ShipClassId) =>
+        dispatch(queueShipBuild(designId)),
+      orderFleetMove: (fleetId: string, systemId: string) =>
+        dispatch(orderFleetMove(fleetId, systemId)),
+      orderScienceShip: (shipId: string, systemId: string) =>
+        dispatch(orderScienceShip(shipId, systemId)),
+      setScienceAutoExplore: (shipId: string, auto: boolean) =>
+        dispatch(setScienceAutoExplore(shipId, auto)),
+    }),
+    [dispatch],
+  );
+
+  return selector({ ...state, ...actions });
+};
