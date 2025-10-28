@@ -401,7 +401,7 @@ export const GalaxyMap = ({
   useEffect(() => {
     if (!focusSystemId || focusPlanetId) {
       if (!focusSystemId) {
-        minZoomRef.current = 50;
+        minZoomRef.current = 35;
       }
       return;
     }
