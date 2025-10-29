@@ -9,6 +9,7 @@ import { FleetAndCombatPanel } from './FleetAndCombatPanel';
 import { SciencePanel } from './SciencePanel';
 import { SystemPanel } from './SystemPanel';
 import { GalaxyOverview } from './GalaxyOverview';
+import { EconomyPanel } from './EconomyPanel';
 import { HudTopBar } from './HudTopBar';
 import { HudBottomBar } from './HudBottomBar';
 import { DraggablePanel } from '../ui/DraggablePanel';
@@ -201,6 +202,15 @@ export const GameScreen = () => {
               setFocusPlanetId(null);
             }}
           />
+        </DraggablePanel>
+        <DraggablePanel
+          title="Bilancio economico"
+          initialX={12}
+          initialY={640}
+          initialWidth={320}
+          initialHeight={260}
+        >
+          <EconomyPanel />
         </DraggablePanel>
         <DraggablePanel
           title="Navi scientifiche"

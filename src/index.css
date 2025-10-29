@@ -930,3 +930,45 @@ body {
   padding: 0.6rem;
   background: rgba(255, 255, 255, 0.02);
 }
+.economy-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.economy-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.economy-panel li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.economy-panel__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.economy-panel__net {
+  font-weight: 600;
+}
+
+.economy-panel__net.is-positive {
+  color: #7fe38f;
+}
+
+.economy-panel__net.is-negative {
+  color: #ff9b8a;
+}
