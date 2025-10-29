@@ -29,7 +29,11 @@ const createPlanetFromTask = (task: ColonizationTask): Planet => ({
   systemId: task.systemId,
   kind: task.planetTemplate.kind,
   size: task.planetTemplate.size,
-  population: 1,
+  population: {
+    workers: 1,
+    specialists: 0,
+    researchers: 0,
+  },
   baseProduction: task.planetTemplate.baseProduction,
   upkeep: task.planetTemplate.upkeep,
   districts: {},

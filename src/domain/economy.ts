@@ -53,7 +53,11 @@ const createHomeworld = (
   systemId,
   kind: config.kind,
   size: config.size,
-  population: config.population,
+  population: {
+    workers: config.population,
+    specialists: 0,
+    researchers: 0,
+  },
   baseProduction: config.baseProduction,
   upkeep: config.upkeep,
   districts: { ...(config.districts ?? {}) },

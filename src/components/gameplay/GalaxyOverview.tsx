@@ -172,7 +172,8 @@ export const GalaxyOverview = ({ onFocusSystem }: GalaxyOverviewProps) => {
                       Sistema: {colony.systemName}
                     </span>
                     <span className="text-muted">
-                      Popolazione: {colony.population.toFixed(1)}
+                      Popolazione: {colony.population.workers} lavoratori /{' '}
+                      {colony.population.researchers} ricercatori
                     </span>
                   </li>
                 ))

@@ -102,7 +102,11 @@ export interface Planet {
   systemId: string;
   kind: PlanetKind;
   size: number;
-  population: number;
+  population: {
+    workers: number;
+    specialists: number;
+    researchers: number;
+  };
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;
   districts: Record<string, number>;

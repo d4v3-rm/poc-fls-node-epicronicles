@@ -281,7 +281,11 @@ export const GameScreen = () => {
           >
             <div className="planet-detail">
               <p>Sistema: {selectedPlanetSystem.name}</p>
-              <p>Popolazione: {selectedPlanet.population}</p>
+              <p>
+                Popolazione: {selectedPlanet.population.workers} lavoratori /
+                {selectedPlanet.population.specialists} specialisti /
+                {selectedPlanet.population.researchers} ricercatori
+              </p>
               <p>Tipo stella: {selectedPlanetSystem.starClass}</p>
               <div className="planet-list__yields">
                 {Object.entries(selectedPlanet.baseProduction).map(
