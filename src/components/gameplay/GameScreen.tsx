@@ -28,6 +28,7 @@ export const GameScreen = () => {
   const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
   const [focusPlanetId, setFocusPlanetId] = useState<string | null>(null);
+  const [districtMessage, setDistrictMessage] = useState<string | null>(null);
   const focusedSessionRef = useRef<string | null>(null);
 
   const clearFocusTargets = () => {
@@ -100,6 +101,51 @@ export const GameScreen = () => {
   const selectedPlanetSystem = selectedPlanet
     ? systems.find((system) => system.id === selectedPlanet.systemId) ?? null
     : null;
+  const districtDefinitions = useGameStore(
+    (state) => state.config.economy.districts,
+  );
+  const districtQueue = useGameStore(
+    (state) => state.session?.districtConstructionQueue ?? [],
+  );
+  const queueDistrictConstruction = useGameStore(
+    (state) => state.queueDistrictConstruction,
+  );
+  const planetDistrictQueue = selectedPlanet
+    ? districtQueue.filter((task) => task.planetId === selectedPlanet.id)
+    : [];
+  const districtErrorMessages: Record<string, string> = {
+    NO_SESSION: 'Nessuna sessione attiva.',
+    PLANET_NOT_FOUND: 'Pianeta non trovato.',
+    INVALID_DISTRICT: 'Distretto non valido.',
+    INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
+  };
+
+  const formatCost = (cost: Record<string, number | undefined>) => {
+    const entries = Object.entries(cost).filter(
+      ([, amount]) => amount && amount > 0,
+    );
+    if (entries.length === 0) {
+      return 'N/A';
+    }
+    return entries
+      .map(
+        ([type, amount]) =>
+          `${resourceLabels[type as keyof typeof resourceLabels]} ${amount}`,
+      )
+      .join(' | ');
+  };
+
+  const handleQueueDistrict = (districtId: string) => {
+    if (!selectedPlanet) {
+      return;
+    }
+    const result = queueDistrictConstruction(selectedPlanet.id, districtId);
+    setDistrictMessage(
+      result.success
+        ? 'Costruzione distretto avviata.'
+        : districtErrorMessages[result.reason],
+    );
+  };
 
   return (
     <div className="game-layout">
@@ -237,6 +283,64 @@ export const GameScreen = () => {
                       <span className="is-positive">+{amount}</span>
                     </div>
                   ),
+                )}
+              </div>
+              {districtMessage ? (
+                <p className="panel-message">{districtMessage}</p>
+              ) : null}
+              <div className="planet-districts">
+                <h4>Distretti</h4>
+                <ul>
+                  {districtDefinitions.map((definition) => {
+                    const owned =
+                      selectedPlanet.districts[definition.id] ?? 0;
+                    return (
+                      <li key={definition.id}>
+                        <div>
+                          <strong>{definition.label}</strong>
+                          <span className="text-muted">
+                            {definition.description}
+                          </span>
+                        </div>
+                        <div className="planet-district__meta">
+                          <span>Costruiti: {owned}</span>
+                          <span>Costo: {formatCost(definition.cost)}</span>
+                          <span>
+                            Produzione: {formatCost(definition.production)}
+                          </span>
+                          <button
+                            className="panel__action panel__action--compact"
+                            onClick={() => handleQueueDistrict(definition.id)}
+                          >
+                            Costruisci
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              <div className="planet-districts">
+                <h4>Coda costruzione</h4>
+                {planetDistrictQueue.length === 0 ? (
+                  <p className="text-muted">Nessun distretto in costruzione.</p>
+                ) : (
+                  <ul>
+                    {planetDistrictQueue.map((task) => {
+                      const definition = districtDefinitions.find(
+                        (entry) => entry.id === task.districtId,
+                      );
+                      return (
+                        <li key={task.id}>
+                          <span>{definition?.label ?? task.districtId}</span>
+                          <span className="text-muted">
+                            Tick rimanenti: {task.ticksRemaining}/
+                            {task.totalTicks}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 )}
               </div>
             </div>

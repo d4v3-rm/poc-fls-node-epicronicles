@@ -5,6 +5,7 @@ import { advanceEconomy } from './economy';
 import { advanceColonization } from './colonization';
 import { advanceShipyard } from './shipyard';
 import { advanceFleets } from './fleets';
+import { advanceDistrictConstruction } from './districts';
 
 export const advanceSimulation = (
   session: GameSession,
@@ -26,6 +27,10 @@ export const advanceSimulation = (
       updatedSession.colonizationTasks,
       updatedSession.economy,
     );
+    const districtConstruction = advanceDistrictConstruction({
+      tasks: updatedSession.districtConstructionQueue,
+      economy: colonization.economy,
+    });
     const shipyard = advanceShipyard({
       tasks: updatedSession.shipyardQueue,
       fleets: updatedSession.fleets,
@@ -44,13 +49,17 @@ export const advanceSimulation = (
       updatedSession.scienceShips,
       config.exploration,
     );
-    const { economy } = advanceEconomy(colonization.economy, config.economy);
+    const { economy } = advanceEconomy(
+      districtConstruction.economy,
+      config.economy,
+    );
 
     updatedSession = {
       ...updatedSession,
       galaxy,
       scienceShips,
       colonizationTasks: colonization.tasks,
+      districtConstructionQueue: districtConstruction.tasks,
       shipyardQueue: shipyard.tasks,
       fleets: fleetsAdvance.fleets,
       combatReports: [

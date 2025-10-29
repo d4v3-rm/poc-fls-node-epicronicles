@@ -721,6 +721,36 @@ body {
   gap: 0.25rem;
 }
 
+.planet-districts {
+  margin-top: 0.75rem;
+}
+
+.planet-districts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.planet-districts li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.45rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.planet-district__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
 .galaxy-overview {
   display: flex;
   flex-wrap: wrap;

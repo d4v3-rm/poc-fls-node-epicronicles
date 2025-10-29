@@ -42,6 +42,7 @@ export const createSession = ({
     colonizationTasks: [],
     fleets: [createInitialFleet(homeSystemId, militaryConfig)],
     shipyardQueue: [],
+    districtConstructionQueue: [],
     combatReports: [],
   };
 };

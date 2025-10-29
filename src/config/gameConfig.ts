@@ -1,6 +1,10 @@
 import type { GalaxyGenerationParams } from '../domain/galaxy';
 import type { EconomyConfig } from '../domain/economy';
-import type { ResourceCost, ShipDesign, ShipClassId } from '../domain/types';
+import type {
+  ResourceCost,
+  ShipDesign,
+  ShipClassId,
+} from '../domain/types';
 
 export interface ColonizationConfig {
   cost: ResourceCost;
@@ -71,7 +75,51 @@ export const gameConfig: GameConfig = {
       upkeep: {
         food: 4,
       },
+      districts: {
+        generator: 2,
+        mining: 2,
+        farm: 1,
+        research: 1,
+      },
     },
+    districts: [
+      {
+        id: 'generator',
+        label: 'Distretto energetico',
+        description: 'Produce energia sfruttando la rete planetaria.',
+        cost: { minerals: 60 },
+        buildTime: 4,
+        production: { energy: 4 },
+        upkeep: { food: 1 },
+      },
+      {
+        id: 'mining',
+        label: 'Distretto minerario',
+        description: 'Estrae minerali dalle superfici del pianeta.',
+        cost: { minerals: 50 },
+        buildTime: 4,
+        production: { minerals: 4 },
+        upkeep: { energy: 1 },
+      },
+      {
+        id: 'farm',
+        label: 'Distretto agricolo',
+        description: 'Aumenta la produzione di cibo locale.',
+        cost: { minerals: 45 },
+        buildTime: 3,
+        production: { food: 5 },
+        upkeep: { energy: 1 },
+      },
+      {
+        id: 'research',
+        label: 'Distretto di ricerca',
+        description: 'Laboratori e campus scientifici.',
+        cost: { minerals: 80, energy: 20 },
+        buildTime: 5,
+        production: { research: 4 },
+        upkeep: { energy: 2 },
+      },
+    ],
   },
   colonization: {
     cost: {

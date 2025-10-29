@@ -23,6 +23,16 @@ export interface ResourceLedger {
   upkeep: number;
 }
 
+export interface DistrictDefinition {
+  id: string;
+  label: string;
+  description: string;
+  cost: ResourceCost;
+  buildTime: number;
+  production: Partial<Record<ResourceType, number>>;
+  upkeep: Partial<Record<ResourceType, number>>;
+}
+
 export type PlanetKind = 'terrestrial' | 'desert' | 'tundra';
 
 export type ShipClassId = 'corvette';
@@ -95,11 +105,19 @@ export interface Planet {
   population: number;
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;
+  districts: Record<string, number>;
 }
 
 export interface EconomyState {
   resources: Record<ResourceType, ResourceLedger>;
   planets: Planet[];
+}
+export interface DistrictConstructionTask {
+  id: string;
+  planetId: string;
+  districtId: string;
+  ticksRemaining: number;
+  totalTicks: number;
 }
 
 export interface FleetShip {
@@ -168,5 +186,6 @@ export interface GameSession {
   colonizationTasks: ColonizationTask[];
   fleets: Fleet[];
   shipyardQueue: ShipyardTask[];
+  districtConstructionQueue: DistrictConstructionTask[];
   combatReports: CombatReport[];
 }

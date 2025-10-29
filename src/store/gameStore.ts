@@ -25,6 +25,7 @@ import { createColonizationTask } from '../domain/colonization';
 import { canAffordCost, spendResources } from '../domain/economy';
 import { createShipyardTask } from '../domain/shipyard';
 import { calculateTravelTicks } from '../domain/fleets';
+import { createDistrictConstructionTask } from '../domain/districts';
 
 export interface StartSessionArgs {
   seed?: string;
@@ -74,6 +75,16 @@ export type ScienceShipOrderError =
 export type ScienceShipOrderResult =
   | { success: true }
   | { success: false; reason: ScienceShipOrderError };
+
+export type DistrictBuildError =
+  | 'NO_SESSION'
+  | 'PLANET_NOT_FOUND'
+  | 'INVALID_DISTRICT'
+  | 'INSUFFICIENT_RESOURCES';
+
+export type QueueDistrictBuildResult =
+  | { success: true }
+  | { success: false; reason: DistrictBuildError };
 
 interface GameSliceState {
   view: GameView;
@@ -299,6 +310,54 @@ export const queueShipBuild =
     return { success: true };
   };
 
+export const queueDistrictConstruction =
+  (
+    planetId: string,
+    districtId: string,
+  ): AppThunk<QueueDistrictBuildResult> =>
+  (dispatch, getState) => {
+    const state = getState().game;
+    const session = state.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const planet = session.economy.planets.find(
+      (candidate) => candidate.id === planetId,
+    );
+    if (!planet) {
+      return { success: false, reason: 'PLANET_NOT_FOUND' };
+    }
+    const definition = state.config.economy.districts.find(
+      (entry) => entry.id === districtId,
+    );
+    if (!definition) {
+      return { success: false, reason: 'INVALID_DISTRICT' };
+    }
+    if (!canAffordCost(session.economy, definition.cost)) {
+      return { success: false, reason: 'INSUFFICIENT_RESOURCES' };
+    }
+
+    const updatedEconomy = spendResources(session.economy, definition.cost);
+    const task = createDistrictConstructionTask({
+      planetId,
+      districtId,
+      buildTime: Math.max(1, definition.buildTime),
+    });
+
+    dispatch(
+      setSession({
+        ...session,
+        economy: updatedEconomy,
+        districtConstructionQueue: [
+          ...session.districtConstructionQueue,
+          task,
+        ],
+      }),
+    );
+
+    return { success: true };
+  };
+
 export const orderFleetMove =
   (fleetId: string, systemId: string): AppThunk<FleetMoveResult> =>
   (dispatch, getState) => {
@@ -455,6 +514,10 @@ interface HookState extends GameSliceState {
     systemId: string,
   ) => ScienceShipOrderResult;
   setScienceAutoExplore: (shipId: string, auto: boolean) => void;
+  queueDistrictConstruction: (
+    planetId: string,
+    districtId: string,
+  ) => QueueDistrictBuildResult;
 }
 
 export const useGameStore = <T>(
@@ -483,6 +546,8 @@ export const useGameStore = <T>(
         dispatch(orderScienceShip(shipId, systemId)),
       setScienceAutoExplore: (shipId: string, auto: boolean) =>
         dispatch(setScienceAutoExplore(shipId, auto)),
+      queueDistrictConstruction: (planetId: string, districtId: string) =>
+        dispatch(queueDistrictConstruction(planetId, districtId)),
     }),
     [dispatch],
   );
