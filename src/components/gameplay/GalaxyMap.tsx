@@ -190,7 +190,6 @@ export const GalaxyMap = ({
   const planetAngleRef = useRef(new Map<string, number>());
   const planetLookupRef = useRef(new Map<string, THREE.Object3D>());
   const clockRef = useRef<THREE.Clock | null>(null);
-  const minZoomRef = useRef(35);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -238,7 +237,7 @@ export const GalaxyMap = ({
       event.preventDefault();
       zoomTargetRef.current = clamp(
         zoomTargetRef.current + event.deltaY * 0.1,
-        minZoomRef.current,
+        35,
         320,
       );
     };
@@ -400,9 +399,6 @@ export const GalaxyMap = ({
 
   useEffect(() => {
     if (!focusSystemId || focusPlanetId) {
-      if (!focusSystemId) {
-        minZoomRef.current = 35;
-      }
       return;
     }
     const target = systems.find((system) => system.id === focusSystemId);
@@ -412,11 +408,6 @@ export const GalaxyMap = ({
     if (target.visibility === 'unknown') {
       onClearFocus?.();
       return;
-    }
-    if (target.visibility !== 'surveyed') {
-      minZoomRef.current = 140;
-    } else {
-      minZoomRef.current = 50;
     }
     const pos = toMapPosition(target);
     const group = systemGroupRef.current;
@@ -428,10 +419,7 @@ export const GalaxyMap = ({
     } else {
       offsetTargetRef.current = new THREE.Vector3(-pos.x, -pos.y, 0);
     }
-    const targetMinZoom =
-      target.visibility === 'surveyed' ? 50 : 140;
-    minZoomRef.current = targetMinZoom;
-    zoomTargetRef.current = Math.max(targetMinZoom, 110);
+    zoomTargetRef.current = target.visibility === 'surveyed' ? 90 : 120;
   }, [focusSystemId, focusPlanetId, onClearFocus, systems]);
 
   useEffect(() => {
@@ -451,7 +439,6 @@ export const GalaxyMap = ({
       offsetTargetRef.current = new THREE.Vector3(-worldPos.x, -worldPos.y, 0);
     }
     zoomTargetRef.current = 70;
-    minZoomRef.current = 50;
   }, [focusPlanetId, systems]);
 
   useEffect(() => {
