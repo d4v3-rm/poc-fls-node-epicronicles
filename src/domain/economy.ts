@@ -17,6 +17,9 @@ export const RESOURCE_TYPES: ResourceType[] = [
   'research',
 ];
 
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+
 export interface HomeworldConfig {
   name: string;
   kind: PlanetKind;
@@ -25,6 +28,18 @@ export interface HomeworldConfig {
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;
   districts?: Record<string, number>;
+}
+
+export interface MoraleConfig {
+  baseStability: number;
+  min: number;
+  max: number;
+  overcrowdingThreshold: number;
+  overcrowdingPenalty: number;
+  deficitThreshold: number;
+  deficitPenalty: number;
+  happinessBonusPerSpecialist: number;
+  happinessPenaltyPerWorker: number;
 }
 
 export interface PopulationAutomationConfig {
@@ -40,7 +55,20 @@ export interface EconomyConfig {
   districts: DistrictDefinition[];
   populationJobs: PopulationJobDefinition[];
   populationAutomation?: PopulationAutomationConfig;
+  morale?: MoraleConfig;
 }
+
+const defaultMoraleConfig: MoraleConfig = {
+  baseStability: 65,
+  min: 20,
+  max: 95,
+  overcrowdingThreshold: 2,
+  overcrowdingPenalty: 2,
+  deficitThreshold: 25,
+  deficitPenalty: 5,
+  happinessBonusPerSpecialist: 0.5,
+  happinessPenaltyPerWorker: 0.2,
+};
 
 const createLedger = (
   starting: Partial<Record<ResourceType, number>>,
@@ -58,6 +86,7 @@ const createLedger = (
 const createHomeworld = (
   systemId: string,
   config: HomeworldConfig,
+  morale: MoraleConfig,
 ): Planet => ({
   id: `HOME-${systemId}`,
   name: config.name,
@@ -73,6 +102,8 @@ const createHomeworld = (
   baseProduction: config.baseProduction,
   upkeep: config.upkeep,
   districts: { ...(config.districts ?? {}) },
+  stability: morale.baseStability,
+  happiness: morale.baseStability,
 });
 
 export const createInitialEconomy = (
@@ -80,7 +111,13 @@ export const createInitialEconomy = (
   config: EconomyConfig,
 ): EconomyState => ({
   resources: createLedger(config.startingResources),
-  planets: [createHomeworld(homeSystemId, config.homeworld)],
+  planets: [
+    createHomeworld(
+      homeSystemId,
+      config.homeworld,
+      config.morale ?? defaultMoraleConfig,
+    ),
+  ],
 });
 
 export const canAffordCost = (
@@ -186,6 +223,52 @@ export const computePlanetProduction = (
   return summary;
 };
 
+interface PlanetMoraleResult {
+  stability: number;
+  happiness: number;
+  modifier: number;
+}
+
+export const calculatePlanetMorale = (
+  planet: Planet,
+  economy: EconomyState,
+  config: EconomyConfig,
+): PlanetMoraleResult => {
+  const morale = config.morale ?? defaultMoraleConfig;
+  const safeCapacity = Math.max(
+    0,
+    planet.size / morale.overcrowdingThreshold,
+  );
+  const crowdingPenalty =
+    Math.max(0, planet.population.total - safeCapacity) *
+    morale.overcrowdingPenalty;
+  const deficitPenalty = RESOURCE_TYPES.reduce((total, resource) => {
+    const ledger = economy.resources[resource];
+    const amount = ledger?.amount ?? 0;
+    if (amount >= morale.deficitThreshold) {
+      return total;
+    }
+    const severity =
+      (morale.deficitThreshold - amount) / morale.deficitThreshold;
+    return total + severity * morale.deficitPenalty;
+  }, 0);
+  const rawStability = morale.baseStability - crowdingPenalty - deficitPenalty;
+  const stability = clamp(rawStability, morale.min, morale.max);
+  const specialistCount =
+    (planet.population.specialists ?? 0) +
+    (planet.population.researchers ?? 0);
+  const happinessScore =
+    stability +
+    specialistCount * morale.happinessBonusPerSpecialist -
+    planet.population.workers * morale.happinessPenaltyPerWorker;
+  const happiness = clamp(happinessScore, morale.min, morale.max);
+  return {
+    stability,
+    happiness,
+    modifier: stability / 100,
+  };
+};
+
 export interface AdvanceEconomyResult {
   economy: EconomyState;
   netProduction: Record<ResourceType, number>;
@@ -214,9 +297,12 @@ export const advanceEconomy = (
     config.populationJobs.map((job) => [job.id, job]),
   );
 
+  const planetsWithMorale: Planet[] = [];
+
   state.planets.forEach((planet) => {
+    const morale = calculatePlanetMorale(planet, state, config);
     RESOURCE_TYPES.forEach((type) => {
-      const production = planet.baseProduction[type] ?? 0;
+      const production = (planet.baseProduction[type] ?? 0) * morale.modifier;
       const consumption = planet.upkeep[type] ?? 0;
       totals.income[type] += production;
       totals.upkeep[type] += consumption;
@@ -227,7 +313,7 @@ export const advanceEconomy = (
         return;
       }
       RESOURCE_TYPES.forEach((type) => {
-        const income = definition.production[type] ?? 0;
+        const income = (definition.production[type] ?? 0) * morale.modifier;
         const upkeep = definition.upkeep[type] ?? 0;
         totals.income[type] += income * count;
         totals.upkeep[type] += upkeep * count;
@@ -239,11 +325,16 @@ export const advanceEconomy = (
         return;
       }
       RESOURCE_TYPES.forEach((type) => {
-        const income = job.production[type] ?? 0;
+        const income = (job.production[type] ?? 0) * morale.modifier;
         const upkeep = job.upkeep[type] ?? 0;
         totals.income[type] += income * count;
         totals.upkeep[type] += upkeep * count;
       });
+    });
+    planetsWithMorale.push({
+      ...planet,
+      stability: morale.stability,
+      happiness: morale.happiness,
     });
   });
 
@@ -272,6 +363,7 @@ export const advanceEconomy = (
     economy: {
       ...state,
       resources,
+      planets: planetsWithMorale,
     },
     netProduction,
   };

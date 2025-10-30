@@ -86,6 +86,8 @@ const createPlanetFromTask = (task: ColonizationTask): Planet => ({
   baseProduction: task.planetTemplate.baseProduction,
   upkeep: task.planetTemplate.upkeep,
   districts: {},
+  stability: 60,
+  happiness: 60,
 });
 
 export interface AdvanceColonizationResult {

@@ -132,6 +132,8 @@ export interface Planet {
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;
   districts: Record<string, number>;
+  stability: number;
+  happiness: number;
 }
 
 export interface EconomyState {

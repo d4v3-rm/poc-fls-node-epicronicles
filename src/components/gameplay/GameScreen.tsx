@@ -346,6 +346,10 @@ export const GameScreen = () => {
                 {selectedPlanet.population.specialists} specialisti /
                 {selectedPlanet.population.researchers} ricercatori
               </p>
+              <p>
+                Stabilità: {Math.round(selectedPlanet.stability)} / Felicità:{' '}
+                {Math.round(selectedPlanet.happiness)}
+              </p>
               <p>Tipo stella: {selectedPlanetSystem.starClass}</p>
               {planetProductionSummary ? (
                 <div className="planet-production">

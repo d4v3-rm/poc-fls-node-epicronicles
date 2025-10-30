@@ -151,6 +151,17 @@ export const gameConfig: GameConfig = {
       deficitThreshold: 0.5,
       surplusThreshold: 3,
     },
+    morale: {
+      baseStability: 65,
+      min: 20,
+      max: 95,
+      overcrowdingThreshold: 2,
+      overcrowdingPenalty: 2,
+      deficitThreshold: 25,
+      deficitPenalty: 6,
+      happinessBonusPerSpecialist: 0.6,
+      happinessPenaltyPerWorker: 0.2,
+    },
   },
   colonization: {
     cost: {
