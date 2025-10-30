@@ -15,12 +15,14 @@ import {
 import { createSession } from '../domain/session';
 import type {
   GameSession,
+  GameNotification,
   GameView,
   ScienceShipStatus,
   ShipClassId,
   SystemVisibility,
   PopulationJobId,
   Planet,
+  NotificationKind,
 } from '../domain/types';
 import { advanceSimulation } from '../domain/simulation';
 import { createColonizationTask } from '../domain/colonization';
@@ -347,6 +349,15 @@ export const queueDistrictConstruction =
       return { success: false, reason: 'INVALID_DISTRICT' };
     }
     if (!canAffordCost(session.economy, definition.cost)) {
+      dispatch(
+        setSession(
+          appendNotification(
+            session,
+            `Costruzione ${definition.label} sospesa: risorse insufficienti.`,
+            'districtSuspended',
+          ),
+        ),
+      );
       return { success: false, reason: 'INSUFFICIENT_RESOURCES' };
     }
 
@@ -370,6 +381,24 @@ export const queueDistrictConstruction =
 
     return { success: true };
   };
+
+const appendNotification = (
+  session: GameSession,
+  message: string,
+  kind: NotificationKind,
+  tick?: number,
+): GameSession => {
+  const entry: GameNotification = {
+    id: `notif-${crypto.randomUUID()}`,
+    tick: tick ?? session.clock.tick,
+    kind,
+    message,
+  };
+  return {
+    ...session,
+    notifications: [...session.notifications, entry].slice(-6),
+  };
+};
 
 const updatePlanetPopulation = (
   planet: Planet,

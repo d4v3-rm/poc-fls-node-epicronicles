@@ -50,7 +50,7 @@ export interface DistrictDefinition {
   upkeep: Partial<Record<ResourceType, number>>;
 }
 
-export type NotificationKind = 'districtComplete';
+export type NotificationKind = 'districtComplete' | 'districtSuspended';
 
 export interface GameNotification {
   id: string;
