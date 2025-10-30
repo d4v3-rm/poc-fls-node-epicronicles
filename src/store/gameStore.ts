@@ -19,6 +19,8 @@ import type {
   ScienceShipStatus,
   ShipClassId,
   SystemVisibility,
+  PopulationJobId,
+  Planet,
 } from '../domain/types';
 import { advanceSimulation } from '../domain/simulation';
 import { createColonizationTask } from '../domain/colonization';
@@ -85,6 +87,17 @@ export type DistrictBuildError =
 export type QueueDistrictBuildResult =
   | { success: true }
   | { success: false; reason: DistrictBuildError };
+
+export type PopulationAdjustError =
+  | 'NO_SESSION'
+  | 'PLANET_NOT_FOUND'
+  | 'INVALID_JOB'
+  | 'NO_WORKERS'
+  | 'NO_POPULATION';
+
+export type PopulationAdjustResult =
+  | { success: true }
+  | { success: false; reason: PopulationAdjustError };
 
 interface GameSliceState {
   view: GameView;
@@ -358,6 +371,105 @@ export const queueDistrictConstruction =
     return { success: true };
   };
 
+const updatePlanetPopulation = (
+  planet: Planet,
+  updates: Partial<Planet['population']>,
+): Planet => ({
+  ...planet,
+  population: {
+    ...planet.population,
+    ...updates,
+  },
+});
+
+const updatePopulationCounts = (
+  planet: Planet,
+  changes: Partial<Record<PopulationJobId, number>>,
+): Planet => {
+  const next = { ...planet.population };
+  (Object.keys(changes) as PopulationJobId[]).forEach((jobId) => {
+    const delta = changes[jobId] ?? 0;
+    next[jobId] = Math.max(0, next[jobId] + delta);
+  });
+  return updatePlanetPopulation(planet, next);
+};
+
+export const promotePopulation =
+  (planetId: string, jobId: PopulationJobId): AppThunk<PopulationAdjustResult> =>
+  (dispatch, getState) => {
+    if (jobId === 'workers') {
+      return { success: false, reason: 'INVALID_JOB' };
+    }
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const planet = session.economy.planets.find(
+      (candidate) => candidate.id === planetId,
+    );
+    if (!planet) {
+      return { success: false, reason: 'PLANET_NOT_FOUND' };
+    }
+    if (planet.population.workers <= 0) {
+      return { success: false, reason: 'NO_WORKERS' };
+    }
+
+    const updatedPlanets = session.economy.planets.map((p) =>
+      p.id === planetId
+        ? updatePopulationCounts(p, { workers: -1, [jobId]: 1 })
+        : p,
+    );
+
+    dispatch(
+      setSession({
+        ...session,
+        economy: {
+          ...session.economy,
+          planets: updatedPlanets,
+        },
+      }),
+    );
+    return { success: true };
+  };
+
+export const demotePopulation =
+  (planetId: string, jobId: PopulationJobId): AppThunk<PopulationAdjustResult> =>
+  (dispatch, getState) => {
+    if (jobId === 'workers') {
+      return { success: false, reason: 'INVALID_JOB' };
+    }
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const planet = session.economy.planets.find(
+      (candidate) => candidate.id === planetId,
+    );
+    if (!planet) {
+      return { success: false, reason: 'PLANET_NOT_FOUND' };
+    }
+    if ((planet.population[jobId] ?? 0) <= 0) {
+      return { success: false, reason: 'NO_POPULATION' };
+    }
+
+    const updatedPlanets = session.economy.planets.map((p) =>
+      p.id === planetId
+        ? updatePopulationCounts(p, { workers: 1, [jobId]: -1 })
+        : p,
+    );
+
+    dispatch(
+      setSession({
+        ...session,
+        economy: {
+          ...session.economy,
+          planets: updatedPlanets,
+        },
+      }),
+    );
+    return { success: true };
+  };
+
 export const orderFleetMove =
   (fleetId: string, systemId: string): AppThunk<FleetMoveResult> =>
   (dispatch, getState) => {
@@ -514,6 +626,14 @@ interface HookState extends GameSliceState {
     systemId: string,
   ) => ScienceShipOrderResult;
   setScienceAutoExplore: (shipId: string, auto: boolean) => void;
+  promotePopulation: (
+    planetId: string,
+    jobId: PopulationJobId,
+  ) => PopulationAdjustResult;
+  demotePopulation: (
+    planetId: string,
+    jobId: PopulationJobId,
+  ) => PopulationAdjustResult;
   queueDistrictConstruction: (
     planetId: string,
     districtId: string,
@@ -548,6 +668,10 @@ export const useGameStore = <T>(
         dispatch(setScienceAutoExplore(shipId, auto)),
       queueDistrictConstruction: (planetId: string, districtId: string) =>
         dispatch(queueDistrictConstruction(planetId, districtId)),
+      promotePopulation: (planetId: string, jobId: PopulationJobId) =>
+        dispatch(promotePopulation(planetId, jobId)),
+      demotePopulation: (planetId: string, jobId: PopulationJobId) =>
+        dispatch(demotePopulation(planetId, jobId)),
     }),
     [dispatch],
   );
