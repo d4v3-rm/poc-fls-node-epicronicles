@@ -110,6 +110,7 @@ export const GameScreen = () => {
   const economyConfig = useGameStore((state) => state.config.economy);
   const districtDefinitions = economyConfig.districts;
   const populationJobs = economyConfig.populationJobs;
+  const automationConfig = economyConfig.populationAutomation;
   const districtQueue = useGameStore(
     (state) => state.session?.districtConstructionQueue ?? [],
   );
@@ -385,6 +386,12 @@ export const GameScreen = () => {
               ) : null}
               <div className="planet-population">
                 <h4>Ruoli popolazione</h4>
+                {automationConfig?.enabled ? (
+                  <p className="text-muted">
+                    Bilanciamento automatico attivo (priorità:{' '}
+                    {automationConfig.priorities.join(' > ')})
+                  </p>
+                ) : null}
                 {populationMessage ? (
                   <p className="panel-message">{populationMessage}</p>
                 ) : null}

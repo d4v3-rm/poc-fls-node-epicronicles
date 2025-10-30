@@ -6,6 +6,7 @@ import { advanceColonization } from './colonization';
 import { advanceShipyard } from './shipyard';
 import { advanceFleets } from './fleets';
 import { advanceDistrictConstruction } from './districts';
+import { autoBalancePopulation } from './population';
 
 export const advanceSimulation = (
   session: GameSession,
@@ -67,10 +68,11 @@ export const advanceSimulation = (
       updatedSession.scienceShips,
       config.exploration,
     );
-    const { economy } = advanceEconomy(
-      districtConstruction.economy,
-      config.economy,
-    );
+    const balancedEconomy = autoBalancePopulation({
+      economy: districtConstruction.economy,
+      config: config.economy,
+    });
+    const { economy } = advanceEconomy(balancedEconomy, config.economy);
 
     updatedSession = {
       ...updatedSession,

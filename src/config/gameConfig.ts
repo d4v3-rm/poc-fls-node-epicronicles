@@ -145,6 +145,12 @@ export const gameConfig: GameConfig = {
         upkeep: { food: 0.5, energy: 0.5 },
       },
     ],
+    populationAutomation: {
+      enabled: true,
+      priorities: ['food', 'energy', 'minerals', 'research'],
+      deficitThreshold: 0.5,
+      surplusThreshold: 3,
+    },
   },
   colonization: {
     cost: {

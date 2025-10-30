@@ -27,11 +27,19 @@ export interface HomeworldConfig {
   districts?: Record<string, number>;
 }
 
+export interface PopulationAutomationConfig {
+  enabled: boolean;
+  priorities: ResourceType[];
+  deficitThreshold: number;
+  surplusThreshold: number;
+}
+
 export interface EconomyConfig {
   startingResources: Partial<Record<ResourceType, number>>;
   homeworld: HomeworldConfig;
   districts: DistrictDefinition[];
   populationJobs: PopulationJobDefinition[];
+  populationAutomation?: PopulationAutomationConfig;
 }
 
 const createLedger = (
