@@ -249,7 +249,10 @@ export const startColonization =
     if (!system) {
       return { success: false, reason: 'SYSTEM_NOT_FOUND' };
     }
-    if (system.visibility !== 'surveyed') {
+    const planetKnown = session.economy.planets.some(
+      (planet) => planet.systemId === systemId,
+    );
+    if (system.visibility !== 'surveyed' && !planetKnown) {
       return { success: false, reason: 'SYSTEM_NOT_SURVEYED' };
     }
     if (!system.habitableWorld) {
