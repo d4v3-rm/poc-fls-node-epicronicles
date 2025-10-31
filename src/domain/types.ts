@@ -65,7 +65,7 @@ export interface GameNotification {
 
 export type PlanetKind = 'terrestrial' | 'desert' | 'tundra';
 
-export type ShipClassId = 'corvette' | 'colony';
+export type ShipClassId = 'corvette' | 'frigate' | 'colony';
 
 export interface ShipDesign {
   id: ShipClassId;

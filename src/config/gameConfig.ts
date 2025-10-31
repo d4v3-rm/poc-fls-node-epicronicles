@@ -200,6 +200,19 @@ export const gameConfig: GameConfig = {
         speed: 1,
       },
       {
+        id: 'frigate',
+        name: 'Classe Asteria',
+        buildCost: {
+          minerals: 170,
+          energy: 70,
+        },
+        buildTime: 7,
+        attack: 10,
+        defense: 4,
+        hullPoints: 28,
+        speed: 0.9,
+      },
+      {
         id: 'colony',
         name: 'Classe Horizon',
         buildCost: {
