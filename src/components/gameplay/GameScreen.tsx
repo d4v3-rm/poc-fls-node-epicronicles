@@ -130,7 +130,20 @@ export const GameScreen = () => {
     (state) => state.demotePopulation,
   );
   const planetDistrictQueue = selectedPlanet
-    ? districtQueue.filter((task) => task.planetId === selectedPlanet.id)
+    ? districtQueue
+        .filter((task) => task.planetId === selectedPlanet.id)
+        .map((task) => {
+          const definition =
+            districtDefinitions.find(
+              (entry) => entry.id === task.districtId,
+            ) ?? null;
+          return {
+            ...task,
+            label: definition?.label ?? task.districtId,
+            progress:
+              1 - task.ticksRemaining / Math.max(1, task.totalTicks),
+          };
+        })
     : [];
   const districtErrorMessages: Record<string, string> = {
     NO_SESSION: 'Nessuna sessione attiva.',
@@ -501,20 +514,23 @@ export const GameScreen = () => {
                   <p className="text-muted">Nessun distretto in costruzione.</p>
                 ) : (
                   <ul>
-                    {planetDistrictQueue.map((task) => {
-                      const definition = districtDefinitions.find(
-                        (entry) => entry.id === task.districtId,
-                      );
-                      return (
-                        <li key={task.id}>
-                          <span>{definition?.label ?? task.districtId}</span>
+                    {planetDistrictQueue.map((task) => (
+                      <li key={task.id}>
+                        <div className="district-queue__header">
+                          <strong>{task.label}</strong>
                           <span className="text-muted">
                             Tick rimanenti: {task.ticksRemaining}/
                             {task.totalTicks}
                           </span>
-                        </li>
-                      );
-                    })}
+                        </div>
+                        <div className="progress-bar">
+                          <div
+                            className="progress-bar__fill"
+                            style={{ width: `${Math.round(task.progress * 100)}%` }}
+                          />
+                        </div>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </div>
