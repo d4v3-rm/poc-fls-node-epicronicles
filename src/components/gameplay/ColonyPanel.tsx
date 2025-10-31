@@ -14,6 +14,7 @@ const colonizationErrors: Record<ColonizationError, string> = {
   ALREADY_COLONIZED: 'Sistema gia colonizzato.',
   TASK_IN_PROGRESS: 'Colonizzazione gia attiva.',
   INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
+  NO_COLONY_SHIP: 'Serve una nave colonia disponibile.',
 };
 
 const statusLabels: Record<ColonizationStatus, string> = {
@@ -40,6 +41,9 @@ export const ColonyPanel = ({
   const colonizationConfig = useGameStore(
     (state) => state.config.colonization,
   );
+  const colonyShipDesignId = useGameStore(
+    (state) => state.config.military.colonyShipDesignId,
+  );
   const [message, setMessage] = useState<string | null>(null);
 
   const colonizedSystems = useMemo(
@@ -57,6 +61,17 @@ export const ColonyPanel = ({
     });
     return map;
   }, [colonizationTasks]);
+  const colonyShipsAvailable = useMemo(() => {
+    if (!session) {
+      return 0;
+    }
+    return session.fleets.reduce((total, fleet) => {
+      const ships = fleet.ships.filter(
+        (ship) => ship.designId === colonyShipDesignId,
+      ).length;
+      return total + ships;
+    }, 0);
+  }, [session, colonyShipDesignId]);
 
   const canAffordColonization = () => {
     if (!resources) {
@@ -165,6 +180,9 @@ export const ColonyPanel = ({
           {message ? <p className="panel-message">{message}</p> : null}
         </div>
         <p className="text-muted">
+          Navi colonia disponibili: {colonyShipsAvailable}
+        </p>
+        <p className="text-muted">
           Costi:{' '}
           {Object.entries(colonizationConfig.cost)
             .filter(([, amount]) => amount && amount > 0)
@@ -200,7 +218,9 @@ export const ColonyPanel = ({
                         ? `Missione in corso (${statusLabels[task.status]})`
                         : !afford
                           ? 'Risorse insufficienti'
-                          : null;
+                          : colonyShipsAvailable <= 0
+                            ? 'Nessuna nave colonia disponibile'
+                            : null;
                 return (
                   <tr key={system.id}>
                     <td>

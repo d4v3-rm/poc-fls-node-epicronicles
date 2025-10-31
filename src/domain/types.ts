@@ -61,7 +61,7 @@ export interface GameNotification {
 
 export type PlanetKind = 'terrestrial' | 'desert' | 'tundra';
 
-export type ShipClassId = 'corvette';
+export type ShipClassId = 'corvette' | 'colony';
 
 export interface ShipDesign {
   id: ShipClassId;
@@ -181,6 +181,7 @@ export interface ColonizationTask {
   totalTicks: number;
   missionElapsedTicks: number;
   missionTotalTicks: number;
+  shipId: string;
 }
 
 export interface CombatLoss {

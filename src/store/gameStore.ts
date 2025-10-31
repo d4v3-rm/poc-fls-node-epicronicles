@@ -43,7 +43,8 @@ export type ColonizationError =
   | 'NO_HABITABLE_WORLD'
   | 'ALREADY_COLONIZED'
   | 'TASK_IN_PROGRESS'
-  | 'INSUFFICIENT_RESOURCES';
+  | 'INSUFFICIENT_RESOURCES'
+  | 'NO_COLONY_SHIP';
 
 export type StartColonizationResult =
   | { success: true }
@@ -275,12 +276,23 @@ export const startColonization =
       return { success: false, reason: 'INSUFFICIENT_RESOURCES' };
     }
 
+    const colonyDesignId = state.config.military.colonyShipDesignId;
+    const colonyShip = detachColonyShip(session.fleets, colonyDesignId);
+    if (!colonyShip) {
+      return { success: false, reason: 'NO_COLONY_SHIP' };
+    }
+
     const updatedEconomy = spendResources(session.economy, cost);
-    const task = createColonizationTask(system, state.config.colonization);
+    const task = createColonizationTask(
+      system,
+      state.config.colonization,
+      colonyShip.shipId,
+    );
     dispatch(
       setSession({
         ...session,
         economy: updatedEconomy,
+        fleets: colonyShip.fleets,
         colonizationTasks: [...session.colonizationTasks, task],
       }),
     );
@@ -384,6 +396,33 @@ export const queueDistrictConstruction =
 
     return { success: true };
   };
+
+const detachColonyShip = (
+  fleets: GameSession['fleets'],
+  designId: ShipClassId,
+): { fleets: GameSession['fleets']; shipId: string } | null => {
+  let shipId: string | null = null;
+  const updatedFleets = fleets.map((fleet) => {
+    if (shipId) {
+      return fleet;
+    }
+    const shipIndex = fleet.ships.findIndex(
+      (ship) => ship.designId === designId,
+    );
+    if (shipIndex < 0) {
+      return fleet;
+    }
+    shipId = fleet.ships[shipIndex].id;
+    return {
+      ...fleet,
+      ships: fleet.ships.filter((_, index) => index !== shipIndex),
+    };
+  });
+  if (!shipId) {
+    return null;
+  }
+  return { fleets: updatedFleets, shipId };
+};
 
 const appendNotification = (
   session: GameSession,

@@ -47,6 +47,7 @@ const getNextStatus = (
 export const createColonizationTask = (
   system: StarSystem,
   config: ColonizationConfig,
+  shipId: string,
 ): ColonizationTask => {
   if (!system.habitableWorld) {
     throw new Error('System has no habitable world');
@@ -68,6 +69,7 @@ export const createColonizationTask = (
     status: initialStatus,
     missionElapsedTicks: 0,
     missionTotalTicks: missionTotalTicks || durations.colonizing,
+    shipId,
   };
 };
 

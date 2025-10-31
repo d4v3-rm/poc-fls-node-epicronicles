@@ -21,6 +21,8 @@ export interface MilitaryConfig {
   fleet: {
     baseTravelTicks: number;
   };
+  colonyShipDesignId: ShipClassId;
+  startingColonyShips: number;
   shipDesigns: ShipDesign[];
 }
 
@@ -181,6 +183,8 @@ export const gameConfig: GameConfig = {
     fleet: {
       baseTravelTicks: 3,
     },
+    colonyShipDesignId: 'colony',
+    startingColonyShips: 1,
     shipDesigns: [
       {
         id: 'corvette',
@@ -194,6 +198,20 @@ export const gameConfig: GameConfig = {
         defense: 2,
         hullPoints: 20,
         speed: 1,
+      },
+      {
+        id: 'colony',
+        name: 'Classe Horizon',
+        buildCost: {
+          minerals: 150,
+          energy: 60,
+          food: 20,
+        },
+        buildTime: 6,
+        attack: 0,
+        defense: 1,
+        hullPoints: 15,
+        speed: 0.8,
       },
     ],
   },
