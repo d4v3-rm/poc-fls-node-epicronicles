@@ -24,6 +24,9 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
   const activeWars = empires.filter(
     (empire) => empire.kind === 'ai' && empire.warStatus === 'war',
   );
+  const warLabels = activeWars
+    .map((empire) => `${empire.name} (${empire.opinion})`)
+    .slice(0, 3);
 
   return (
     <div className="hud-bottom-bar">
@@ -59,6 +62,19 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
         <dt>Guerre</dt>
         <dd>{activeWars.length}</dd>
       </div>
+      {warLabels.length > 0 ? (
+        <div className="hud-bottom-bar__wars">
+          <strong>Conflitti:</strong>
+          {warLabels.map((label) => (
+            <span key={label} className="hud-war-chip">
+              {label}
+            </span>
+          ))}
+          {activeWars.length > warLabels.length ? (
+            <span className="text-muted">+{activeWars.length - warLabels.length}</span>
+          ) : null}
+        </div>
+      ) : null}
       {visibleNotifications.length > 0 ? (
         <div className="hud-bottom-bar__notifications">
           {visibleNotifications.map((notification) => (

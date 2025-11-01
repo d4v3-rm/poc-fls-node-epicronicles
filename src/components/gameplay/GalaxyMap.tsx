@@ -170,6 +170,12 @@ const fleetMaterials = {
   }),
 };
 
+const hostileIndicatorMaterial = new THREE.MeshBasicMaterial({
+  color: 0xff6b6b,
+  transparent: true,
+  opacity: 0.6,
+});
+
 const toMapPosition = (system: StarSystem) => ({
   x: system.mapPosition?.x ?? system.position.x,
   y: system.mapPosition?.y ?? system.position.y,
@@ -532,6 +538,20 @@ export const GalaxyMap = ({
       const label = isRevealed ? createLabelSprite(system.name) : null;
       if (label) {
         node.add(label);
+      }
+
+      if (system.hostilePower && system.hostilePower > 0) {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(
+            starMesh.geometry.parameters.radius + 1.2,
+            starMesh.geometry.parameters.radius + 2.1,
+            24,
+          ),
+          hostileIndicatorMaterial,
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.userData.systemId = system.id;
+        node.add(ring);
       }
 
       if (isSurveyed && system.orbitingPlanets.length > 0) {
