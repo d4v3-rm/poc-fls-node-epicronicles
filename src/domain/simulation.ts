@@ -1,4 +1,8 @@
-import type { GameSession, GameNotification } from './types';
+import type {
+  GameSession,
+  GameNotification,
+  CombatResultType,
+} from './types';
 import type { GameConfig } from '../config/gameConfig';
 import { advanceExploration } from './exploration';
 import { advanceEconomy } from './economy';
@@ -7,6 +11,12 @@ import { advanceShipyard } from './shipyard';
 import { advanceFleets } from './fleets';
 import { advanceDistrictConstruction } from './districts';
 import { autoBalancePopulation } from './population';
+
+const combatResultLabel: Record<CombatResultType, string> = {
+  playerVictory: 'Vittoria',
+  playerDefeat: 'Sconfitta',
+  mutualDestruction: 'Mutua distruzione',
+};
 
 export const advanceSimulation = (
   session: GameSession,
@@ -73,6 +83,22 @@ export const advanceSimulation = (
       fallbackSystemId,
       tick: updatedSession.clock.tick + iteration + 1,
     });
+    if (fleetsAdvance.reports.length > 0) {
+      fleetsAdvance.reports.forEach((report) => {
+        const systemName =
+          fleetsAdvance.galaxy.systems.find(
+            (system) => system.id === report.systemId,
+          )?.name ?? report.systemId;
+        const resultLabel =
+          combatResultLabel[report.result] ?? report.result;
+        iterationNotifications.push({
+          id: `notif-${crypto.randomUUID()}`,
+          tick: report.tick,
+          kind: 'combatReport',
+          message: `Combattimento a ${systemName}: ${resultLabel} (forza ${report.playerPower} vs ${report.hostilePower}).`,
+        });
+      });
+    }
     const { galaxy, scienceShips } = advanceExploration(
       fleetsAdvance.galaxy,
       updatedSession.scienceShips,

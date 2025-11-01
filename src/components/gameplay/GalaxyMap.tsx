@@ -155,6 +155,15 @@ const scienceLineMaterials: Record<
   }),
 };
 
+const fleetMaterials = {
+  idle: new THREE.MeshBasicMaterial({ color: 0x9fc1ff }),
+  line: new THREE.LineBasicMaterial({
+    color: 0x9fc1ff,
+    transparent: true,
+    opacity: 0.4,
+  }),
+};
+
 const toMapPosition = (system: StarSystem) => ({
   x: system.mapPosition?.x ?? system.position.x,
   y: system.mapPosition?.y ?? system.position.y,
@@ -181,6 +190,7 @@ export const GalaxyMap = ({
   const scienceShips = useGameStore(
     (state) => state.session?.scienceShips ?? [],
   );
+  const fleets = useGameStore((state) => state.session?.fleets ?? []);
   const orbitBaseSpeed = useGameStore((state) => state.config.map.orbitSpeed);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const systemGroupRef = useRef<THREE.Group | null>(null);
@@ -571,7 +581,48 @@ export const GalaxyMap = ({
     group.add(targetGroup);
     group.add(scienceGroup);
 
-  }, [systems, orbitBaseSpeed, scienceShips]);
+    const fleetGroup = new THREE.Group();
+    fleetGroup.name = 'fleets';
+    const fleetTargetGroup = new THREE.Group();
+    fleetTargetGroup.name = 'fleetTargets';
+    const fleetGeometry = new THREE.SphereGeometry(0.8, 12, 12);
+    const fleetTargetGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+
+    fleets.forEach((fleet) => {
+      const position = positions.get(fleet.systemId);
+      if (position) {
+        const marker = new THREE.Mesh(fleetGeometry, fleetMaterials.idle);
+        marker.position.set(position.x, position.y, position.z + 3);
+        fleetGroup.add(marker);
+      }
+      if (
+        fleet.targetSystemId &&
+        fleet.targetSystemId !== fleet.systemId
+      ) {
+        const from = positions.get(fleet.systemId);
+        const to = positions.get(fleet.targetSystemId);
+        if (from && to) {
+          const points = [
+            new THREE.Vector3(from.x, from.y, from.z + 0.2),
+            new THREE.Vector3(to.x, to.y, to.z + 0.2),
+          ];
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = new THREE.Line(geometry, fleetMaterials.line);
+          fleetTargetGroup.add(line);
+
+          const targetMarker = new THREE.Mesh(
+            fleetTargetGeometry,
+            fleetMaterials.idle,
+          );
+          targetMarker.position.set(to.x, to.y, to.z + 1.5);
+          fleetTargetGroup.add(targetMarker);
+        }
+      }
+    });
+    group.add(fleetTargetGroup);
+    group.add(fleetGroup);
+
+  }, [systems, orbitBaseSpeed, scienceShips, fleets]);
 
   return <div className="galaxy-map" ref={containerRef} />;
 };

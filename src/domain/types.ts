@@ -54,7 +54,8 @@ export type NotificationKind =
   | 'districtComplete'
   | 'districtSuspended'
   | 'colonizationStarted'
-  | 'colonizationCompleted';
+  | 'colonizationCompleted'
+  | 'combatReport';
 
 export interface GameNotification {
   id: string;
