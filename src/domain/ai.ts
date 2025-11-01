@@ -21,10 +21,15 @@ export const ensureAiFleet = (
   session: GameSession,
   military: MilitaryConfig,
 ): GameSession => {
+  const hostileSystems = session.galaxy.systems.filter(
+    (system) => (system.hostilePower ?? 0) > 0,
+  ).length;
+  const desiredAiFleets =
+    hostileSystems >= 5 ? 3 : hostileSystems >= 3 ? 2 : 1;
   const aiFleets = session.fleets.filter(
     (fleet) => fleet.ownerId && fleet.ownerId !== 'player',
   );
-  if (aiFleets.length >= 2) {
+  if (aiFleets.length >= desiredAiFleets) {
     return session;
   }
   const homeSystem = session.galaxy.systems[1]?.id ?? session.galaxy.systems[0]?.id;
