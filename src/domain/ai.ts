@@ -21,10 +21,10 @@ export const ensureAiFleet = (
   session: GameSession,
   military: MilitaryConfig,
 ): GameSession => {
-  const aiFleet = session.fleets.find(
+  const aiFleets = session.fleets.filter(
     (fleet) => fleet.ownerId && fleet.ownerId !== 'player',
   );
-  if (aiFleet) {
+  if (aiFleets.length >= 2) {
     return session;
   }
   const homeSystem = session.galaxy.systems[1]?.id ?? session.galaxy.systems[0]?.id;
@@ -58,11 +58,11 @@ export const advanceAiWarMoves = ({
     if (!fleet || fleet.targetSystemId) {
       return;
     }
-    const target = chooseTargetSystem(
-      session.galaxy,
-      fleet.systemId,
-    );
-    if (!target) {
+    const target =
+      chooseTargetSystem(session.galaxy, fleet.systemId) ??
+      session.galaxy.systems[0]?.id ??
+      null;
+    if (!target || target === fleet.systemId) {
       return;
     }
     const travelTicks = calculateTravelTicks(

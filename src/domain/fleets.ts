@@ -87,6 +87,7 @@ export const advanceFleets = ({
   let systemsCloned = false;
   const reports: CombatReport[] = [];
   const updatedFleets: Fleet[] = fleets.map(cloneFleet);
+  const hostilesCleared: string[] = [];
 
   const getSystemIndex = (systemId: string) =>
     updatedGalaxySystems.findIndex((system) => system.id === systemId);

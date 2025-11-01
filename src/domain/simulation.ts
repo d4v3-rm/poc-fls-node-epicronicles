@@ -107,6 +107,20 @@ export const advanceSimulation = (
         });
       });
     }
+    if (fleetsAdvance.hostilesCleared.length > 0) {
+      fleetsAdvance.hostilesCleared.forEach((systemId) => {
+        const systemName =
+          fleetsAdvance.galaxy.systems.find(
+            (system) => system.id === systemId,
+          )?.name ?? systemId;
+        iterationNotifications.push({
+          id: `notif-${crypto.randomUUID()}`,
+          tick: currentTick,
+          kind: 'combatReport',
+          message: `Minaccia neutralizzata in ${systemName}.`,
+        });
+      });
+    }
     const diplomacy = advanceDiplomacy({
       empires: updatedSession.empires,
       config: config.diplomacy,
