@@ -13,6 +13,17 @@ export interface ColonizationConfig {
   durationTicks: number;
 }
 
+export interface DiplomacyConfig {
+  aiStartingOpinion: {
+    min: number;
+    max: number;
+  };
+  warThreshold: number;
+  peaceThreshold: number;
+  autoCheckInterval: number;
+  opinionDriftPerCheck: number;
+}
+
 export interface MilitaryConfig {
   shipyard: {
     queueSize: number;
@@ -38,6 +49,7 @@ export interface GameConfig {
   };
   economy: EconomyConfig;
   colonization: ColonizationConfig;
+  diplomacy: DiplomacyConfig;
   military: MilitaryConfig;
   map: {
     orbitSpeed: number;
@@ -174,6 +186,16 @@ export const gameConfig: GameConfig = {
     preparationTicks: 2,
     travelTicks: 3,
     durationTicks: 6,
+  },
+  diplomacy: {
+    aiStartingOpinion: {
+      min: -10,
+      max: 30,
+    },
+    warThreshold: -60,
+    peaceThreshold: -5,
+    autoCheckInterval: 12,
+    opinionDriftPerCheck: -1.5,
   },
   military: {
     shipyard: {

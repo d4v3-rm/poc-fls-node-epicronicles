@@ -11,6 +11,7 @@ import { advanceShipyard } from './shipyard';
 import { advanceFleets } from './fleets';
 import { advanceDistrictConstruction } from './districts';
 import { autoBalancePopulation } from './population';
+import { advanceDiplomacy } from './diplomacy';
 
 const combatResultLabel: Record<CombatResultType, string> = {
   playerVictory: 'Vittoria',
@@ -35,6 +36,7 @@ export const advanceSimulation = (
       updatedSession.fleets[0]?.systemId ??
       updatedSession.galaxy.systems[0]?.id ??
       'unknown';
+    const currentTick = updatedSession.clock.tick + iteration + 1;
     const colonization = advanceColonization(
       updatedSession.colonizationTasks,
       updatedSession.economy,
@@ -81,7 +83,7 @@ export const advanceSimulation = (
       galaxy: updatedSession.galaxy,
       config,
       fallbackSystemId,
-      tick: updatedSession.clock.tick + iteration + 1,
+      tick: currentTick,
     });
     if (fleetsAdvance.reports.length > 0) {
       fleetsAdvance.reports.forEach((report) => {
@@ -99,6 +101,14 @@ export const advanceSimulation = (
         });
       });
     }
+    const diplomacy = advanceDiplomacy({
+      empires: updatedSession.empires,
+      config: config.diplomacy,
+      tick: currentTick,
+    });
+    if (diplomacy.notifications.length > 0) {
+      iterationNotifications.push(...diplomacy.notifications);
+    }
     const { galaxy, scienceShips } = advanceExploration(
       fleetsAdvance.galaxy,
       updatedSession.scienceShips,
@@ -114,6 +124,7 @@ export const advanceSimulation = (
       ...updatedSession,
       galaxy,
       scienceShips,
+      empires: diplomacy.empires,
       colonizationTasks: colonization.tasks,
       districtConstructionQueue: districtConstruction.tasks,
       shipyardQueue: shipyard.tasks,

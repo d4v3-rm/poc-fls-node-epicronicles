@@ -26,6 +26,8 @@ import type {
   NotificationKind,
   ResourceType,
   ResourceCost,
+  WarStatus,
+  Empire,
 } from '../domain/types';
 import { advanceSimulation } from '../domain/simulation';
 import { createColonizationTask } from '../domain/colonization';
@@ -114,6 +116,16 @@ export type PopulationAdjustResult =
   | { success: true }
   | { success: false; reason: PopulationAdjustError };
 
+export type DiplomacyActionError =
+  | 'NO_SESSION'
+  | 'EMPIRE_NOT_FOUND'
+  | 'INVALID_TARGET'
+  | 'ALREADY_IN_STATE';
+
+export type DiplomacyActionResult =
+  | { success: true }
+  | { success: false; reason: DiplomacyActionError };
+
 interface GameSliceState {
   view: GameView;
   config: GameConfig;
@@ -186,6 +198,7 @@ export const startNewSession =
       },
       economyConfig: cfg.economy,
       militaryConfig: cfg.military,
+      diplomacyConfig: cfg.diplomacy,
     });
     dispatch(startSessionSuccess(session));
   };
@@ -522,6 +535,27 @@ const appendNotification = (
   };
 };
 
+const setEmpireWarStatus = (
+  empires: Empire[],
+  targetId: string,
+  status: WarStatus,
+  opinionDelta = 0,
+): Empire[] => {
+  let changed = false;
+  const updated = empires.map((empire) => {
+    if (empire.id !== targetId) {
+      return empire;
+    }
+    changed = true;
+    return {
+      ...empire,
+      warStatus: status,
+      opinion: empire.opinion + opinionDelta,
+    };
+  });
+  return changed ? updated : empires;
+};
+
 const refundResourceCost = (
   economy: EconomyState,
   cost: ResourceCost,
@@ -644,6 +678,64 @@ export const demotePopulation =
     return { success: true };
   };
 
+export const declareWarOnEmpire =
+  (empireId: string): AppThunk<DiplomacyActionResult> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const target = session.empires.find((empire) => empire.id === empireId);
+    if (!target) {
+      return { success: false, reason: 'EMPIRE_NOT_FOUND' };
+    }
+    if (target.kind === 'player') {
+      return { success: false, reason: 'INVALID_TARGET' };
+    }
+    if (target.warStatus === 'war') {
+      return { success: false, reason: 'ALREADY_IN_STATE' };
+    }
+    const empires = setEmpireWarStatus(session.empires, empireId, 'war', -15);
+    const updatedSession = appendNotification(
+      { ...session, empires },
+      `Guerra dichiarata contro ${target.name}.`,
+      'warDeclared',
+    );
+    dispatch(setSession(updatedSession));
+    return { success: true };
+  };
+
+export const proposePeaceWithEmpire =
+  (empireId: string): AppThunk<DiplomacyActionResult> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const target = session.empires.find((empire) => empire.id === empireId);
+    if (!target) {
+      return { success: false, reason: 'EMPIRE_NOT_FOUND' };
+    }
+    if (target.kind === 'player') {
+      return { success: false, reason: 'INVALID_TARGET' };
+    }
+    if (target.warStatus === 'peace') {
+      return { success: false, reason: 'ALREADY_IN_STATE' };
+    }
+    const empires = setEmpireWarStatus(
+      session.empires,
+      empireId,
+      'peace',
+      10,
+    );
+    const updatedSession = appendNotification(
+      { ...session, empires },
+      `Tregua firmata con ${target.name}.`,
+      'peaceAccepted',
+    );
+    dispatch(setSession(updatedSession));
+    return { success: true };
+  };
 export const orderFleetMove =
   (fleetId: string, systemId: string): AppThunk<FleetMoveResult> =>
   (dispatch, getState) => {
@@ -818,6 +910,12 @@ interface HookState extends GameSliceState {
   prioritizeDistrictTask: (
     taskId: string,
   ) => DistrictQueueManageResult;
+  declareWarOnEmpire: (
+    empireId: string,
+  ) => DiplomacyActionResult;
+  proposePeaceWithEmpire: (
+    empireId: string,
+  ) => DiplomacyActionResult;
 }
 
 export const useGameStore = <T>(
@@ -856,6 +954,10 @@ export const useGameStore = <T>(
         dispatch(cancelDistrictTask(taskId)),
       prioritizeDistrictTask: (taskId: string) =>
         dispatch(prioritizeDistrictTask(taskId)),
+      declareWarOnEmpire: (empireId: string) =>
+        dispatch(declareWarOnEmpire(empireId)),
+      proposePeaceWithEmpire: (empireId: string) =>
+        dispatch(proposePeaceWithEmpire(empireId)),
     }),
     [dispatch],
   );

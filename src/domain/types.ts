@@ -17,6 +17,19 @@ export type ScienceShipStatus = 'idle' | 'traveling' | 'surveying';
 export type ResourceType = 'energy' | 'minerals' | 'food' | 'research';
 export type ResourceCost = Partial<Record<ResourceType, number>>;
 
+export type EmpireKind = 'player' | 'ai';
+export type WarStatus = 'peace' | 'war';
+
+export interface Empire {
+  id: string;
+  name: string;
+  kind: EmpireKind;
+  color: string;
+  opinion: number;
+  warStatus: WarStatus;
+  personality?: string;
+}
+
 export interface ResourceLedger {
   amount: number;
   income: number;
@@ -55,7 +68,9 @@ export type NotificationKind =
   | 'districtSuspended'
   | 'colonizationStarted'
   | 'colonizationCompleted'
-  | 'combatReport';
+  | 'combatReport'
+  | 'warDeclared'
+  | 'peaceAccepted';
 
 export interface GameNotification {
   id: string;
@@ -216,6 +231,7 @@ export interface GameSession {
   label: string;
   createdAt: number;
   galaxy: GalaxyState;
+  empires: Empire[];
   clock: SimulationClock;
   scienceShips: ScienceShip[];
   economy: EconomyState;
