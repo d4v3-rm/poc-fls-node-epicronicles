@@ -45,7 +45,11 @@ export const advanceSimulation = (
       updatedSession.galaxy.systems[0]?.id ??
       'unknown';
     const currentTick = updatedSession.clock.tick + iteration + 1;
-    updatedSession = ensureAiFleet(updatedSession, config.military);
+    updatedSession = ensureAiFleet(
+      updatedSession,
+      config.military,
+      config.diplomacy,
+    );
     const colonization = advanceColonization(
       updatedSession.colonizationTasks,
       updatedSession.economy,

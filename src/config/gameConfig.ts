@@ -27,6 +27,11 @@ export interface DiplomacyConfig {
     powerMin: number;
     powerMax: number;
   };
+  aiFleetStrength: {
+    baseShips: number;
+    extraPerHostile: number;
+    maxShips: number;
+  };
 }
 
 export interface MilitaryConfig {
@@ -205,6 +210,11 @@ export const gameConfig: GameConfig = {
       count: 2,
       powerMin: 8,
       powerMax: 18,
+    },
+    aiFleetStrength: {
+      baseShips: 1,
+      extraPerHostile: 1,
+      maxShips: 6,
     },
   },
   military: {

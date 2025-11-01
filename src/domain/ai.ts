@@ -1,7 +1,7 @@
 import type { GalaxyState, Fleet, GameSession } from './types';
 import { createInitialFleet } from './ships';
 import { calculateTravelTicks } from './fleets';
-import type { MilitaryConfig } from '../config/gameConfig';
+import type { MilitaryConfig, DiplomacyConfig } from '../config/gameConfig';
 
 const chooseTargetSystem = (
   galaxy: GalaxyState,
@@ -20,6 +20,7 @@ const chooseTargetSystem = (
 export const ensureAiFleet = (
   session: GameSession,
   military: MilitaryConfig,
+  diplomacy: DiplomacyConfig,
 ): GameSession => {
   const hostileSystems = session.galaxy.systems.filter(
     (system) => (system.hostilePower ?? 0) > 0,
@@ -36,7 +37,26 @@ export const ensureAiFleet = (
   if (!homeSystem) {
     return session;
   }
-  const newFleet = createInitialFleet(homeSystem, military, 'ai-1');
+  const size =
+    diplomacy.aiFleetStrength.baseShips +
+    Math.min(
+      hostileSystems * diplomacy.aiFleetStrength.extraPerHostile,
+      diplomacy.aiFleetStrength.maxShips,
+    );
+  const ships: Fleet['ships'] = [];
+  for (let idx = 0; idx < size; idx += 1) {
+    const design = military.shipDesigns[idx % military.shipDesigns.length];
+    ships.push({
+      id: `SHIP-${crypto.randomUUID()}`,
+      designId: design.id,
+      hullPoints: design.hullPoints,
+    });
+  }
+  const newFleet: Fleet = {
+    ...createInitialFleet(homeSystem, military, 'ai-1'),
+    name: `Flotta AI ${aiFleets.length + 1}`,
+    ships,
+  };
   return {
     ...session,
     fleets: [...session.fleets, newFleet],
