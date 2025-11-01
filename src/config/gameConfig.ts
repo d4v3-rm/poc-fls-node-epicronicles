@@ -22,6 +22,11 @@ export interface DiplomacyConfig {
   peaceThreshold: number;
   autoCheckInterval: number;
   opinionDriftPerCheck: number;
+  warZones: {
+    count: number;
+    powerMin: number;
+    powerMax: number;
+  };
 }
 
 export interface MilitaryConfig {
@@ -196,6 +201,11 @@ export const gameConfig: GameConfig = {
     peaceThreshold: -5,
     autoCheckInterval: 12,
     opinionDriftPerCheck: -1.5,
+    warZones: {
+      count: 2,
+      powerMin: 8,
+      powerMax: 18,
+    },
   },
   military: {
     shipyard: {

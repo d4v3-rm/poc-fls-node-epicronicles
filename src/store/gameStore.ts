@@ -35,6 +35,7 @@ import { canAffordCost, spendResources } from '../domain/economy';
 import { createShipyardTask } from '../domain/shipyard';
 import { calculateTravelTicks } from '../domain/fleets';
 import { createDistrictConstructionTask } from '../domain/districts';
+import { applyWarPressureToGalaxy } from '../domain/diplomacy';
 
 export interface StartSessionArgs {
   seed?: string;
@@ -681,7 +682,8 @@ export const demotePopulation =
 export const declareWarOnEmpire =
   (empireId: string): AppThunk<DiplomacyActionResult> =>
   (dispatch, getState) => {
-    const session = getState().game.session;
+    const state = getState().game;
+    const session = state.session;
     if (!session) {
       return { success: false, reason: 'NO_SESSION' };
     }
@@ -696,8 +698,14 @@ export const declareWarOnEmpire =
       return { success: false, reason: 'ALREADY_IN_STATE' };
     }
     const empires = setEmpireWarStatus(session.empires, empireId, 'war', -15);
+    const galaxyWithPressure = applyWarPressureToGalaxy({
+      galaxy: session.galaxy,
+      warsStarted: [empireId],
+      tick: session.clock.tick + 1,
+      config: state.config.diplomacy.warZones,
+    });
     const updatedSession = appendNotification(
-      { ...session, empires },
+      { ...session, empires, galaxy: galaxyWithPressure },
       `Guerra dichiarata contro ${target.name}.`,
       'warDeclared',
     );

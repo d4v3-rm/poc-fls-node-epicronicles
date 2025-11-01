@@ -47,11 +47,27 @@ const createEmpires = (
   const random = createRandom(seed);
   const clampOpinion = (value: number) =>
     Math.max(-100, Math.min(100, value));
-  const baseOpinion =
-    diplomacy.aiStartingOpinion.min +
-    random() *
-      (diplomacy.aiStartingOpinion.max - diplomacy.aiStartingOpinion.min);
-  const opinion = clampOpinion(Math.round(baseOpinion));
+
+  const palette = ['#ff9b5f', '#8bcf8a', '#f6e05e', '#dd97ff'];
+  const aiNames = ['Impero Arcturus', 'Confederazione Lyra', 'Lega Vega'];
+
+  const createAi = (index: number): Empire => {
+    const baseOpinion =
+      diplomacy.aiStartingOpinion.min +
+      random() *
+        (diplomacy.aiStartingOpinion.max - diplomacy.aiStartingOpinion.min);
+    const opinion = clampOpinion(Math.round(baseOpinion));
+    return {
+      id: `ai-${index + 1}`,
+      name: aiNames[index] ?? `Impero-${index + 1}`,
+      kind: 'ai',
+      color: palette[index % palette.length] ?? '#ff9b5f',
+      opinion,
+      warStatus: 'peace',
+      personality: opinion < 0 ? 'espansionista' : 'pragmatico',
+    };
+  };
+
   const player: Empire = {
     id: 'player',
     name: 'Impero del Giocatore',
@@ -60,16 +76,8 @@ const createEmpires = (
     opinion: 0,
     warStatus: 'peace',
   };
-  const ai: Empire = {
-    id: 'ai-1',
-    name: 'Impero Arcturus',
-    kind: 'ai',
-    color: '#ff9b5f',
-    opinion,
-    warStatus: 'peace',
-    personality: opinion < 0 ? 'espansionista' : 'pragmatico',
-  };
-  return [player, ai];
+
+  return [player, createAi(0), createAi(1)];
 };
 
 export const createSession = ({

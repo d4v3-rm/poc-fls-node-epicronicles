@@ -13,7 +13,7 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
     return null;
   }
 
-  const { clock, galaxy, scienceShips, notifications } = session;
+  const { clock, galaxy, scienceShips, notifications, empires } = session;
   const revealedCount = galaxy.systems.filter(
     (system) => system.visibility !== 'unknown',
   ).length;
@@ -21,6 +21,9 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
     (system) => system.visibility === 'surveyed',
   ).length;
   const visibleNotifications = notifications.slice(-2).reverse();
+  const activeWars = empires.filter(
+    (empire) => empire.kind === 'ai' && empire.warStatus === 'war',
+  );
 
   return (
     <div className="hud-bottom-bar">
@@ -51,6 +54,10 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
       <div>
         <dt>Navi scientifiche</dt>
         <dd>{scienceShips.length}</dd>
+      </div>
+      <div>
+        <dt>Guerre</dt>
+        <dd>{activeWars.length}</dd>
       </div>
       {visibleNotifications.length > 0 ? (
         <div className="hud-bottom-bar__notifications">

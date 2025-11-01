@@ -1,5 +1,5 @@
 import type { DiplomacyConfig } from '../config/gameConfig';
-import type { Empire, GameNotification } from './types';
+import type { Empire, GameNotification, GalaxyState } from './types';
 
 const clampOpinion = (value: number) => Math.max(-100, Math.min(100, value));
 
@@ -11,15 +11,22 @@ export const advanceDiplomacy = ({
   empires: Empire[];
   config: DiplomacyConfig;
   tick: number;
-}): { empires: Empire[]; notifications: GameNotification[] } => {
+}): {
+  empires: Empire[];
+  notifications: GameNotification[];
+  warsStarted: string[];
+  warsEnded: string[];
+} => {
   if (empires.length <= 1) {
-    return { empires, notifications: [] };
+    return { empires, notifications: [], warsStarted: [], warsEnded: [] };
   }
   if (tick % Math.max(1, config.autoCheckInterval) !== 0) {
-    return { empires, notifications: [] };
+    return { empires, notifications: [], warsStarted: [], warsEnded: [] };
   }
 
   const notifications: GameNotification[] = [];
+  const warsStarted: string[] = [];
+  const warsEnded: string[] = [];
   const updated = empires.map((entry) => ({ ...entry }));
 
   updated.forEach((empire) => {
@@ -33,6 +40,7 @@ export const advanceDiplomacy = ({
 
     if (empire.warStatus === 'peace' && drifted <= config.warThreshold) {
       empire.warStatus = 'war';
+      warsStarted.push(empire.id);
       notifications.push({
         id: `notif-${crypto.randomUUID()}`,
         tick,
@@ -44,6 +52,7 @@ export const advanceDiplomacy = ({
       drifted >= config.peaceThreshold
     ) {
       empire.warStatus = 'peace';
+      warsEnded.push(empire.id);
       notifications.push({
         id: `notif-${crypto.randomUUID()}`,
         tick,
@@ -53,5 +62,42 @@ export const advanceDiplomacy = ({
     }
   });
 
-  return { empires: updated, notifications };
+  return { empires: updated, notifications, warsStarted, warsEnded };
+};
+
+export const applyWarPressureToGalaxy = ({
+  galaxy,
+  warsStarted,
+  tick,
+  config,
+}: {
+  galaxy: GalaxyState;
+  warsStarted: string[];
+  tick: number;
+  config: DiplomacyConfig['warZones'];
+}): GalaxyState => {
+  if (warsStarted.length === 0) {
+    return galaxy;
+  }
+  const systems = galaxy.systems.slice();
+  const maxIndex = Math.max(1, systems.length - 1);
+
+  warsStarted.forEach((_, idx) => {
+    for (let offset = 0; offset < config.count; offset += 1) {
+      const index = 1 + ((tick + idx * 3 + offset) % maxIndex);
+      const system = systems[index];
+      if (!system) {
+        continue;
+      }
+      const powerSpan = Math.max(1, config.powerMax - config.powerMin);
+      const power =
+        config.powerMin + ((tick + offset + idx) % powerSpan);
+      systems[index] = {
+        ...system,
+        hostilePower: Math.max(system.hostilePower ?? 0, power),
+      };
+    }
+  });
+
+  return { ...galaxy, systems };
 };
