@@ -104,31 +104,6 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
           </span>
         ))}
       </div>
-      <div className="panel-section">
-        <div className="panel-section__header">
-          <h3>Eventi di guerra</h3>
-        </div>
-        <ul>
-          {warEvents.length === 0 ? (
-            <li className="text-muted">Nessun evento registrato.</li>
-          ) : (
-            warEvents.map((event) => {
-              const empire = empires.find((e) => e.id === event.empireId);
-              return (
-                <li key={event.id}>
-                  <div className="fleet-row">
-                    <strong>{empire?.name ?? event.empireId}</strong>
-                    <span className="text-muted">
-                      Tick {event.tick}
-                    </span>
-                  </div>
-                  <p className="text-muted">{event.message}</p>
-                </li>
-              );
-            })
-          )}
-        </ul>
-      </div>
     );
   };
 
@@ -169,6 +144,29 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
               </li>
             );
           })}
+        </ul>
+      </div>
+      <div className="panel-section">
+        <div className="panel-section__header">
+          <h3>Eventi di guerra</h3>
+        </div>
+        <ul>
+          {warEvents.length === 0 ? (
+            <li className="text-muted">Nessun evento registrato.</li>
+          ) : (
+            warEvents.map((event) => {
+              const empire = empires.find((e) => e.id === event.empireId);
+              return (
+                <li key={event.id}>
+                  <div className="fleet-row">
+                    <strong>{empire?.name ?? event.empireId}</strong>
+                    <span className="text-muted">Tick {event.tick}</span>
+                  </div>
+                  <p className="text-muted">{event.message}</p>
+                </li>
+              );
+            })
+          )}
         </ul>
       </div>
       <div className="panel-section">
