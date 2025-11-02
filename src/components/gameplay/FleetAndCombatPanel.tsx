@@ -5,6 +5,8 @@ import type {
   ScienceShipStatus,
   WarStatus,
   WarEventType,
+  FleetMergeResult,
+  FleetSplitResult,
 } from '../../domain/types';
 
 const fleetOrderErrors = {
@@ -24,6 +26,15 @@ const resultLabel = {
 const warStatusLabel: Record<WarStatus, string> = {
   peace: 'Pace',
   war: 'Guerra',
+};
+
+const fleetManageErrors: Record<string, string> = {
+  NO_SESSION: 'Nessuna sessione attiva.',
+  FLEET_NOT_FOUND: 'Flotta non trovata.',
+  TARGET_NOT_FOUND: 'Flotta bersaglio non trovata.',
+  SAME_FLEET: 'Seleziona una flotta diversa.',
+  DIFFERENT_SYSTEM: 'Le flotte devono essere nello stesso sistema.',
+  INSUFFICIENT_SHIPS: 'Servono almeno 2 navi per dividere.',
 };
 
 interface FleetAndCombatPanelProps {
@@ -46,6 +57,8 @@ export const FleetAndCombatPanel = ({
   const scienceShips = session?.scienceShips ?? [];
   const empires = session?.empires ?? [];
   const [message, setMessage] = useState<string | null>(null);
+  const mergeFleetsAction = useGameStore((state) => state.mergeFleets);
+  const splitFleetAction = useGameStore((state) => state.splitFleet);
   const warLog = empires.filter((empire) => empire.kind === 'ai');
   const warEvents = (session?.warEvents ?? []).slice().reverse();
   const [warFilter, setWarFilter] = useState<'all' | WarEventType>('all');
@@ -254,6 +267,52 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
                   ))}
                 </select>
               </label>
+              <div className="fleet-panel__order">
+                <span className="text-muted">Gestione flotta</span>
+                <div className="fleet-panel__actions">
+                  <select
+                    value=""
+                    onChange={(event) => {
+                      if (!event.target.value) {
+                        return;
+                      }
+                      const result = mergeFleetsAction(fleet.id, event.target.value);
+                      setMessage(
+                        result.success
+                          ? 'Flotte unite.'
+                          : fleetManageErrors[result.reason],
+                      );
+                    }}
+                  >
+                    <option value="">Unisci con...</option>
+                    {fleets
+                      .filter(
+                        (candidate) =>
+                          candidate.id !== fleet.id &&
+                          candidate.systemId === fleet.systemId,
+                      )
+                      .map((candidate) => (
+                        <option key={candidate.id} value={candidate.id}>
+                          {candidate.name}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    className="panel__action panel__action--compact"
+                    onClick={() => {
+                      const result = splitFleetAction(fleet.id);
+                      setMessage(
+                        result.success
+                          ? 'Nuova flotta creata.'
+                          : fleetManageErrors[result.reason],
+                      );
+                    }}
+                    disabled={fleet.ships.length <= 1}
+                  >
+                    Dividi 1 nave
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
