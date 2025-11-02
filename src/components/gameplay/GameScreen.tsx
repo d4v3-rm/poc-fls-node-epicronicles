@@ -22,6 +22,42 @@ import {
 import type { StarSystem, PopulationJobId } from '../../domain/types';
 import { DiplomacyPanel } from './DiplomacyPanel';
 
+const WAR_SEEN_KEY = 'warSeen';
+
+const loadWarSeen = (sessionId: string): string | null => {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+  try {
+    const raw = localStorage.getItem(WAR_SEEN_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return parsed[sessionId] ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const saveWarSeen = (sessionId: string, eventId: string | null) => {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+  try {
+    const raw = localStorage.getItem(WAR_SEEN_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    if (eventId) {
+      parsed[sessionId] = eventId;
+    } else {
+      delete parsed[sessionId];
+    }
+    localStorage.setItem(WAR_SEEN_KEY, JSON.stringify(parsed));
+  } catch {
+    /* ignore */
+  }
+};
+
 export const GameScreen = () => {
   useGameLoop();
   const session = useGameStore((state) => state.session);
@@ -79,17 +115,6 @@ export const GameScreen = () => {
     setFocusPlanetId(null);
   };
 
-  if (!session) {
-    return (
-      <div className="panel">
-        <p>No active session.</p>
-        <button className="panel__action" onClick={returnToMenu}>
-          Back to menu
-        </button>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (!sessionId) {
       return;
@@ -123,12 +148,43 @@ export const GameScreen = () => {
       setLastSeenWarId(null);
       return;
     }
-    const latestId = session.warEvents.at(-1)?.id ?? null;
-    if (!latestId || latestId === lastSeenWarId) {
+    const storedSeen = loadWarSeen(session.id);
+    setLastSeenWarId(storedSeen);
+    if (session.warEvents.length === 0) {
+      setWarUnread(0);
       return;
     }
-    setWarUnread((current) => current + 1);
-  }, [session, lastSeenWarId]);
+    if (!storedSeen) {
+      setWarUnread(session.warEvents.length);
+      return;
+    }
+    const markerIndex = session.warEvents.findIndex(
+      (event) => event.id === storedSeen,
+    );
+    const unseen =
+      markerIndex >= 0
+        ? session.warEvents.length - markerIndex - 1
+        : session.warEvents.length;
+    setWarUnread(unseen);
+  }, [session?.id]);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+    if (!lastSeenWarId) {
+      setWarUnread(session.warEvents.length);
+      return;
+    }
+    const markerIndex = session.warEvents.findIndex(
+      (event) => event.id === lastSeenWarId,
+    );
+    const unseen =
+      markerIndex >= 0
+        ? Math.max(0, session.warEvents.length - markerIndex - 1)
+        : session.warEvents.length;
+    setWarUnread(unseen);
+  }, [session?.warEvents.length, session?.id, lastSeenWarId]);
 
   const viewportWidth =
     typeof window !== 'undefined' ? window.innerWidth : 1200;
@@ -303,6 +359,10 @@ export const GameScreen = () => {
           if (session?.warEvents?.length) {
             setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
             setWarUnread(0);
+            saveWarSeen(
+              session.id,
+              session.warEvents.at(-1)?.id ?? null,
+            );
           }
         }}
         warUnread={warUnread}
@@ -402,6 +462,10 @@ export const GameScreen = () => {
               }
               setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
               setWarUnread(0);
+              saveWarSeen(
+                session.id,
+                session.warEvents.at(-1)?.id ?? null,
+              );
             }}
           />
         </DraggablePanel>
