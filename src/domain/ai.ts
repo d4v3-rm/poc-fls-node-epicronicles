@@ -40,6 +40,10 @@ export const ensureAiFleet = (
   const hostileSystems = session.galaxy.systems.filter(
     (system) => (system.hostilePower ?? 0) > 0,
   ).length;
+  const totalThreat = session.galaxy.systems.reduce(
+    (sum, system) => sum + (system.hostilePower ?? 0),
+    0,
+  );
   const desiredAiFleets =
     hostileSystems >= 5 ? 3 : hostileSystems >= 3 ? 2 : 1;
   const aiFleets = session.fleets.filter(
@@ -58,6 +62,10 @@ export const ensureAiFleet = (
       hostileSystems * diplomacy.aiFleetStrength.extraPerHostile,
       diplomacy.aiFleetStrength.maxShips,
     );
+  const attackBonus = Math.min(
+    6,
+    Math.floor(totalThreat / Math.max(1, diplomacy.aiFleetStrength.attackBonusPerThreat)),
+  );
   const ships: Fleet['ships'] = [];
   for (let idx = 0; idx < size; idx += 1) {
     const design = military.shipDesigns[idx % military.shipDesigns.length];
@@ -67,7 +75,7 @@ export const ensureAiFleet = (
       id: `SHIP-${crypto.randomUUID()}`,
       designId: design.id,
       hullPoints: design.hullPoints + boost,
-      attackBonus: boost > 0 ? Math.max(1, Math.floor(boost / 2)) : 0,
+      attackBonus: Math.max(0, attackBonus),
     });
   }
   const newFleet: Fleet = {
