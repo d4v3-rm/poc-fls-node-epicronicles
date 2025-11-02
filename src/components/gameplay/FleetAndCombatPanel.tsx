@@ -29,11 +29,13 @@ const warStatusLabel: Record<WarStatus, string> = {
 interface FleetAndCombatPanelProps {
   warEventsRef?: RefObject<HTMLDivElement>;
   unreadWarIds?: Set<string>;
+  onMarkWarRead?: () => void;
 }
 
 export const FleetAndCombatPanel = ({
   warEventsRef,
   unreadWarIds,
+  onMarkWarRead,
 }: FleetAndCombatPanelProps) => {
   const session = useGameStore((state) => state.session);
   const fleets = session?.fleets ?? [];
@@ -177,6 +179,14 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
               <option value="warEnd">Pace</option>
             </select>
           </label>
+          {onMarkWarRead ? (
+            <button
+              className="panel__action panel__action--compact panel__action--inline"
+              onClick={onMarkWarRead}
+            >
+              Segna letti
+            </button>
+          ) : null}
         </div>
         <ul ref={warEventsRef}>
           {filteredWarEvents.length === 0 ? (

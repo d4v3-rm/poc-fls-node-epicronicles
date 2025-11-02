@@ -395,6 +395,14 @@ export const GameScreen = () => {
           <FleetAndCombatPanel
             warEventsRef={warEventsRef}
             unreadWarIds={unreadWarIds}
+            onMarkWarRead={() => {
+              if (!session?.warEvents?.length) {
+                setWarUnread(0);
+                return;
+              }
+              setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
+              setWarUnread(0);
+            }}
           />
         </DraggablePanel>
         <DraggablePanel
