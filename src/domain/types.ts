@@ -235,6 +235,22 @@ export interface CombatReport {
   losses: CombatLoss[];
 }
 
+export type FleetManageError =
+  | 'NO_SESSION'
+  | 'FLEET_NOT_FOUND'
+  | 'TARGET_NOT_FOUND'
+  | 'SAME_FLEET'
+  | 'DIFFERENT_SYSTEM'
+  | 'INSUFFICIENT_SHIPS';
+
+export type FleetMergeResult =
+  | { success: true }
+  | { success: false; reason: FleetManageError };
+
+export type FleetSplitResult =
+  | { success: true; newFleetId: string }
+  | { success: false; reason: FleetManageError };
+
 export interface GalaxyState {
   seed: string;
   systems: StarSystem[];

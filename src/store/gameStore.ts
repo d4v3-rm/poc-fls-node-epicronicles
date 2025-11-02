@@ -78,6 +78,22 @@ export type FleetMoveResult =
   | { success: true }
   | { success: false; reason: FleetOrderError };
 
+export type FleetManageError =
+  | 'NO_SESSION'
+  | 'FLEET_NOT_FOUND'
+  | 'TARGET_NOT_FOUND'
+  | 'SAME_FLEET'
+  | 'DIFFERENT_SYSTEM'
+  | 'INSUFFICIENT_SHIPS';
+
+export type FleetMergeResult =
+  | { success: true }
+  | { success: false; reason: FleetManageError };
+
+export type FleetSplitResult =
+  | { success: true; newFleetId: string }
+  | { success: false; reason: FleetManageError };
+
 export type ScienceShipOrderError =
   | 'NO_SESSION'
   | 'SHIP_NOT_FOUND'
@@ -584,6 +600,24 @@ const setEmpireWarStatus = (
   return changed ? updated : empires;
 };
 
+const createFleetFromShip = ({
+  ship,
+  systemId,
+  ownerId,
+}: {
+  ship: FleetShip;
+  systemId: string;
+  ownerId?: string;
+}): Fleet => ({
+  id: `FLEET-${crypto.randomUUID()}`,
+  name: 'Nuova flotta',
+  ownerId,
+  systemId,
+  targetSystemId: null,
+  ticksToArrival: 0,
+  ships: [ship],
+});
+
 const refundResourceCost = (
   economy: EconomyState,
   cost: ResourceCost,
@@ -843,6 +877,76 @@ export const orderFleetMove =
     return { success: true };
   };
 
+export const mergeFleets =
+  (sourceId: string, targetId: string): AppThunk<FleetMergeResult> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    if (sourceId === targetId) {
+      return { success: false, reason: 'SAME_FLEET' };
+    }
+    const source = session.fleets.find((fleet) => fleet.id === sourceId);
+    const target = session.fleets.find((fleet) => fleet.id === targetId);
+    if (!source) {
+      return { success: false, reason: 'FLEET_NOT_FOUND' };
+    }
+    if (!target) {
+      return { success: false, reason: 'TARGET_NOT_FOUND' };
+    }
+    if (source.systemId !== target.systemId) {
+      return { success: false, reason: 'DIFFERENT_SYSTEM' };
+    }
+    const merged = session.fleets
+      .filter((fleet) => fleet.id !== sourceId)
+      .map((fleet) =>
+        fleet.id === targetId
+          ? { ...fleet, ships: [...fleet.ships, ...source.ships] }
+          : fleet,
+      );
+    dispatch(
+      setSession({
+        ...session,
+        fleets: merged,
+      }),
+    );
+    return { success: true };
+  };
+
+export const splitFleet =
+  (fleetId: string): AppThunk<FleetSplitResult> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const fleet = session.fleets.find((candidate) => candidate.id === fleetId);
+    if (!fleet) {
+      return { success: false, reason: 'FLEET_NOT_FOUND' };
+    }
+    if (fleet.ships.length <= 1) {
+      return { success: false, reason: 'INSUFFICIENT_SHIPS' };
+    }
+    const ship = fleet.ships[fleet.ships.length - 1];
+    const remaining = fleet.ships.slice(0, -1);
+    const newFleet = createFleetFromShip({
+      ship,
+      systemId: fleet.systemId,
+      ownerId: fleet.ownerId,
+    });
+    const updatedFleets = session.fleets.map((f) =>
+      f.id === fleetId ? { ...f, ships: remaining } : f,
+    );
+    dispatch(
+      setSession({
+        ...session,
+        fleets: [...updatedFleets, newFleet],
+      }),
+    );
+    return { success: true, newFleetId: newFleet.id };
+  };
+
 export const orderScienceShip =
   (shipId: string, systemId: string): AppThunk<ScienceShipOrderResult> =>
   (dispatch, getState) => {
@@ -973,6 +1077,8 @@ interface HookState extends GameSliceState {
   proposePeaceWithEmpire: (
     empireId: string,
   ) => DiplomacyActionResult;
+  mergeFleets: (sourceId: string, targetId: string) => FleetMergeResult;
+  splitFleet: (fleetId: string) => FleetSplitResult;
 }
 
 export const useGameStore = <T>(
@@ -1015,6 +1121,9 @@ export const useGameStore = <T>(
         dispatch(declareWarOnEmpire(empireId)),
       proposePeaceWithEmpire: (empireId: string) =>
         dispatch(proposePeaceWithEmpire(empireId)),
+      mergeFleets: (sourceId: string, targetId: string) =>
+        dispatch(mergeFleets(sourceId, targetId)),
+      splitFleet: (fleetId: string) => dispatch(splitFleet(fleetId)),
     }),
     [dispatch],
   );
