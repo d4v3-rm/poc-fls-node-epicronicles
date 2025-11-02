@@ -257,6 +257,15 @@ body {
   color: #ffaaaa;
   font-weight: 700;
 }
+.war-event {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem;
+}
+.war-event--new {
+  border-color: rgba(255, 158, 128, 0.7);
+  background: rgba(255, 158, 128, 0.12);
+}
 
 .hud-notification {
   min-width: 180px;

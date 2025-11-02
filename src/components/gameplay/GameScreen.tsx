@@ -42,6 +42,22 @@ export const GameScreen = () => {
   const warEventsRef = useRef<HTMLDivElement | null>(null);
   const [warUnread, setWarUnread] = useState(0);
   const [lastSeenWarId, setLastSeenWarId] = useState<string | null>(null);
+  const unreadWarIds = useMemo(() => {
+    if (!session) {
+      return new Set<string>();
+    }
+    if (!lastSeenWarId) {
+      return new Set(session.warEvents.map((event) => event.id));
+    }
+    const markerIndex = session.warEvents.findIndex(
+      (event) => event.id === lastSeenWarId,
+    );
+    const slice =
+      markerIndex >= 0
+        ? session.warEvents.slice(markerIndex + 1)
+        : session.warEvents;
+    return new Set(slice.map((event) => event.id));
+  }, [session, lastSeenWarId]);
 
   const clearFocusTargets = () => {
     setFocusSystemId(null);
@@ -376,7 +392,10 @@ export const GameScreen = () => {
           initialX={Math.max(12, viewportWidth - 320)}
           initialY={320}
         >
-          <FleetAndCombatPanel warEventsRef={warEventsRef} />
+          <FleetAndCombatPanel
+            warEventsRef={warEventsRef}
+            unreadWarIds={unreadWarIds}
+          />
         </DraggablePanel>
         <DraggablePanel
           title="Diplomazia"

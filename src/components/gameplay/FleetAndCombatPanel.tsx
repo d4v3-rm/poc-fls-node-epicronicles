@@ -28,9 +28,13 @@ const warStatusLabel: Record<WarStatus, string> = {
 
 interface FleetAndCombatPanelProps {
   warEventsRef?: RefObject<HTMLDivElement>;
+  unreadWarIds?: Set<string>;
 }
 
-export const FleetAndCombatPanel = ({ warEventsRef }: FleetAndCombatPanelProps) => {
+export const FleetAndCombatPanel = ({
+  warEventsRef,
+  unreadWarIds,
+}: FleetAndCombatPanelProps) => {
   const session = useGameStore((state) => state.session);
   const fleets = session?.fleets ?? [];
   const systems = session?.galaxy.systems ?? [];
@@ -180,8 +184,12 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
           ) : (
             filteredWarEvents.map((event) => {
               const empire = empires.find((e) => e.id === event.empireId);
+              const isUnread = unreadWarIds?.has(event.id);
               return (
-                <li key={event.id}>
+                <li
+                  key={event.id}
+                  className={isUnread ? 'war-event war-event--new' : 'war-event'}
+                >
                   <div className="fleet-row">
                     <strong>{empire?.name ?? event.empireId}</strong>
                     <span className="text-muted">Tick {event.tick}</span>
