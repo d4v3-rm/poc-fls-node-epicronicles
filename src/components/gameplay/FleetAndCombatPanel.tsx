@@ -26,7 +26,11 @@ const warStatusLabel: Record<WarStatus, string> = {
   war: 'Guerra',
 };
 
-export const FleetAndCombatPanel = () => {
+interface FleetAndCombatPanelProps {
+  warEventsRef?: React.RefObject<HTMLDivElement>;
+}
+
+export const FleetAndCombatPanel = ({ warEventsRef }: FleetAndCombatPanelProps) => {
   const session = useGameStore((state) => state.session);
   const fleets = session?.fleets ?? [];
   const systems = session?.galaxy.systems ?? [];
@@ -170,7 +174,7 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
             </select>
           </label>
         </div>
-        <ul>
+        <ul ref={warEventsRef}>
           {filteredWarEvents.length === 0 ? (
             <li className="text-muted">Nessun evento registrato.</li>
           ) : (

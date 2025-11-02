@@ -3,9 +3,14 @@ import { useGameStore } from '../../store/gameStore';
 interface HudBottomBarProps {
   onToggleDebug: () => void;
   debugOpen: boolean;
+  onShowWars?: () => void;
 }
 
-export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) => {
+export const HudBottomBar = ({
+  onToggleDebug,
+  debugOpen,
+  onShowWars,
+}: HudBottomBarProps) => {
   const session = useGameStore((state) => state.session);
   const returnToMenu = useGameStore((state) => state.returnToMenu);
 
@@ -87,6 +92,14 @@ export const HudBottomBar = ({ onToggleDebug, debugOpen }: HudBottomBarProps) =>
             <span className="text-muted">+{activeWars.length - warLabels.length}</span>
           ) : null}
           {hasWarEvent ? <span className="hud-war-chip hud-war-chip--alert">!</span> : null}
+          {onShowWars ? (
+            <button
+              className="panel__action panel__action--inline panel__action--compact"
+              onClick={onShowWars}
+            >
+              Journal
+            </button>
+          ) : null}
         </div>
       ) : null}
       {latestWarEvent ? (

@@ -39,6 +39,7 @@ export const GameScreen = () => {
   const [populationMessage, setPopulationMessage] = useState<string | null>(null);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const focusedSessionRef = useRef<string | null>(null);
+  const warEventsRef = useRef<HTMLDivElement | null>(null);
 
   const clearFocusTargets = () => {
     setFocusSystemId(null);
@@ -263,6 +264,12 @@ export const GameScreen = () => {
       <HudBottomBar
         onToggleDebug={() => setDebugOpen((value) => !value)}
         debugOpen={debugOpen}
+        onShowWars={() => {
+          const target = warEventsRef.current;
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }}
       />
       <div className="floating-panels">
         <DraggablePanel
@@ -349,7 +356,7 @@ export const GameScreen = () => {
           initialX={Math.max(12, viewportWidth - 320)}
           initialY={320}
         >
-          <FleetAndCombatPanel />
+          <FleetAndCombatPanel warEventsRef={warEventsRef} />
         </DraggablePanel>
         <DraggablePanel
           title="Diplomazia"
