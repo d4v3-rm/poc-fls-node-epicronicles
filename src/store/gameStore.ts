@@ -351,7 +351,7 @@ export const startColonization =
   };
 
 export const queueShipBuild =
-  (designId: ShipClassId): AppThunk<QueueShipBuildResult> =>
+  (designId: ShipClassId, templateId?: string): AppThunk<QueueShipBuildResult> =>
   (dispatch, getState) => {
     const state = getState().game;
     const session = state.session;
@@ -377,7 +377,7 @@ export const queueShipBuild =
     }
 
     const updatedEconomy = spendResources(session.economy, design.buildCost);
-    const task = createShipyardTask(design.id, design.buildTime);
+    const task = createShipyardTask(design.id, design.buildTime, templateId);
 
     dispatch(
       setSession({

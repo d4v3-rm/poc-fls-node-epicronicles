@@ -10,11 +10,13 @@ import type { Fleet, ShipClassId, ShipyardTask } from './types';
 export const createShipyardTask = (
   designId: ShipClassId,
   buildTime: number,
+  templateId?: string,
 ): ShipyardTask => ({
   id: `YARD-${crypto.randomUUID()}`,
   designId,
   ticksRemaining: buildTime,
   totalTicks: buildTime,
+  templateId,
 });
 
 interface AdvanceShipyardArgs {
@@ -57,12 +59,13 @@ export const advanceShipyard = ({
     const ticksRemaining = Math.max(0, task.ticksRemaining - 1);
     if (ticksRemaining === 0) {
     const baseDesign = getShipDesign(military, task.designId);
-    const template = military.templates.find(
-      (entry) => entry.base === baseDesign.id,
-    );
-    const effectiveDesign = template
-      ? applyShipTemplate(baseDesign, template)
-      : baseDesign;
+    const template = task.templateId
+      ? military.templates.find((entry) => entry.id === task.templateId)
+      : military.templates.find((entry) => entry.base === baseDesign.id);
+    const effectiveDesign =
+      template && template.base === baseDesign.id
+        ? applyShipTemplate(baseDesign, template)
+        : baseDesign;
     const fleet = ensureFleetAvailable();
     fleet.ships.push(createFleetShip(effectiveDesign));
     } else {

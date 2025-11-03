@@ -203,6 +203,7 @@ export interface ShipyardTask {
   designId: ShipClassId;
   ticksRemaining: number;
   totalTicks: number;
+  templateId?: string;
 }
 
 export type ColonizationStatus = 'preparing' | 'traveling' | 'colonizing';

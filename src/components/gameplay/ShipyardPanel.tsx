@@ -21,7 +21,9 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
     (state) => state.config.military.shipyard.queueSize,
   );
   const queueShipBuild = useGameStore((state) => state.queueShipBuild);
+  const shipTemplates = useGameStore((state) => state.config.military.templates);
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Record<string, string>>({});
 
   const resources = session?.economy.resources;
   const queue = session?.shipyardQueue ?? [];
@@ -42,7 +44,8 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
   const queueUsage = `${queue.length}/${queueLimit}`;
 
   const handleBuild = (designId: ShipClassId, designName: string) => {
-    const result = queueShipBuild(designId);
+    const templateId = selectedTemplate[designId];
+    const result = queueShipBuild(designId, templateId);
     if (result.success) {
       setMessage(`Costruzione ${designName} avviata.`);
     } else {
@@ -80,6 +83,10 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
       {message ? <p className="panel-message">{message}</p> : null}
       <div className="shipyard-panel__designs">
         {designs.map((design) => {
+          const templates = shipTemplates.filter(
+            (template) => template.base === design.id,
+          );
+          const templateId = selectedTemplate[design.id] ?? '';
           const affordable = canAfford(design.buildCost);
           const disabled = queue.length >= queueLimit || !affordable;
           return (
@@ -88,6 +95,27 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
               <span className="text-muted">
                 Tempo: {design.buildTime} tick
               </span>
+              {templates.length > 0 ? (
+                <label className="fleet-panel__order">
+                  <span className="text-muted">Template</span>
+                  <select
+                    value={templateId}
+                    onChange={(event) =>
+                      setSelectedTemplate((prev) => ({
+                        ...prev,
+                        [design.id]: event.target.value || '',
+                      }))
+                    }
+                  >
+                    <option value="">Base</option>
+                    {templates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               <p>
                 Costi:{' '}
                 {Object.entries(design.buildCost)
