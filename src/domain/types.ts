@@ -234,6 +234,8 @@ export interface CombatReport {
   systemId: string;
   tick: number;
   playerPower: number;
+  playerDefense: number;
+  damageTaken: number;
   hostilePower: number;
   result: CombatResultType;
   losses: CombatLoss[];

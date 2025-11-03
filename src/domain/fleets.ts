@@ -173,6 +173,8 @@ export const advanceFleets = ({
       systemId: system.id,
       tick,
       playerPower: fleetAttack,
+      playerDefense: fleetDefense,
+      damageTaken: incomingDamage,
       hostilePower,
       result,
       losses: [

@@ -332,8 +332,9 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
                 </span>
               </div>
               <p>
-                Potenza flotta: {report.playerPower} | Minaccia: {report.hostilePower}
+                Potenza flotta: {report.playerPower} | Difesa: {report.playerDefense} | Danno subito: {report.damageTaken}
               </p>
+              <p>Minaccia: {report.hostilePower}</p>
               {report.losses.map((loss) => (
                 <p key={`${report.id}-${loss.fleetId}`} className="text-muted">
                   Perdite flotta {loss.fleetId.slice(0, 6)}: {loss.shipsLost}
