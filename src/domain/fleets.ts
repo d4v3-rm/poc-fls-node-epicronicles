@@ -59,6 +59,15 @@ const sumFleetAttack = (
     return total + (design?.attack ?? 0) + bonus;
   }, 0);
 
+const sumFleetDefense = (
+  fleet: Fleet,
+  designLookup: Map<string, ShipDesign>,
+): number =>
+  fleet.ships.reduce((total, ship) => {
+    const design = designLookup.get(ship.designId);
+    return total + (design?.defense ?? 0);
+  }, 0);
+
 export interface AdvanceFleetsArgs {
   fleets: Fleet[];
   galaxy: GalaxyState;
@@ -128,22 +137,25 @@ export const advanceFleets = ({
 
     ensureSystemsCloned();
     const fleetAttack = sumFleetAttack(fleet, designLookup);
+    const fleetDefense = sumFleetDefense(fleet, designLookup);
+
+    const outgoingDamage = fleetAttack;
+    const incomingDamage = Math.max(
+      0,
+      hostilePower - Math.round(fleetDefense * 0.5),
+    );
+
+    const hostileRemaining = Math.max(0, hostilePower - outgoingDamage);
+    const damageResult = applyDamage(fleet.ships, incomingDamage, designLookup);
+    fleet.ships = damageResult.survivors;
+    const losses = damageResult.shipsLost;
 
     let result: CombatResultType = 'playerVictory';
-    let hostileRemaining = hostilePower - fleetAttack;
-    let losses = 0;
-    if (fleetAttack >= hostilePower) {
-      const damage = hostilePower;
-      const damageResult = applyDamage(fleet.ships, damage, designLookup);
-      fleet.ships = damageResult.survivors;
-      losses = damageResult.shipsLost;
-      hostileRemaining = 0;
-      result = fleet.ships.length > 0 ? 'playerVictory' : 'mutualDestruction';
-    } else {
-      // defeat
-      hostileRemaining = hostilePower - fleetAttack;
-      losses = fleet.ships.length;
-      fleet.ships = [];
+    if (hostileRemaining <= 0 && fleet.ships.length === 0) {
+      result = 'mutualDestruction';
+    } else if (hostileRemaining > 0 && fleet.ships.length === 0) {
+      result = 'playerDefeat';
+    } else if (hostileRemaining > 0 && fleet.ships.length > 0) {
       result = 'playerDefeat';
     }
 
