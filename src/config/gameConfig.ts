@@ -47,6 +47,15 @@ export interface MilitaryConfig {
   colonyShipDesignId: ShipClassId;
   startingColonyShips: number;
   shipDesigns: ShipDesign[];
+  templates: Array<{
+    id: string;
+    base: ShipClassId;
+    name: string;
+    attack: number;
+    defense: number;
+    hull: number;
+    costMultiplier: number;
+  }>;
 }
 
 export interface GameConfig {
@@ -271,6 +280,26 @@ export const gameConfig: GameConfig = {
         defense: 1,
         hullPoints: 15,
         speed: 0.8,
+      },
+    ],
+    templates: [
+      {
+        id: 'assault',
+        base: 'corvette',
+        name: 'Variante d Assalto',
+        attack: 3,
+        defense: 0,
+        hull: 2,
+        costMultiplier: 1.15,
+      },
+      {
+        id: 'guardian',
+        base: 'corvette',
+        name: 'Variante Guardia',
+        attack: 0,
+        defense: 3,
+        hull: 3,
+        costMultiplier: 1.2,
       },
     ],
   },

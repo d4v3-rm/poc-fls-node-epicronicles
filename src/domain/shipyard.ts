@@ -3,6 +3,7 @@ import {
   createFleetShip,
   createInitialFleet,
   getShipDesign,
+  applyShipTemplate,
 } from './ships';
 import type { Fleet, ShipClassId, ShipyardTask } from './types';
 
@@ -55,9 +56,15 @@ export const advanceShipyard = ({
   tasks.forEach((task) => {
     const ticksRemaining = Math.max(0, task.ticksRemaining - 1);
     if (ticksRemaining === 0) {
-      const design = getShipDesign(military, task.designId);
-      const fleet = ensureFleetAvailable();
-      fleet.ships.push(createFleetShip(design));
+    const baseDesign = getShipDesign(military, task.designId);
+    const template = military.templates.find(
+      (entry) => entry.base === baseDesign.id,
+    );
+    const effectiveDesign = template
+      ? applyShipTemplate(baseDesign, template)
+      : baseDesign;
+    const fleet = ensureFleetAvailable();
+    fleet.ships.push(createFleetShip(effectiveDesign));
     } else {
       remainingTasks.push({
         ...task,

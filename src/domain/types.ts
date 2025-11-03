@@ -103,6 +103,7 @@ export interface ShipDesign {
   defense: number;
   hullPoints: number;
   speed: number;
+  templateId?: string;
 }
 
 export interface Vector2 {

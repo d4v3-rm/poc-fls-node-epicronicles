@@ -22,6 +22,24 @@ export const createFleetShip = (
   ...overrides,
 });
 
+export const applyShipTemplate = (
+  design: ShipDesign,
+  template: MilitaryConfig['templates'][number],
+): ShipDesign => ({
+  ...design,
+  id: design.id,
+  name: `${design.name} - ${template.name}`,
+  attack: design.attack + template.attack,
+  defense: design.defense + template.defense,
+  hullPoints: design.hullPoints + template.hull,
+  buildCost: Object.fromEntries(
+    Object.entries(design.buildCost).map(([key, value]) => [
+      key,
+      Math.round((value ?? 0) * template.costMultiplier),
+    ]),
+  ) as ShipDesign['buildCost'],
+});
+
 export const createInitialFleet = (
   homeSystemId: string,
   config: MilitaryConfig,
