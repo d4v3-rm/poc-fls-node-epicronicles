@@ -17,6 +17,7 @@ import {
   intensifyWarZones,
 } from './diplomacy';
 import { advanceAiWarMoves, ensureAiFleet } from './ai';
+import { calculatePlayerFleetPower } from './fleets';
 
 const combatResultLabel: Record<CombatResultType, string> = {
   playerVictory: 'Vittoria',
@@ -133,6 +134,10 @@ export const advanceSimulation = (
       empires: updatedSession.empires,
       config: config.diplomacy,
       tick: currentTick,
+      playerFleetPower: calculatePlayerFleetPower(
+        fleetsAdvance.fleets,
+        config,
+      ),
     });
     if (diplomacy.notifications.length > 0) {
       iterationNotifications.push(...diplomacy.notifications);

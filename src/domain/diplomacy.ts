@@ -7,10 +7,12 @@ export const advanceDiplomacy = ({
   empires,
   config,
   tick,
+  playerFleetPower = 0,
 }: {
   empires: Empire[];
   config: DiplomacyConfig;
   tick: number;
+  playerFleetPower?: number;
 }): {
   empires: Empire[];
   notifications: GameNotification[];
@@ -50,7 +52,8 @@ export const advanceDiplomacy = ({
       });
     } else if (
       empire.warStatus === 'war' &&
-      drifted >= config.peaceThreshold
+      (drifted >= config.peaceThreshold ||
+        evaluatePeaceAcceptance({ empire, playerFleetPower }))
     ) {
       empire.warStatus = 'peace';
       empire.warSince = null;
@@ -140,6 +143,18 @@ export const intensifyWarZones = ({
     };
   });
   return { ...galaxy, systems };
+};
+
+export const evaluatePeaceAcceptance = ({
+  empire,
+  playerFleetPower,
+}: {
+  empire: Empire;
+  playerFleetPower: number;
+}): boolean => {
+  const hostility = Math.abs(empire.opinion);
+  const needsPeace = empire.opinion > -20 && playerFleetPower > 12;
+  return needsPeace || hostility < 15;
 };
 
 export const getAiHomeSystem = (galaxy: GalaxyState): StarSystem | null =>

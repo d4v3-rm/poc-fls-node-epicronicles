@@ -49,7 +49,7 @@ const applyDamage = (
   return { survivors, shipsLost: losses };
 };
 
-const sumFleetAttack = (
+export const sumFleetAttack = (
   fleet: Fleet,
   designLookup: Map<string, ShipDesign>,
 ): number =>
@@ -67,6 +67,19 @@ const sumFleetDefense = (
     const design = designLookup.get(ship.designId);
     return total + (design?.defense ?? 0);
   }, 0);
+
+export const calculatePlayerFleetPower = (
+  fleets: Fleet[],
+  config: GameConfig,
+): number => {
+  const designLookup = buildDesignMap(config);
+  return fleets
+    .filter((fleet) => !fleet.ownerId || fleet.ownerId === 'player')
+    .reduce(
+      (total, fleet) => total + sumFleetAttack(fleet, designLookup),
+      0,
+    );
+};
 
 export interface AdvanceFleetsArgs {
   fleets: Fleet[];
