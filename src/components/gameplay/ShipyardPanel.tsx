@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { resourceLabels } from '../../domain/resourceMetadata';
 import type { ShipClassId, StarSystem } from '../../domain/types';
+import { applyShipTemplate } from '../../domain/ships';
 
 const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
@@ -87,11 +88,18 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
             (template) => template.base === design.id,
           );
           const templateId = selectedTemplate[design.id] ?? '';
+          const effectiveDesign =
+            templateId && templates.length > 0
+              ? applyShipTemplate(
+                  design,
+                  templates.find((tpl) => tpl.id === templateId) ?? templates[0],
+                )
+              : design;
           const affordable = canAfford(design.buildCost);
           const disabled = queue.length >= queueLimit || !affordable;
           return (
             <div key={design.id} className="shipyard-panel__card">
-              <strong>{design.name}</strong>
+              <strong>{effectiveDesign.name}</strong>
               <span className="text-muted">
                 Tempo: {design.buildTime} tick
               </span>
@@ -118,7 +126,7 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
               ) : null}
               <p>
                 Costi:{' '}
-                {Object.entries(design.buildCost)
+                {Object.entries(effectiveDesign.buildCost)
                   .filter(([, amount]) => amount && amount > 0)
                   .map(
                     ([type, amount]) =>
@@ -126,6 +134,12 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
                   )
                   .join(' | ')}
               </p>
+              <div className="fleet-panel__order">
+                <span className="text-muted">
+                  Att:{effectiveDesign.attack} Dif:{effectiveDesign.defense} Hull:
+                  {effectiveDesign.hullPoints}
+                </span>
+              </div>
               <button
                 className="panel__action panel__action--compact"
                 disabled={disabled}
