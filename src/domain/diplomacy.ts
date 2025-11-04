@@ -1,5 +1,5 @@
 import type { DiplomacyConfig } from '../config/gameConfig';
-import type { Empire, GameNotification, GalaxyState } from './types';
+import type { Empire, GameNotification, GalaxyState, StarSystem } from './types';
 
 const clampOpinion = (value: number) => Math.max(-100, Math.min(100, value));
 
@@ -140,4 +140,30 @@ export const intensifyWarZones = ({
     };
   });
   return { ...galaxy, systems };
+};
+
+export const getAiHomeSystem = (galaxy: GalaxyState): StarSystem | null =>
+  galaxy.systems[1] ?? galaxy.systems[0] ?? null;
+
+export const getNextColonizableSystem = (
+  galaxy: GalaxyState,
+  systemsKnown: Set<string>,
+): StarSystem | null => {
+  const candidates = galaxy.systems.filter(
+    (system) =>
+      !systemsKnown.has(system.id) && system.habitableWorld && system.visibility !== 'unknown',
+  );
+  return candidates[0] ?? null;
+};
+
+export const evaluatePeaceAcceptance = ({
+  empire,
+  playerFleetPower,
+}: {
+  empire: Empire;
+  playerFleetPower: number;
+}): boolean => {
+  const hostility = Math.abs(empire.opinion);
+  const needsPeace = empire.opinion > -20 && playerFleetPower > 12;
+  return needsPeace || hostility < 15;
 };
