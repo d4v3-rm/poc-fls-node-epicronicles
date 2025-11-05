@@ -14,7 +14,7 @@ export type SystemVisibility = 'unknown' | 'revealed' | 'surveyed';
 
 export type ScienceShipStatus = 'idle' | 'traveling' | 'surveying';
 
-export type ResourceType = 'energy' | 'minerals' | 'food' | 'research';
+export type ResourceType = 'energy' | 'minerals' | 'food' | 'research' | 'influence';
 export type ResourceCost = Partial<Record<ResourceType, number>>;
 
 export type EmpireKind = 'player' | 'ai';
@@ -122,6 +122,7 @@ export interface HabitableWorldTemplate {
   size: number;
   baseProduction: ResourceCost;
   upkeep: ResourceCost;
+  habitability: number;
 }
 
 export interface OrbitingPlanet {
@@ -161,6 +162,7 @@ export interface Planet {
   systemId: string;
   kind: PlanetKind;
   size: number;
+  habitability: number;
   population: PopulationStats;
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;

@@ -8,6 +8,7 @@ const RESOURCE_DISPLAY_ORDER: ResourceType[] = [
   'minerals',
   'food',
   'research',
+  'influence',
 ];
 
 const formatDelta = (value: number) =>

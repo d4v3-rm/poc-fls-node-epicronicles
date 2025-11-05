@@ -52,7 +52,8 @@ export type ColonizationError =
   | 'ALREADY_COLONIZED'
   | 'TASK_IN_PROGRESS'
   | 'INSUFFICIENT_RESOURCES'
-  | 'NO_COLONY_SHIP';
+  | 'NO_COLONY_SHIP'
+  | 'SYSTEM_UNKNOWN';
 
 export type StartColonizationResult =
   | { success: true }
@@ -417,6 +418,9 @@ export const startColonization =
     );
     if (!system) {
       return { success: false, reason: 'SYSTEM_NOT_FOUND' };
+    }
+    if (system.visibility === 'unknown') {
+      return { success: false, reason: 'SYSTEM_UNKNOWN' };
     }
     const planetKnown = session.economy.planets.some(
       (planet) => planet.systemId === systemId,

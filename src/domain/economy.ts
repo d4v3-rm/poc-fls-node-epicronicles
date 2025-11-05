@@ -15,6 +15,7 @@ export const RESOURCE_TYPES: ResourceType[] = [
   'minerals',
   'food',
   'research',
+  'influence',
 ];
 
 const clamp = (value: number, min: number, max: number) =>
@@ -24,6 +25,7 @@ export interface HomeworldConfig {
   name: string;
   kind: PlanetKind;
   size: number;
+  habitability?: number;
   population: number;
   baseProduction: Partial<Record<ResourceType, number>>;
   upkeep: Partial<Record<ResourceType, number>>;
@@ -56,6 +58,7 @@ export interface EconomyConfig {
   populationJobs: PopulationJobDefinition[];
   populationAutomation?: PopulationAutomationConfig;
   morale?: MoraleConfig;
+  habitabilityByKind?: Partial<Record<PlanetKind, number>>;
 }
 
 const defaultMoraleConfig: MoraleConfig = {
@@ -93,6 +96,7 @@ const createHomeworld = (
   systemId,
   kind: config.kind,
   size: config.size,
+  habitability: config.habitability ?? 1,
   population: {
     total: config.population,
     workers: config.population,
@@ -252,7 +256,11 @@ export const calculatePlanetMorale = (
       (morale.deficitThreshold - amount) / morale.deficitThreshold;
     return total + severity * morale.deficitPenalty;
   }, 0);
-  const rawStability = morale.baseStability - crowdingPenalty - deficitPenalty;
+  const habitability = planet.habitability ?? 1;
+  const habitabilityPenalty =
+    habitability < 1 ? Math.round((1 - habitability) * 20) : 0;
+  const rawStability =
+    morale.baseStability - crowdingPenalty - deficitPenalty - habitabilityPenalty;
   const stability = clamp(rawStability, morale.min, morale.max);
   const specialistCount =
     (planet.population.specialists ?? 0) +

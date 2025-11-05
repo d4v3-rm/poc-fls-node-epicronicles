@@ -103,17 +103,20 @@ export const gameConfig: GameConfig = {
       minerals: 80,
       food: 60,
       research: 0,
+      influence: 50,
     },
     homeworld: {
       name: 'Aurora Prime',
       kind: 'terrestrial',
       size: 18,
+      habitability: 1,
       population: 4,
       baseProduction: {
         energy: 6,
         minerals: 5,
         food: 7,
         research: 3,
+        influence: 1,
       },
       upkeep: {
         food: 4,
@@ -202,6 +205,11 @@ export const gameConfig: GameConfig = {
       deficitPenalty: 6,
       happinessBonusPerSpecialist: 0.6,
       happinessPenaltyPerWorker: 0.2,
+    },
+    habitabilityByKind: {
+      terrestrial: 0.9,
+      desert: 0.6,
+      tundra: 0.65,
     },
   },
   colonization: {

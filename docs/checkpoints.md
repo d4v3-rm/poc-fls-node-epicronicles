@@ -26,9 +26,9 @@ Stato sintetico per fasi, con feature flaggate tramite checkbox `[x]` (complete)
 - [x] Distretti base con coda costruzione, priorità/annulla e progress bar
 - [x] Calcolo produzione/consumo per pianeta e morale (stabilità/felicità)
 - [x] Popolazione semplificata con automazione ruoli e promo/democrazioni manuali
-- [ ] Risorsa influenza e abitabilità specie-specifica
-- [ ] Notifiche dedicate per sospensione distretti/risorse insufficienti (parziali)
-- [ ] Gating colonizzazione su sistemi non sondati con messaggi più espliciti
+- [x] Risorsa influenza e abitabilità specie-specifica
+- [x] Notifiche dedicate per sospensione distretti/risorse insufficienti
+- [x] Gating colonizzazione su sistemi non sondati con messaggi più espliciti
 
 ## Fase 3 – Flotte militari e Combattimento
 - [x] Classi nave base (corvette, frigate, colony) e design da config

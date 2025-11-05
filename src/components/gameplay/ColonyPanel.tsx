@@ -9,6 +9,7 @@ import type {
 const colonizationErrors: Record<ColonizationError, string> = {
   NO_SESSION: 'Nessuna sessione.',
   SYSTEM_NOT_FOUND: 'Sistema non trovato.',
+  SYSTEM_UNKNOWN: 'Devi prima rivelare il sistema.',
   SYSTEM_NOT_SURVEYED: 'Sonda prima il sistema.',
   NO_HABITABLE_WORLD: 'Nessun mondo abitabile.',
   ALREADY_COLONIZED: 'Sistema gia colonizzato.',

@@ -37,6 +37,12 @@ const baseProductionByKind: Record<
   },
 };
 
+const baseHabitabilityByKind: Record<PlanetKind, number> = {
+  terrestrial: 0.9,
+  desert: 0.6,
+  tundra: 0.65,
+};
+
 const stringToSeed = (value: string) =>
   value.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
@@ -62,6 +68,7 @@ const createHabitableWorld = (
     planetKinds[Math.floor(random() * planetKinds.length)] ?? 'terrestrial';
   const base = baseProductionByKind[kind];
   const size = 12 + Math.round(random() * 8);
+  const habitability = baseHabitabilityByKind[kind] ?? 0.7;
 
   return {
     name: `${systemName} Prime`,
@@ -69,6 +76,7 @@ const createHabitableWorld = (
     size,
     baseProduction: { ...base.yields },
     upkeep: { ...base.upkeep },
+    habitability,
   };
 };
 

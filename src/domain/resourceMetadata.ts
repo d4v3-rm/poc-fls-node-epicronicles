@@ -5,4 +5,5 @@ export const resourceLabels: Record<ResourceType, string> = {
   minerals: 'Minerali',
   food: 'Cibo',
   research: 'Ricerca',
+  influence: 'Influenza',
 };
