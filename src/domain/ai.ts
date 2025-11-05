@@ -1,23 +1,40 @@
-import type { GalaxyState, Fleet, GameSession } from './types';
+import type {
+  GalaxyState,
+  Fleet,
+  GameSession,
+  StarSystem,
+} from './types';
 import { createInitialFleet } from './ships';
-import { calculateTravelTicks } from './fleets';
+import { calculateTravelTicks, sumFleetAttack } from './fleets';
 import type { MilitaryConfig, DiplomacyConfig } from '../config/gameConfig';
 
-const chooseTargetSystem = (
-  galaxy: GalaxyState,
-  avoidSystemIds: string[],
-  preferHostile: boolean,
-): string | null => {
+const chooseTargetSystem = ({
+  galaxy,
+  avoidSystemIds,
+  preferHostile,
+  fleetPower,
+}: {
+  galaxy: GalaxyState;
+  avoidSystemIds: string[];
+  preferHostile: boolean;
+  fleetPower: number;
+}): string | null => {
   const hostile = galaxy.systems
     .filter(
       (system) =>
         (system.hostilePower ?? 0) > 0 &&
         !avoidSystemIds.includes(system.id),
     )
-    .sort(
-      (a, b) => (b.hostilePower ?? 0) - (a.hostilePower ?? 0),
+    .sort((a, b) => (b.hostilePower ?? 0) - (a.hostilePower ?? 0));
+  if (preferHostile) {
+    const viable = hostile.find(
+      (system) => (system.hostilePower ?? 0) <= fleetPower * 1.6,
     );
-  if (preferHostile && hostile.length > 0) {
+    if (viable) {
+      return viable.id;
+    }
+  }
+  if (hostile.length > 0) {
     return hostile[0]?.id ?? null;
   }
   const nonHostile = galaxy.systems.filter(
@@ -25,11 +42,10 @@ const chooseTargetSystem = (
       (system.hostilePower ?? 0) === 0 &&
       !avoidSystemIds.includes(system.id),
   );
-  const pool = hostile.length > 0 ? hostile : nonHostile;
-  if (pool.length === 0) {
+  if (nonHostile.length === 0) {
     return null;
   }
-  return pool[Math.floor(Math.random() * pool.length)]?.id ?? null;
+  return nonHostile[Math.floor(Math.random() * nonHostile.length)]?.id ?? null;
 };
 
 export const ensureAiFleet = (
@@ -109,13 +125,40 @@ export const advanceAiWarMoves = ({
     if (!fleet || fleet.targetSystemId) {
       return;
     }
+    const currentSystem =
+      session.galaxy.systems.find((sys) => sys.id === fleet.systemId) ?? null;
+    const fleetPower = sumFleetAttack(fleet, new Map(military.shipDesigns.map((d) => [d.id, d])));
+    const threat = currentSystem?.hostilePower ?? 0;
+    const homeSystem = session.galaxy.systems[1] ?? session.galaxy.systems[0];
+    if (threat > fleetPower * 1.25 && homeSystem) {
+      const retreatTicks = calculateTravelTicks(
+        fleet.systemId,
+        homeSystem.id,
+        session.galaxy,
+        { ...military, fleet: military.fleet },
+      );
+      fleet.targetSystemId = homeSystem.id;
+      fleet.ticksToArrival = Math.max(1, retreatTicks);
+      changed = true;
+      return;
+    }
     const avoidIds = [fleet.systemId];
     if (fleet.lastTargetSystemId) {
       avoidIds.push(fleet.lastTargetSystemId);
     }
     const target =
-      chooseTargetSystem(session.galaxy, avoidIds, true) ??
-      chooseTargetSystem(session.galaxy, avoidIds, false) ??
+      chooseTargetSystem({
+        galaxy: session.galaxy,
+        avoidSystemIds: avoidIds,
+        preferHostile: true,
+        fleetPower,
+      }) ??
+      chooseTargetSystem({
+        galaxy: session.galaxy,
+        avoidSystemIds: avoidIds,
+        preferHostile: false,
+        fleetPower,
+      }) ??
       session.galaxy.systems[0]?.id ??
       null;
     if (!target || target === fleet.systemId) {

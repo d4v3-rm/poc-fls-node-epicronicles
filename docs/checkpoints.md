@@ -37,8 +37,8 @@ Stato sintetico per fasi, con feature flaggate tramite checkbox `[x]` (complete)
 - [x] Combattimento contro minacce di sistema, report e notifiche
 - [x] Indicatori combattimento su mappa/HUD, log battaglie recente
 - [x] Designer navi avanzato (varianti custom con potenziamenti rapidi)
-- [ ] IA militare completa (ingaggio/ritiro, targeting strategico)
-- [ ] UI riepilogo battaglie e statistiche approfondite
+- [x] IA militare completa (ingaggio/ritiro, targeting strategico)
+- [x] UI riepilogo battaglie e statistiche approfondite
 
 ## Fase 4 – Multi-impero, IA base e Diplomazia minima
 - [x] Imperi AI multipli con opinione e drift automatico
