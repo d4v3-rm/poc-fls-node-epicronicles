@@ -65,6 +65,7 @@ const createEmpires = (
       opinion,
       warStatus: 'peace',
       personality: opinion < 0 ? 'espansionista' : 'pragmatico',
+      accessToPlayer: false,
     };
   };
 
@@ -88,8 +89,18 @@ export const createSession = ({
   militaryConfig,
   diplomacyConfig,
 }: SessionParams): GameSession => {
-  const galaxy = createTestGalaxy({ seed, ...galaxyOverrides });
-  const homeSystemId = galaxy.systems[0]?.id ?? 'unknown';
+  const baseGalaxy = createTestGalaxy({ seed, ...galaxyOverrides });
+  const systems = baseGalaxy.systems.map((system, index) => {
+    if (index === 0) {
+      return { ...system, ownerId: 'player' };
+    }
+    if (index === 1) {
+      return { ...system, ownerId: 'ai-1' };
+    }
+    return system;
+  });
+  const galaxy = { ...baseGalaxy, systems };
+  const homeSystemId = systems[0]?.id ?? 'unknown';
   return {
     id: crypto.randomUUID(),
     label: label ?? `Session ${new Date().toLocaleTimeString()}`,

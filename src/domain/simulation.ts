@@ -15,9 +15,33 @@ import {
   advanceDiplomacy,
   applyWarPressureToGalaxy,
   intensifyWarZones,
+  assignBordersToPlayer,
 } from './diplomacy';
 import { advanceAiWarMoves, ensureAiFleet } from './ai';
 import { calculatePlayerFleetPower } from './fleets';
+
+const assignAiExpansion = (
+  galaxy: GalaxyState,
+  empires: GameSession['empires'],
+): GalaxyState => {
+  const ai = empires.find((empire) => empire.kind === 'ai');
+  if (!ai) {
+    return galaxy;
+  }
+  const target = galaxy.systems.find(
+    (system) =>
+      !system.ownerId &&
+      system.habitableWorld &&
+      (system.hostilePower ?? 0) === 0,
+  );
+  if (!target) {
+    return galaxy;
+  }
+  const systems = galaxy.systems.map((system) =>
+    system.id === target.id ? { ...system, ownerId: ai.id } : system,
+  );
+  return { ...galaxy, systems };
+};
 
 const combatResultLabel: Record<CombatResultType, string> = {
   playerVictory: 'Vittoria',
@@ -57,6 +81,15 @@ export const advanceSimulation = (
       updatedSession.economy,
       config.colonization,
     );
+    let workingGalaxy = updatedSession.galaxy;
+    const colonizedSystems = new Set(
+      colonization.economy.planets.map((planet) => planet.systemId),
+    );
+    colonization.completed.forEach((entry) => colonizedSystems.add(entry.systemId));
+    if (colonizedSystems.size > 0) {
+      workingGalaxy = assignBordersToPlayer(workingGalaxy, colonizedSystems);
+    }
+    workingGalaxy = assignAiExpansion(workingGalaxy, updatedSession.empires);
     const districtConstruction = advanceDistrictConstruction({
       tasks: updatedSession.districtConstructionQueue,
       economy: colonization.economy,
@@ -95,7 +128,7 @@ export const advanceSimulation = (
     });
     const fleetsAdvance = advanceFleets({
       fleets: shipyard.fleets,
-      galaxy: updatedSession.galaxy,
+      galaxy: workingGalaxy,
       config,
       fallbackSystemId,
       tick: currentTick,

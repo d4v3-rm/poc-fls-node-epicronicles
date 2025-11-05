@@ -40,6 +40,9 @@ export const HudBottomBar = ({
     session.warEvents.length > 0
       ? session.warEvents[session.warEvents.length - 1]
       : null;
+  const ownedSystems = galaxy.systems.filter(
+    (system) => system.ownerId === 'player',
+  ).length;
   const warLabels = activeWars
     .map((empire) => {
       const duration =
@@ -78,6 +81,10 @@ export const HudBottomBar = ({
         <dd>
           {surveyedCount}/{galaxy.systems.length}
         </dd>
+      </div>
+      <div>
+        <dt>Controllati</dt>
+        <dd>{ownedSystems}</dd>
       </div>
       <div>
         <dt>Navi scientifiche</dt>

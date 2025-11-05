@@ -188,6 +188,19 @@ const battleIconMaterial = new THREE.MeshBasicMaterial({
   opacity: 0.9,
 });
 
+const ownerMaterials: Record<string, THREE.MeshBasicMaterial> = {
+  player: new THREE.MeshBasicMaterial({
+    color: 0x6fa8ff,
+    transparent: true,
+    opacity: 0.4,
+  }),
+  ai: new THREE.MeshBasicMaterial({
+    color: 0xffc857,
+    transparent: true,
+    opacity: 0.35,
+  }),
+};
+
 const toMapPosition = (system: StarSystem) => ({
   x: system.mapPosition?.x ?? system.position.x,
   y: system.mapPosition?.y ?? system.position.y,
@@ -600,6 +613,21 @@ export const GalaxyMap = ({
             24,
           ),
           combatIndicatorMaterial,
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.userData.systemId = system.id;
+        node.add(ring);
+      }
+
+      if (system.ownerId) {
+        const ownerKey = system.ownerId === 'player' ? 'player' : 'ai';
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(
+            starMesh.geometry.parameters.radius + 3.6,
+            starMesh.geometry.parameters.radius + 5.2,
+            32,
+          ),
+          ownerMaterials[ownerKey] ?? ownerMaterials.player,
         );
         ring.rotation.x = Math.PI / 2;
         ring.userData.systemId = system.id;

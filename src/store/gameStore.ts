@@ -74,7 +74,8 @@ export type FleetOrderError =
   | 'FLEET_NOT_FOUND'
   | 'SYSTEM_NOT_FOUND'
   | 'ALREADY_IN_SYSTEM'
-  | 'NO_SHIPS';
+  | 'NO_SHIPS'
+  | 'BORDER_CLOSED';
 
 export type FleetMoveResult =
   | { success: true }
@@ -140,7 +141,8 @@ export type DiplomacyActionError =
   | 'NO_SESSION'
   | 'EMPIRE_NOT_FOUND'
   | 'INVALID_TARGET'
-  | 'ALREADY_IN_STATE';
+  | 'ALREADY_IN_STATE'
+  | 'ALREADY_GRANTED';
 
 export type DiplomacyActionResult =
   | { success: true }
@@ -1001,6 +1003,38 @@ export const proposePeaceWithEmpire =
     dispatch(setSession(updatedSession));
     return { success: true };
   };
+
+export const requestBorderAccess =
+  (empireId: string): AppThunk<DiplomacyActionResult> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return { success: false, reason: 'NO_SESSION' };
+    }
+    const target = session.empires.find((empire) => empire.id === empireId);
+    if (!target) {
+      return { success: false, reason: 'EMPIRE_NOT_FOUND' };
+    }
+    if (target.kind === 'player') {
+      return { success: false, reason: 'INVALID_TARGET' };
+    }
+    if (target.accessToPlayer) {
+      return { success: false, reason: 'ALREADY_GRANTED' };
+    }
+    const updatedEmpires = session.empires.map((empire) =>
+      empire.id === empireId ? { ...empire, accessToPlayer: true, opinion: empire.opinion + 5 } : empire,
+    );
+    dispatch(
+      setSession(
+        appendNotification(
+          { ...session, empires: updatedEmpires },
+          `${target.name} apre i confini.`,
+          'peaceAccepted',
+        ),
+      ),
+    );
+    return { success: true };
+  };
 export const orderFleetMove =
   (fleetId: string, systemId: string): AppThunk<FleetMoveResult> =>
   (dispatch, getState) => {
@@ -1018,6 +1052,18 @@ export const orderFleetMove =
     );
     if (!system) {
       return { success: false, reason: 'SYSTEM_NOT_FOUND' };
+    }
+    if (
+      system.ownerId &&
+      system.ownerId !== 'player' &&
+      system.ownerId.startsWith('ai')
+    ) {
+      const empire = session.empires.find(
+        (e) => e.id === system.ownerId,
+      );
+      if (empire && empire.warStatus === 'peace' && !empire.accessToPlayer) {
+        return { success: false, reason: 'BORDER_CLOSED' };
+      }
     }
     if (fleet.systemId === systemId && fleet.targetSystemId === null) {
       return { success: false, reason: 'ALREADY_IN_SYSTEM' };
@@ -1261,6 +1307,7 @@ interface HookState extends GameSliceState {
   proposePeaceWithEmpire: (
     empireId: string,
   ) => DiplomacyActionResult;
+  requestBorderAccess: (empireId: string) => DiplomacyActionResult;
   mergeFleets: (sourceId: string, targetId: string) => FleetMergeResult;
   splitFleet: (fleetId: string) => FleetSplitResult;
   saveSession: () => SaveGameResult;
@@ -1317,6 +1364,8 @@ export const useGameStore = <T>(
         dispatch(declareWarOnEmpire(empireId)),
       proposePeaceWithEmpire: (empireId: string) =>
         dispatch(proposePeaceWithEmpire(empireId)),
+      requestBorderAccess: (empireId: string) =>
+        dispatch(requestBorderAccess(empireId)),
       mergeFleets: (sourceId: string, targetId: string) =>
         dispatch(mergeFleets(sourceId, targetId)),
       splitFleet: (fleetId: string) => dispatch(splitFleet(fleetId)),

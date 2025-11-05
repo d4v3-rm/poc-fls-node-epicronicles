@@ -18,6 +18,7 @@ export const DiplomacyPanel = () => {
   const empires = session?.empires ?? [];
   const declareWar = useGameStore((state) => state.declareWarOnEmpire);
   const proposePeace = useGameStore((state) => state.proposePeaceWithEmpire);
+  const requestBorders = useGameStore((state) => state.requestBorderAccess);
   const [message, setMessage] = useState<string | null>(null);
 
   const aiEmpires = empires.filter((empire) => empire.kind === 'ai');
@@ -52,6 +53,21 @@ export const DiplomacyPanel = () => {
     }
   };
 
+  const handleBorders = (empire: Empire) => {
+    const result = requestBorders(empire.id);
+    if (result.success) {
+      changeMessage(`${empire.name} apre i confini al giocatore.`);
+    } else {
+      const reasons: Record<string, string> = {
+        NO_SESSION: 'Nessuna sessione attiva.',
+        EMPIRE_NOT_FOUND: 'Impero non trovato.',
+        INVALID_TARGET: 'Bersaglio non valido.',
+        ALREADY_GRANTED: 'Confini già aperti.',
+      };
+      changeMessage(reasons[result.reason] ?? 'Richiesta non accettata.');
+    }
+  };
+
   return (
     <section className="diplomacy-panel">
       <header className="panel-section__header">
@@ -76,6 +92,9 @@ export const DiplomacyPanel = () => {
                   >
                     Opinione: {empire.opinion}
                   </span>
+                  <span className="text-muted">
+                    Confini: {empire.accessToPlayer ? 'Aperti' : 'Chiusi'}
+                  </span>
                 </div>
                 <span className="text-muted">
                   Stato: {statusLabel[empire.warStatus]}
@@ -97,6 +116,15 @@ export const DiplomacyPanel = () => {
                     Proponi pace
                   </button>
                 )}
+                {empire.warStatus === 'peace' ? (
+                  <button
+                    className="panel__action panel__action--compact"
+                    onClick={() => handleBorders(empire)}
+                    disabled={empire.accessToPlayer}
+                  >
+                    Richiedi accesso confini
+                  </button>
+                ) : null}
               </div>
             </li>
           ))}

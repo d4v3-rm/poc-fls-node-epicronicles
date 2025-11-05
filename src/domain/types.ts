@@ -29,6 +29,7 @@ export interface Empire {
   warStatus: WarStatus;
   warSince?: number | null;
   personality?: string;
+  accessToPlayer?: boolean;
 }
 
 export type WarEventType = 'warStart' | 'warEnd';
@@ -144,6 +145,7 @@ export interface StarSystem {
   habitableWorld?: HabitableWorldTemplate;
   hostilePower?: number;
   orbitingPlanets: OrbitingPlanet[];
+  ownerId?: string | null;
 }
 
 export interface ScienceShip {

@@ -13,8 +13,9 @@ const fleetOrderErrors = {
   NO_SESSION: 'Nessuna sessione.',
   FLEET_NOT_FOUND: 'Flotta non trovata.',
   SYSTEM_NOT_FOUND: 'Sistema non valido.',
-  ALREADY_IN_SYSTEM: 'La flotta Ã¨ giÃ  nel sistema.',
+  ALREADY_IN_SYSTEM: 'La flotta è già nel sistema.',
   NO_SHIPS: 'La flotta non ha navi.',
+  BORDER_CLOSED: 'Confini chiusi: richiedi accesso o dichiara guerra.',
 } as const;
 
 const resultLabel = {
@@ -379,3 +380,4 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
     </section>
   );
 };
+

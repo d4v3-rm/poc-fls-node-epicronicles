@@ -1,9 +1,4 @@
-import type {
-  GalaxyState,
-  Fleet,
-  GameSession,
-  StarSystem,
-} from './types';
+import type { GalaxyState, Fleet, GameSession } from './types';
 import { createInitialFleet } from './ships';
 import { calculateTravelTicks, sumFleetAttack } from './fleets';
 import type { MilitaryConfig, DiplomacyConfig } from '../config/gameConfig';
@@ -70,6 +65,9 @@ export const ensureAiFleet = (
   }
   const homeSystem = session.galaxy.systems[1]?.id ?? session.galaxy.systems[0]?.id;
   if (!homeSystem) {
+    return session;
+  }
+  if (session.fleets.some((fleet) => fleet.ownerId === 'ai-1')) {
     return session;
   }
   const size =

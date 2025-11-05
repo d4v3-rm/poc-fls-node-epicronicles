@@ -107,6 +107,25 @@ export const applyWarPressureToGalaxy = ({
   return { ...galaxy, systems };
 };
 
+export const assignBordersToPlayer = (
+  galaxy: GalaxyState,
+  colonizedSystems: Set<string>,
+): GalaxyState => {
+  if (colonizedSystems.size === 0) {
+    return galaxy;
+  }
+  const systems = galaxy.systems.map((system, idx) => {
+    if (idx === 0 || colonizedSystems.has(system.id)) {
+      return { ...system, ownerId: 'player' };
+    }
+    if (system.ownerId && system.ownerId !== 'player') {
+      return system;
+    }
+    return system;
+  });
+  return { ...galaxy, systems };
+};
+
 export const intensifyWarZones = ({
   galaxy,
   empires,
