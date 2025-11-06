@@ -1,4 +1,4 @@
-import type { GameConfig } from '../config/gameConfig';
+﻿import type { GameConfig } from '@config/gameConfig';
 import type {
   CombatReport,
   CombatResultType,
@@ -6,7 +6,7 @@ import type {
   FleetShip,
   GalaxyState,
   ShipDesign,
-} from './types';
+} from '@domain/types';
 import { createInitialFleet } from './ships';
 
 const buildDesignMap = (config: GameConfig) =>
@@ -247,3 +247,5 @@ export const calculateTravelTicks = (
     Math.round(config.military.fleet.baseTravelTicks + scaled),
   );
 };
+
+

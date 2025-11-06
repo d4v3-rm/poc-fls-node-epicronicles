@@ -20,7 +20,12 @@ Questa è la struttura attuale del codice dopo il refactor dello store e delle c
 Usali per evitare percorsi relativi annidati.
 
 ## Dominio (logica pura)
-- `src/domain/` contiene funzioni pure per galassia, economia, colonizzazione, distretti, flotte/combattimento, diplomazia, IA, ecc.
+- `src/domain/` organizzato per area:
+  - `economy/` (economy, districts, population, resourceMetadata in `shared/`)
+  - `fleet/` (ships, fleets, shipyard)
+  - `galaxy/` (galaxy, exploration)
+  - `session/` (session bootstrap, simulation, colonization)
+  - `diplomacy/`, `ai/`, `time/` (clock), `types.ts` condiviso
 - Config di bilanciamento in `src/config/gameConfig.ts`.
 
 ## UI

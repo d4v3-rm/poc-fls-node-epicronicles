@@ -1,7 +1,7 @@
-import type { GalaxyState, Fleet, GameSession } from './types';
-import { createFleetShip, createInitialFleet } from './ships';
-import { calculateTravelTicks, sumFleetAttack } from './fleets';
-import type { MilitaryConfig, DiplomacyConfig } from '../config/gameConfig';
+﻿import type { GalaxyState, Fleet, GameSession } from '@domain/types';
+import { createFleetShip, createInitialFleet } from '../fleet/ships';
+import { calculateTravelTicks, sumFleetAttack } from '../fleet/fleets';
+import type { MilitaryConfig, DiplomacyConfig } from '@config/gameConfig';
 
 const chooseTargetSystem = ({
   galaxy,
@@ -212,3 +212,4 @@ export const advanceAiWarMoves = ({
   }
   return { ...session, fleets };
 };
+

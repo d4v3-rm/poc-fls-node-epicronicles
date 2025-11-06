@@ -1,6 +1,6 @@
-import { useGameStore } from '../../store/gameStore';
-import { RESOURCE_TYPES } from '../../domain/economy';
-import { resourceLabels } from '../../domain/resourceMetadata';
+﻿import { useGameStore } from '@store/gameStore';
+import { RESOURCE_TYPES } from '@domain/economy/economy';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
 
 export const ResourceBar = () => {
   const resources = useGameStore((state) => state.session?.economy.resources);
@@ -44,3 +44,4 @@ export const ResourceBar = () => {
     </div>
   );
 };
+

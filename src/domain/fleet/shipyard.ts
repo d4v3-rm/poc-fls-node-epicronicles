@@ -1,4 +1,4 @@
-import type { MilitaryConfig } from '../config/gameConfig';
+﻿import type { MilitaryConfig } from '@config/gameConfig';
 import {
   createFleetShip,
   createInitialFleet,
@@ -10,7 +10,7 @@ import type {
   ShipClassId,
   ShipyardTask,
   ShipCustomization,
-} from './types';
+} from '@domain/types';
 
 export const createShipyardTask = (
   designId: ShipClassId,
@@ -89,3 +89,5 @@ export const advanceShipyard = ({
     fleets: updatedFleets,
   };
 };
+
+

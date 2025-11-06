@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   EconomyState,
   Planet,
   PlanetKind,
@@ -8,7 +8,7 @@ import type {
   DistrictDefinition,
   PopulationJobDefinition,
   PopulationJobId,
-} from './types';
+} from '@domain/types';
 
 export const RESOURCE_TYPES: ResourceType[] = [
   'energy',
@@ -376,3 +376,4 @@ export const advanceEconomy = (
     netProduction,
   };
 };
+

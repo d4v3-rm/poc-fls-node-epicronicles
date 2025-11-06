@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   GalaxyState,
   HabitableWorldTemplate,
   OrbitingPlanet,
@@ -8,7 +8,7 @@ import type {
   StarSystem,
   SystemVisibility,
   Vector3,
-} from './types';
+} from '@domain/types';
 
 export interface GalaxyGenerationParams {
   seed: string;
@@ -154,3 +154,4 @@ export const createTestGalaxy = ({
     systems,
   };
 };
+

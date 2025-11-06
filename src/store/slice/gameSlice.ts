@@ -1,6 +1,6 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+﻿import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { gameConfig, type GameConfig } from '../../config/gameConfig';
-import type { GameSession } from '../../domain/types';
+import type { GameSession } from '@domain/types';
 
 export interface StartSessionArgs {
   seed?: string;

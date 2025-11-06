@@ -1,11 +1,11 @@
-import { RESOURCE_TYPES, type EconomyConfig } from './economy';
+﻿import { RESOURCE_TYPES, type EconomyConfig } from './economy';
 import type {
   EconomyState,
   Planet,
   PopulationJobDefinition,
   PopulationJobId,
   ResourceType,
-} from './types';
+} from '@domain/types';
 
 const jobNetContribution = (
   job: PopulationJobDefinition,
@@ -243,3 +243,4 @@ export const autoBalancePopulation = ({
     planets: updatedPlanets,
   };
 };
+

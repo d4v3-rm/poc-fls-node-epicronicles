@@ -1,5 +1,5 @@
-import { useMemo, useState, type RefObject } from 'react';
-import { useGameStore } from '../../store/gameStore';
+﻿import { useMemo, useState, type RefObject } from 'react';
+import { useGameStore } from '@store/gameStore';
 import type {
   ShipClassId,
   ScienceShipStatus,
@@ -7,13 +7,13 @@ import type {
   WarEventType,
   FleetMergeResult,
   FleetSplitResult,
-} from '../../domain/types';
+} from '@domain/types';
 
 const fleetOrderErrors = {
   NO_SESSION: 'Nessuna sessione.',
   FLEET_NOT_FOUND: 'Flotta non trovata.',
   SYSTEM_NOT_FOUND: 'Sistema non valido.',
-  ALREADY_IN_SYSTEM: 'La flotta � gi� nel sistema.',
+  ALREADY_IN_SYSTEM: 'La flotta è già nel sistema.',
   NO_SHIPS: 'La flotta non ha navi.',
   BORDER_CLOSED: 'Confini chiusi: richiedi accesso o dichiara guerra.',
 } as const;
@@ -346,12 +346,12 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
         </div>
         <div className="fleet-panel__order">
           <span className="text-muted">
-            Totali: {battleSummary.total} · Vittorie {battleSummary.victories} ·
-            Sconfitte {battleSummary.defeats} · Stallo {battleSummary.stalemate} ·
+            Totali: {battleSummary.total} Â· Vittorie {battleSummary.victories} Â·
+            Sconfitte {battleSummary.defeats} Â· Stallo {battleSummary.stalemate} Â·
             Mutua {battleSummary.mutual}
           </span>
           <span className="text-muted">
-            Navi perse: {battleSummary.shipsLost} · Danno medio subito:{' '}
+            Navi perse: {battleSummary.shipsLost} Â· Danno medio subito:{' '}
             {battleSummary.avgDamageTaken}
           </span>
         </div>
@@ -380,4 +380,6 @@ const describeFleetShips = (ships: typeof fleets[number]['ships']) => {
     </section>
   );
 };
+
+
 

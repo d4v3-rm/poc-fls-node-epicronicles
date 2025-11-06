@@ -20,31 +20,31 @@ import type {
   LoadGameResult,
   StartSessionArgs,
 } from '../slice/gameSlice';
-import { gameConfig, type GameConfig } from '../../config/gameConfig';
-import { createSession } from '../../domain/session';
+import { gameConfig, type GameConfig } from '@config/gameConfig';
+import { createSession } from '@domain/session/session';
 import {
   advanceClock,
   setClockRunning as setClockRunningDomain,
   setClockSpeed,
-} from '../../domain/clock';
+} from '@domain/time/clock';
 import {
   canAffordCost,
   spendResources,
-} from '../../domain/economy';
-import { createShipyardTask, advanceShipyard } from '../../domain/shipyard';
-import { advanceFleets, calculateTravelTicks } from '../../domain/fleets';
-import { advanceDistrictConstruction, createDistrictConstructionTask } from '../../domain/districts';
-import { advanceColonization, createColonizationTask } from '../../domain/colonization';
-import { autoBalancePopulation } from '../../domain/population';
-import { advanceExploration } from '../../domain/exploration';
-import { advanceSimulation } from '../../domain/simulation';
+} from '@domain/economy/economy';
+import { createShipyardTask, advanceShipyard } from '@domain/fleet/shipyard';
+import { advanceFleets, calculateTravelTicks } from '@domain/fleet/fleets';
+import { advanceDistrictConstruction, createDistrictConstructionTask } from '@domain/economy/districts';
+import { advanceColonization, createColonizationTask } from '@domain/session/colonization';
+import { autoBalancePopulation } from '@domain/economy/population';
+import { advanceExploration } from '@domain/galaxy/exploration';
+import { advanceSimulation } from '@domain/session/simulation';
 import {
   advanceDiplomacy,
   applyWarPressureToGalaxy,
   intensifyWarZones,
-} from '../../domain/diplomacy';
-import { advanceAiWarMoves, ensureAiFleet, reinforceAiFleets } from '../../domain/ai';
-import { createInitialFleet, applyShipTemplate } from '../../domain/ships';
+} from '@domain/diplomacy/diplomacy';
+import { advanceAiWarMoves, ensureAiFleet, reinforceAiFleets } from '@domain/ai/ai';
+import { createInitialFleet, applyShipTemplate } from '@domain/fleet/ships';
 import type {
   GameNotification,
   GameSession,
@@ -56,7 +56,7 @@ import type {
   WarEventType,
   Empire,
   WarStatus,
-} from '../../domain/types';
+} from '@domain/types';
 import {
   appendNotification,
   appendWarEvent,

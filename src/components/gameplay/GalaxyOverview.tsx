@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useGameStore } from '../../store/gameStore';
-import type { ScienceShip, StarClass, SystemVisibility } from '../../domain/types';
+﻿import { useMemo } from 'react';
+import { useGameStore } from '@store/gameStore';
+import type { ScienceShip, StarClass, SystemVisibility } from '@domain/types';
 
 const VIEWPORT_SIZE = 320;
 
@@ -218,3 +218,4 @@ export const GalaxyOverview = ({ onFocusSystem }: GalaxyOverviewProps) => {
     </section>
   );
 };
+

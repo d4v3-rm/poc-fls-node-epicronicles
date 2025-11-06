@@ -1,9 +1,9 @@
-import { useDispatch, useSelector } from 'react-redux';
+﻿import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useMemo } from 'react';
 import type { AppDispatch, RootState } from './index';
-import type { GameSession, PopulationJobId, ShipClassId } from '../domain/types';
-import type { GameConfig } from '../config/gameConfig';
+import type { GameSession, PopulationJobId, ShipClassId } from '@domain/types';
+import type { GameConfig } from '@config/gameConfig';
 import type { GameView } from './slice/gameSlice';
 import {
   startNewSession,
@@ -169,3 +169,4 @@ export const useGameStore = <T>(selector: (state: HookState) => T): T => {
 
   return selector({ ...state, ...actions });
 };
+

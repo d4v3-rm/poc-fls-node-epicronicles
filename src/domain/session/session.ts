@@ -1,16 +1,16 @@
-import { createTestGalaxy } from './galaxy';
-import type { GalaxyGenerationParams } from './galaxy';
+﻿import { createTestGalaxy } from '@domain/galaxy/galaxy';
+import type { GalaxyGenerationParams } from '@domain/galaxy/galaxy';
 import type {
   Empire,
   GameSession,
   SimulationClock,
-} from './types';
-import { createInitialScienceShips } from './exploration';
-import { createInitialEconomy, type EconomyConfig } from './economy';
+} from '@domain/types';
+import { createInitialScienceShips } from '@domain/galaxy/exploration';
+import { createInitialEconomy, type EconomyConfig } from '@domain/economy/economy';
 import type {
   DiplomacyConfig,
   MilitaryConfig,
-} from '../config/gameConfig';
+} from '@config/gameConfig';
 import { createInitialFleet } from './ships';
 
 export interface SessionParams {
@@ -119,3 +119,6 @@ export const createSession = ({
     notifications: [],
   };
 };
+
+
+

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useGameStore } from '../../store/gameStore';
-import type { Empire, WarStatus } from '../../domain/types';
+﻿import { useState } from 'react';
+import { useGameStore } from '@store/gameStore';
+import type { Empire, WarStatus } from '@domain/types';
 
 const statusLabel: Record<WarStatus, string> = {
   peace: 'Pace',
@@ -62,7 +62,7 @@ export const DiplomacyPanel = () => {
         NO_SESSION: 'Nessuna sessione attiva.',
         EMPIRE_NOT_FOUND: 'Impero non trovato.',
         INVALID_TARGET: 'Bersaglio non valido.',
-        ALREADY_GRANTED: 'Confini già aperti.',
+        ALREADY_GRANTED: 'Confini giÃ  aperti.',
       };
       changeMessage(reasons[result.reason] ?? 'Richiesta non accettata.');
     }
@@ -133,3 +133,4 @@ export const DiplomacyPanel = () => {
     </section>
   );
 };
+

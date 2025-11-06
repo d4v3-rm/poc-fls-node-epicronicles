@@ -1,4 +1,4 @@
-import type { ResourceType } from './types';
+﻿import type { ResourceType } from '@domain/types';
 
 export const resourceLabels: Record<ResourceType, string> = {
   energy: 'Energia',
@@ -7,3 +7,4 @@ export const resourceLabels: Record<ResourceType, string> = {
   research: 'Ricerca',
   influence: 'Influenza',
 };
+

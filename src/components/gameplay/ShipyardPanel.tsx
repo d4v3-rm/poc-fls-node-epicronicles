@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
-import { useGameStore } from '../../store/gameStore';
-import { resourceLabels } from '../../domain/resourceMetadata';
-import type { ShipClassId, StarSystem } from '../../domain/types';
-import { applyShipTemplate, applyCustomization } from '../../domain/ships';
+﻿import { useMemo, useState } from 'react';
+import { useGameStore } from '@store/gameStore';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
+import type { ShipClassId, StarSystem } from '@domain/types';
+import { applyShipTemplate, applyCustomization } from '@domain/fleet/ships';
 
 const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
@@ -280,10 +280,10 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
                   />
                 </label>
                 <p className="text-muted">
-                  Punti: {points} · Moltiplicatore costo: {costMultiplier.toFixed(2)}
+                  Punti: {points} Â· Moltiplicatore costo: {costMultiplier.toFixed(2)}
                 </p>
                 <p className="text-muted">
-                  Statistiche: Atk {customizedDesign.attack} · Dif {customizedDesign.defense} · Hull{' '}
+                  Statistiche: Atk {customizedDesign.attack} Â· Dif {customizedDesign.defense} Â· Hull{' '}
                   {customizedDesign.hullPoints}
                 </p>
                 <p>
@@ -344,3 +344,4 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
     </section>
   );
 };
+

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { useGameStore } from '../../store/gameStore';
-import type { OrbitingPlanet, StarSystem } from '../../domain/types';
+import { useGameStore } from '@store/gameStore';
+import type { OrbitingPlanet, StarSystem } from '@domain/types';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -761,3 +761,4 @@ export const GalaxyMap = ({
 
   return <div className="galaxy-map" ref={containerRef} />;
 };
+

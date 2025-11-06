@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useGameStore } from '../../store/gameStore';
-import { resourceLabels } from '../../domain/resourceMetadata';
-import type { ResourceType } from '../../domain/types';
+﻿import { useMemo } from 'react';
+import { useGameStore } from '@store/gameStore';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
+import type { ResourceType } from '@domain/types';
 
 const RESOURCE_DISPLAY_ORDER: ResourceType[] = [
   'energy',
@@ -79,3 +79,4 @@ export const EconomyPanel = () => {
     </section>
   );
 };
+

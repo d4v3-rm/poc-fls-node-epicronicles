@@ -1,4 +1,4 @@
-import type { SimulationClock } from './types';
+﻿import type { SimulationClock } from '@domain/types';
 
 export interface AdvanceClockArgs {
   clock: SimulationClock;
@@ -50,3 +50,4 @@ export const setClockSpeed = (
   ...clock,
   speedMultiplier,
 });
+

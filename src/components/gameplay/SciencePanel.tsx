@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useGameStore } from '../../store/gameStore';
-import type { ScienceShipStatus } from '../../domain/types';
+﻿import { useState } from 'react';
+import { useGameStore } from '@store/gameStore';
+import type { ScienceShipStatus } from '@domain/types';
 
 const statusLabel: Record<ScienceShipStatus, string> = {
   idle: 'In stazione',
@@ -132,3 +132,4 @@ export const SciencePanel = ({ onFocusSystem }: SciencePanelProps) => {
     </section>
   );
 };
+

@@ -1,5 +1,5 @@
-import type { DiplomacyConfig } from '../config/gameConfig';
-import type { Empire, GameNotification, GalaxyState, StarSystem } from './types';
+﻿import type { DiplomacyConfig } from '@config/gameConfig';
+import type { Empire, GameNotification, GalaxyState, StarSystem } from '@domain/types';
 
 const clampOpinion = (value: number) => Math.max(-100, Math.min(100, value));
 
@@ -189,3 +189,5 @@ export const getNextColonizableSystem = (
   );
   return candidates[0] ?? null;
 };
+
+

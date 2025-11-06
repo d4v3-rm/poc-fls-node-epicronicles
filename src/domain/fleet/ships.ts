@@ -1,6 +1,6 @@
-import type { MilitaryConfig } from '../config/gameConfig';
-import type { Fleet, FleetShip, ShipClassId, ShipDesign } from './types';
-import type { ShipCustomization } from './types';
+﻿import type { MilitaryConfig } from '@config/gameConfig';
+import type { Fleet, FleetShip, ShipClassId, ShipDesign } from '@domain/types';
+import type { ShipCustomization } from '@domain/types';
 
 export const getShipDesign = (
   config: MilitaryConfig,
@@ -112,3 +112,5 @@ export const createInitialFleet = (
     ships,
   };
 };
+
+

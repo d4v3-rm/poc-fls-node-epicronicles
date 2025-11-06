@@ -1,8 +1,8 @@
-import type {
+﻿import type {
   DistrictConstructionTask,
   EconomyState,
   Planet,
-} from './types';
+} from '@domain/types';
 import type { EconomyConfig } from './economy';
 
 export const createDistrictConstructionTask = ({
@@ -90,3 +90,4 @@ export const advanceDistrictConstruction = ({
     completed: completedTasks,
   };
 };
+

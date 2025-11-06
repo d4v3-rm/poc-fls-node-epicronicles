@@ -1,24 +1,25 @@
-import type {
+﻿import type {
   GameSession,
   GameNotification,
   CombatResultType,
-} from './types';
-import type { GameConfig } from '../config/gameConfig';
-import { advanceExploration } from './exploration';
-import { advanceEconomy } from './economy';
+  GalaxyState,
+} from '@domain/types';
+import type { GameConfig } from '@config/gameConfig';
+import { advanceExploration } from '@domain/galaxy/exploration';
+import { advanceEconomy } from '@domain/economy/economy';
 import { advanceColonization } from './colonization';
-import { advanceShipyard } from './shipyard';
-import { advanceFleets } from './fleets';
-import { advanceDistrictConstruction } from './districts';
-import { autoBalancePopulation } from './population';
+import { advanceShipyard } from '@domain/fleet/shipyard';
+import { advanceFleets } from '@domain/fleet/fleets';
+import { advanceDistrictConstruction } from '@domain/economy/districts';
+import { autoBalancePopulation } from '@domain/economy/population';
 import {
   advanceDiplomacy,
   applyWarPressureToGalaxy,
   intensifyWarZones,
   assignBordersToPlayer,
-} from './diplomacy';
-import { advanceAiWarMoves, ensureAiFleet, reinforceAiFleets } from './ai';
-import { calculatePlayerFleetPower } from './fleets';
+} from '@domain/diplomacy/diplomacy';
+import { advanceAiWarMoves, ensureAiFleet, reinforceAiFleets } from '@domain/ai/ai';
+import { calculatePlayerFleetPower } from '@domain/fleet/fleets';
 
 const assignAiExpansion = (
   galaxy: GalaxyState,
@@ -255,3 +256,7 @@ export const advanceSimulation = (
 
   return updatedSession;
 };
+
+
+
+

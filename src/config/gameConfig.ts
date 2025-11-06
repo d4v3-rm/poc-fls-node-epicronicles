@@ -1,10 +1,10 @@
-import type { GalaxyGenerationParams } from '../domain/galaxy';
-import type { EconomyConfig } from '../domain/economy';
+import type { GalaxyGenerationParams } from '@domain/galaxy/galaxy';
+import type { EconomyConfig } from '@domain/economy/economy';
 import type {
   ResourceCost,
   ShipDesign,
   ShipClassId,
-} from '../domain/types';
+} from '@domain/types';
 
 export interface ColonizationConfig {
   cost: ResourceCost;

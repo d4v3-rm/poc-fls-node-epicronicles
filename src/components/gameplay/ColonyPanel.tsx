@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
-import { useGameStore, type ColonizationError } from '../../store/gameStore';
-import { resourceLabels } from '../../domain/resourceMetadata';
+﻿import { useMemo, useState } from 'react';
+import { useGameStore, type ColonizationError } from '@store/gameStore';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
 import type {
   ColonizationStatus,
   ColonizationTask,
-} from '../../domain/types';
+} from '@domain/types';
 
 const colonizationErrors: Record<ColonizationError, string> = {
   NO_SESSION: 'Nessuna sessione.',
@@ -245,7 +245,7 @@ export const ColonyPanel = ({
                         </button>
                       </div>
                     </td>
-                    <td>{habitable ? habitable.kind : '—'}</td>
+                    <td>{habitable ? habitable.kind : 'â€”'}</td>
                     <td>
                       {colonized
                         ? 'Colonia attiva'
@@ -273,3 +273,4 @@ export const ColonyPanel = ({
     </section>
   );
 };
+

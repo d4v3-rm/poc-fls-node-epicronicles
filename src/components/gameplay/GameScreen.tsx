@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useGameStore } from '../../store/gameStore';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useGameStore } from '@store/gameStore';
 import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
 import { GalaxyMap } from './GalaxyMap';
@@ -14,12 +14,12 @@ import { DistrictQueuePanel } from './DistrictQueuePanel';
 import { HudTopBar } from './HudTopBar';
 import { HudBottomBar } from './HudBottomBar';
 import { DraggablePanel } from '../ui/DraggablePanel';
-import { resourceLabels } from '../../domain/resourceMetadata';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
 import {
   RESOURCE_TYPES,
   computePlanetProduction,
-} from '../../domain/economy';
-import type { StarSystem, PopulationJobId } from '../../domain/types';
+} from '@domain/economy/economy';
+import type { StarSystem, PopulationJobId } from '@domain/types';
 import { DiplomacyPanel } from './DiplomacyPanel';
 
 const WAR_SEEN_KEY = 'warSeen';
@@ -519,7 +519,7 @@ export const GameScreen = () => {
                 {selectedPlanet.population.researchers} ricercatori
               </p>
               <p>
-                Stabilità: {Math.round(selectedPlanet.stability)} / Felicità:{' '}
+                StabilitÃ : {Math.round(selectedPlanet.stability)} / FelicitÃ :{' '}
                 {Math.round(selectedPlanet.happiness)}
               </p>
               <p>Tipo stella: {selectedPlanetSystem.starClass}</p>
@@ -564,7 +564,7 @@ export const GameScreen = () => {
                 <h4>Ruoli popolazione</h4>
                 {automationConfig?.enabled ? (
                   <p className="text-muted">
-                    Bilanciamento automatico attivo (priorità:{' '}
+                    Bilanciamento automatico attivo (prioritÃ :{' '}
                     {automationConfig.priorities.join(' > ')})
                   </p>
                 ) : null}
@@ -679,3 +679,4 @@ export const GameScreen = () => {
     </div>
   );
 };
+

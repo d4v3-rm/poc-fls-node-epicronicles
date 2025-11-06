@@ -1,5 +1,5 @@
-import type { GalaxyState, ScienceShip, SystemVisibility } from './types';
-import type { GameConfig } from '../config/gameConfig';
+﻿import type { GalaxyState, ScienceShip, SystemVisibility } from '@domain/types';
+import type { GameConfig } from '@config/gameConfig';
 
 const visibilityRank: Record<SystemVisibility, number> = {
   unknown: 0,
@@ -148,3 +148,5 @@ export const advanceExploration = (
     scienceShips: updatedShips,
   };
 };
+
+

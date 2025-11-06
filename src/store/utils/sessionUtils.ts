@@ -7,7 +7,7 @@ import type {
   WarEvent,
   WarEventType,
   Planet,
-} from '../../domain/types';
+} from '@domain/types';
 
 export const appendNotification = (
   session: GameSession,

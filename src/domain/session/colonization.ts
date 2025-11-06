@@ -1,11 +1,11 @@
-import type { ColonizationConfig } from '../config/gameConfig';
+﻿import type { ColonizationConfig } from '@config/gameConfig';
 import type {
   ColonizationTask,
   ColonizationStatus,
   EconomyState,
   Planet,
   StarSystem,
-} from './types';
+} from '@domain/types';
 
 type StageDurations = Record<ColonizationStatus, number>;
 
@@ -179,3 +179,5 @@ export const advanceColonization = (
     completed: completedEntries,
   };
 };
+
+
