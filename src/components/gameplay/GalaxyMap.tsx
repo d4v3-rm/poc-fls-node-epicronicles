@@ -2,6 +2,16 @@
 import * as THREE from 'three';
 import { useGameStore } from '@store/gameStore';
 import type { OrbitingPlanet, StarSystem } from '@domain/types';
+import {
+  materialCache,
+  scienceMaterials,
+  scienceLineMaterials,
+  fleetMaterials,
+  hostileIndicatorMaterial,
+  combatIndicatorMaterial,
+  battleIconMaterial,
+  ownerMaterials,
+} from '@three/materials';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
