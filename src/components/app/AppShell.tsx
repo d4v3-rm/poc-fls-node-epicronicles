@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import '../../index.css';
-import { GameScreen } from '../gameplay/GameScreen';
+import { GameScreen } from '@components/gameplay/GameScreen';
 import { MainMenu } from '../menu/MainMenu';
-import { useGameStore } from '../../store/gameStore';
+import { useGameStore } from '@store/gameStore';
 
 export const AppShell = () => {
   const view = useGameStore((state) => state.view);
