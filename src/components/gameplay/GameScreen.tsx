@@ -3,24 +3,15 @@ import { useGameStore } from '@store/gameStore';
 import { DebugConsole } from '../debug/DebugConsole';
 import { useGameLoop } from '../../utils/useGameLoop';
 import { MapLayer } from './MapLayer';
-import { ColonyPanel } from './ColonyPanel';
-import { ShipyardPanel } from './ShipyardPanel';
-import { FleetAndCombatPanel } from './FleetAndCombatPanel';
-import { SciencePanel } from './SciencePanel';
-import { SystemPanel } from './SystemPanel';
-import { GalaxyOverview } from './GalaxyOverview';
-import { EconomyPanel } from './EconomyPanel';
-import { DistrictQueuePanel } from './DistrictQueuePanel';
 import { HudTopBar } from './HudTopBar';
 import { HudBottomBar } from './HudBottomBar';
-import { DraggablePanel } from '../ui/DraggablePanel';
 import { resourceLabels } from '@domain/shared/resourceMetadata';
 import {
   RESOURCE_TYPES,
   computePlanetProduction,
 } from '@domain/economy/economy';
 import type { StarSystem, PopulationJobId } from '@domain/types';
-import { DiplomacyPanel } from './DiplomacyPanel';
+import { MapPanels } from './MapPanels';
 
 const WAR_SEEN_KEY = 'warSeen';
 
@@ -366,116 +357,48 @@ export const GameScreen = () => {
         warUnread={warUnread}
       />
       <div className="floating-panels">
-        <DraggablePanel
-          title="Colonie"
-          initialX={12}
-          initialY={80}
-          initialHeight={320}
-          initialWidth={320}
-        >
-          <ColonyPanel
-            onSelectPlanet={(planetId, systemId) => {
-              setFocusSystemId(systemId);
-              setSelectedPlanetId(planetId);
-              setShipyardSystemId(null);
-              setFocusPlanetId(planetId);
-            }}
-            onFocusSystem={(systemId) => {
-              setFocusSystemId(systemId);
-              setFocusPlanetId(null);
-            }}
-          />
-        </DraggablePanel>
-        <DraggablePanel
-          title="Panoramica galassia"
-          initialX={12}
-          initialY={340}
-          initialWidth={360}
-          initialHeight={280}
-        >
-          <GalaxyOverview
-            onFocusSystem={(systemId) => {
-              setFocusSystemId(systemId);
-              setFocusPlanetId(null);
-            }}
-          />
-        </DraggablePanel>
-        <DraggablePanel
-          title="Bilancio economico"
-          initialX={12}
-          initialY={640}
-          initialWidth={320}
-          initialHeight={260}
-        >
-          <EconomyPanel />
-        </DraggablePanel>
-        <DraggablePanel
-          title="Coda distretti"
-          initialX={Math.max(12, viewportWidth - 360)}
-          initialY={520}
-          initialWidth={320}
-          initialHeight={260}
-        >
-          <DistrictQueuePanel />
-        </DraggablePanel>
-        <DraggablePanel
-          title="Navi scientifiche"
-          initialX={Math.max(12, viewportWidth - 360)}
-          initialY={80}
-          initialWidth={320}
-          initialHeight={260}
-        >
-          <SciencePanel
-            onFocusSystem={(systemId) => {
-              setFocusSystemId(systemId);
-              setFocusPlanetId(null);
-            }}
-          />
-        </DraggablePanel>
-        {focusSystemId ? (
-          <DraggablePanel
-            title="Dettagli sistema"
-            initialX={Math.max(12, viewportWidth - 340)}
-            initialY={100}
-            onClose={clearFocusTargets}
-          >
-            <SystemPanel
-              systemId={focusSystemId}
-              onFocusPlanet={(planetId) => setFocusPlanetId(planetId)}
-            />
-          </DraggablePanel>
-        ) : null}
-        <DraggablePanel
-          title="Flotte & Battaglie"
-          initialX={Math.max(12, viewportWidth - 320)}
-          initialY={320}
-        >
-          <FleetAndCombatPanel
-            warEventsRef={warEventsRef}
-            unreadWarIds={unreadWarIds}
-            onMarkWarRead={() => {
-              if (!session?.warEvents?.length) {
-                setWarUnread(0);
-                return;
-              }
-              setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
+        <MapPanels
+          focusSystemId={focusSystemId}
+          focusPlanetId={focusPlanetId}
+          viewportWidth={viewportWidth}
+          viewportHeight={viewportHeight}
+          warEventsRef={warEventsRef}
+          unreadWarIds={unreadWarIds}
+          onMarkWarRead={() => {
+            if (!session?.warEvents?.length) {
               setWarUnread(0);
-              saveWarSeen(
-                session.id,
-                session.warEvents.at(-1)?.id ?? null,
-              );
-            }}
-          />
-        </DraggablePanel>
-        <DraggablePanel
-          title="Diplomazia"
-          initialX={Math.max(12, viewportWidth - 640)}
-          initialY={360}
-          initialWidth={300}
-          initialHeight={220}
-        >
-          <DiplomacyPanel />
-        </DraggablePanel>
+              return;
+            }
+            setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
+            setWarUnread(0);
+            saveWarSeen(
+              session.id,
+              session.warEvents.at(-1)?.id ?? null,
+            );
+          }}
+          onSelectPlanet={(planetId, systemId) => {
+            setFocusSystemId(systemId);
+            setSelectedPlanetId(planetId);
+            setShipyardSystemId(null);
+            setFocusPlanetId(planetId);
+          }}
+          onFocusSystem={(systemId) => {
+            setFocusSystemId(systemId);
+            setFocusPlanetId(null);
+          }}
+          onClearFocusTargets={clearFocusTargets}
+          shipyardSystem={shipyardSystem}
+          selectedPlanet={
+            selectedPlanet
+              ? { id: selectedPlanet.id, name: selectedPlanet.name }
+              : null
+          }
+          selectedPlanetSystem={selectedPlanetSystem}
+          closeShipyard={closeShipyardPanel}
+          closePlanet={closePlanetPanel}
+          setFocusSystemId={setFocusSystemId}
+          setFocusPlanetId={setFocusPlanetId}
+        />
         {debugOpen ? (
           <div className="debug-modal">
             <div className="debug-modal__header">
@@ -491,16 +414,6 @@ export const GameScreen = () => {
               <DebugConsole />
             </div>
           </div>
-        ) : null}
-        {shipyardSystem ? (
-          <DraggablePanel
-            title={`Cantieri - ${shipyardSystem.name}`}
-            initialX={viewportWidth / 2 - 180}
-            initialY={viewportHeight / 2 - 200}
-            onClose={closeShipyardPanel}
-          >
-            <ShipyardPanel system={shipyardSystem} />
-          </DraggablePanel>
         ) : null}
         {selectedPlanet && selectedPlanetSystem ? (
           <DraggablePanel
