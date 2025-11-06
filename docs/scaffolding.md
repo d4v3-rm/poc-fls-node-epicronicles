@@ -10,6 +10,15 @@ Questa è la struttura attuale del codice dopo il refactor dello store e delle c
 - `src/store/hooks.ts`: hook `useGameStore` (API invariata), `useAppDispatch`, `useAppSelector`.
 - `src/store/gameStore.ts`: shim di compatibilità che re-esporta `store` e `useGameStore` (per non toccare gli import dei componenti).
 
+## Alias (import puliti)
+- Configurati in `tsconfig.app.json` e `vite.config.ts`:
+  - `@store/*` → `src/store/*`
+  - `@domain/*` → `src/domain/*`
+  - `@components/*` → `src/components/*`
+  - `@config/*` → `src/config/*`
+  - `@assets/*` → `src/assets/*`
+Usali per evitare percorsi relativi annidati.
+
 ## Dominio (logica pura)
 - `src/domain/` contiene funzioni pure per galassia, economia, colonizzazione, distretti, flotte/combattimento, diplomazia, IA, ecc.
 - Config di bilanciamento in `src/config/gameConfig.ts`.
