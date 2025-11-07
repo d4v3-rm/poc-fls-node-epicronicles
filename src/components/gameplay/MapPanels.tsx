@@ -1,13 +1,13 @@
 import { DraggablePanel } from '@components/ui/DraggablePanel';
-import { ColonyPanel } from './ColonyPanel';
-import { GalaxyOverview } from './GalaxyOverview';
-import { EconomyPanel } from './EconomyPanel';
-import { DistrictQueuePanel } from './DistrictQueuePanel';
-import { SciencePanel } from './SciencePanel';
-import { SystemPanel } from './SystemPanel';
-import { FleetAndCombatPanel } from './FleetAndCombatPanel';
-import { DiplomacyPanel } from './DiplomacyPanel';
-import { ShipyardPanel } from './ShipyardPanel';
+import { ColonyPanel } from './panels/ColonyPanel';
+import { GalaxyOverview } from './panels/GalaxyOverview';
+import { EconomyPanel } from './panels/EconomyPanel';
+import { DistrictQueuePanel } from './panels/DistrictQueuePanel';
+import { SciencePanel } from './panels/SciencePanel';
+import { SystemPanel } from './panels/SystemPanel';
+import { FleetAndCombatPanel } from './panels/FleetAndCombatPanel';
+import { DiplomacyPanel } from './panels/DiplomacyPanel';
+import { ShipyardPanel } from './panels/ShipyardPanel';
 import type { StarSystem } from '@domain/types';
 
 interface MapPanelsProps {

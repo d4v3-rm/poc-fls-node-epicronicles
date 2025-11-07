@@ -44,7 +44,7 @@ Configurati in `tsconfig.app.json` e `vite.config.ts`:
 
 ## UI (React)
 - Componenti sotto `src/components/`, organizzati per area:
-  - `gameplay/` (HUD, mappa, pannelli nave/pianeta/flotta/diplomazia, ecc.).
+  - `gameplay/` (HUD, mappa); pannelli di gioco in `gameplay/panels/` (colonie, economia, cantieri, flotte/combattimento, diplomazia, sistema).
   - `app/` (AppShell, MainMenu).
   - `ui/` (elementi riutilizzabili).
 - Barrel utili: `src/components/gameplay/index.ts`, `src/components/ui/index.ts`.

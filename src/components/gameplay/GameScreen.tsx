@@ -8,7 +8,7 @@ import { HudBottomBar } from './HudBottomBar';
 import { HudTopBar } from './HudTopBar';
 import { MapLayer } from './MapLayer';
 import { MapPanels } from './MapPanels';
-import { PlanetDetail } from './PlanetDetail';
+import { PlanetDetail } from './panels/PlanetDetail';
 import { useWarEvents } from './hooks/useWarEvents';
 
 export const GameScreen = () => {
