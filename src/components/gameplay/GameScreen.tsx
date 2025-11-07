@@ -1,49 +1,15 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { PopulationJobId, StarSystem } from '@domain/types';
 import { useGameStore } from '@store/gameStore';
-import { DebugConsole } from '../debug/DebugConsole';
+import { DraggablePanel } from '@components/ui/DraggablePanel';
 import { useGameLoop } from '../../utils/useGameLoop';
-import { MapLayer } from './MapLayer';
-import { HudTopBar } from './HudTopBar';
+import { DebugConsole } from '../debug/DebugConsole';
 import { HudBottomBar } from './HudBottomBar';
-import type { StarSystem, PopulationJobId } from '@domain/types';
+import { HudTopBar } from './HudTopBar';
+import { MapLayer } from './MapLayer';
 import { MapPanels } from './MapPanels';
 import { PlanetDetail } from './PlanetDetail';
-
-const WAR_SEEN_KEY = 'warSeen';
-
-const loadWarSeen = (sessionId: string): string | null => {
-  if (typeof localStorage === 'undefined') {
-    return null;
-  }
-  try {
-    const raw = localStorage.getItem(WAR_SEEN_KEY);
-    if (!raw) {
-      return null;
-    }
-    const parsed = JSON.parse(raw) as Record<string, string>;
-    return parsed[sessionId] ?? null;
-  } catch {
-    return null;
-  }
-};
-
-const saveWarSeen = (sessionId: string, eventId: string | null) => {
-  if (typeof localStorage === 'undefined') {
-    return;
-  }
-  try {
-    const raw = localStorage.getItem(WAR_SEEN_KEY);
-    const parsed = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-    if (eventId) {
-      parsed[sessionId] = eventId;
-    } else {
-      delete parsed[sessionId];
-    }
-    localStorage.setItem(WAR_SEEN_KEY, JSON.stringify(parsed));
-  } catch {
-    /* ignore */
-  }
-};
+import { useWarEvents } from './hooks/useWarEvents';
 
 export const GameScreen = () => {
   useGameLoop();
@@ -63,24 +29,11 @@ export const GameScreen = () => {
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLDivElement | null>(null);
-  const [warUnread, setWarUnread] = useState(0);
-  const [lastSeenWarId, setLastSeenWarId] = useState<string | null>(null);
-  const unreadWarIds = useMemo(() => {
-    if (!session) {
-      return new Set<string>();
-    }
-    if (!lastSeenWarId) {
-      return new Set(session.warEvents.map((event) => event.id));
-    }
-    const markerIndex = session.warEvents.findIndex(
-      (event) => event.id === lastSeenWarId,
-    );
-    const slice =
-      markerIndex >= 0
-        ? session.warEvents.slice(markerIndex + 1)
-        : session.warEvents;
-    return new Set(slice.map((event) => event.id));
-  }, [session, lastSeenWarId]);
+  const {
+    warUnread,
+    unreadWarIds,
+    markWarsRead,
+  } = useWarEvents(session ?? null);
 
   const clearFocusTargets = () => {
     setFocusSystemId(null);
@@ -106,7 +59,6 @@ export const GameScreen = () => {
     if (!sessionId) {
       return;
     }
-
     setSimulationRunning(true, Date.now());
   }, [sessionId, setSimulationRunning]);
 
@@ -129,49 +81,19 @@ export const GameScreen = () => {
     focusedSessionRef.current = session.id;
   }, [session, setFocusPlanetId, setFocusSystemId]);
 
-  useEffect(() => {
-    if (!session) {
-      setWarUnread(0);
-      setLastSeenWarId(null);
-      return;
-    }
-    const storedSeen = loadWarSeen(session.id);
-    setLastSeenWarId(storedSeen);
-    if (session.warEvents.length === 0) {
-      setWarUnread(0);
-      return;
-    }
-    if (!storedSeen) {
-      setWarUnread(session.warEvents.length);
-      return;
-    }
-    const markerIndex = session.warEvents.findIndex(
-      (event) => event.id === storedSeen,
+  if (!session) {
+    return (
+      <div className="game-layout">
+        <HudTopBar />
+        <div className="floating-panels">
+          <p className="text-muted">Nessuna sessione attiva.</p>
+          <button className="panel__action" onClick={returnToMenu}>
+            Torna al menu
+          </button>
+        </div>
+      </div>
     );
-    const unseen =
-      markerIndex >= 0
-        ? session.warEvents.length - markerIndex - 1
-        : session.warEvents.length;
-    setWarUnread(unseen);
-  }, [session?.id]);
-
-  useEffect(() => {
-    if (!session) {
-      return;
-    }
-    if (!lastSeenWarId) {
-      setWarUnread(session.warEvents.length);
-      return;
-    }
-    const markerIndex = session.warEvents.findIndex(
-      (event) => event.id === lastSeenWarId,
-    );
-    const unseen =
-      markerIndex >= 0
-        ? Math.max(0, session.warEvents.length - markerIndex - 1)
-        : session.warEvents.length;
-    setWarUnread(unseen);
-  }, [session?.warEvents.length, session?.id, lastSeenWarId]);
+  }
 
   const viewportWidth =
     typeof window !== 'undefined' ? window.innerWidth : 1200;
@@ -279,7 +201,7 @@ export const GameScreen = () => {
         focusSystemId={focusSystemId}
         focusPlanetId={focusPlanetId}
         mapMessage={mapMessage}
-        onSelectSystem={(systemId, _anchor) => {
+        onSelectSystem={(systemId) => {
           const targetSystem = systems.find(
             (entry) => entry.id === systemId,
           );
@@ -309,14 +231,7 @@ export const GameScreen = () => {
           if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-          if (session?.warEvents?.length) {
-            setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
-            setWarUnread(0);
-            saveWarSeen(
-              session.id,
-              session.warEvents.at(-1)?.id ?? null,
-            );
-          }
+          markWarsRead();
         }}
         warUnread={warUnread}
       />
@@ -328,18 +243,7 @@ export const GameScreen = () => {
           viewportHeight={viewportHeight}
           warEventsRef={warEventsRef}
           unreadWarIds={unreadWarIds}
-          onMarkWarRead={() => {
-            if (!session?.warEvents?.length) {
-              setWarUnread(0);
-              return;
-            }
-            setLastSeenWarId(session.warEvents.at(-1)?.id ?? null);
-            setWarUnread(0);
-            saveWarSeen(
-              session.id,
-              session.warEvents.at(-1)?.id ?? null,
-            );
-          }}
+          onMarkWarRead={markWarsRead}
           onSelectPlanet={(planetId, systemId) => {
             setFocusSystemId(systemId);
             setSelectedPlanetId(planetId);
@@ -381,7 +285,7 @@ export const GameScreen = () => {
         ) : null}
         {selectedPlanet && selectedPlanetSystem ? (
           <DraggablePanel
-            title={${selectedPlanet.name} ()}
+            title={`${selectedPlanet.name} (${selectedPlanetSystem.name})`}
             initialX={viewportWidth / 2 - 180}
             initialY={viewportHeight / 2 - 140}
             onClose={closePlanetPanel}
@@ -401,123 +305,7 @@ export const GameScreen = () => {
             />
           </DraggablePanel>
         ) : null}
-              <div className="planet-population">
-                <h4>Ruoli popolazione</h4>
-                {automationConfig?.enabled ? (
-                  <p className="text-muted">
-                    Bilanciamento automatico attivo (prioritÃ :{' '}
-                    {automationConfig.priorities.join(' > ')})
-                  </p>
-                ) : null}
-                {populationMessage ? (
-                  <p className="panel-message">{populationMessage}</p>
-                ) : null}
-                <ul>
-                  {populationJobs.map((job) => {
-                    const assigned =
-                      selectedPlanet.population[
-                        job.id as keyof typeof selectedPlanet.population
-                      ] ?? 0;
-                    return (
-                      <li key={job.id}>
-                        <div className="population-job__meta">
-                          <div>
-                            <strong>{job.label}</strong>
-                            <span className="text-muted">
-                              {job.description}
-                            </span>
-                          </div>
-                          <span>Pop assegnati: {assigned}</span>
-                          <span>Produzione: {formatCost(job.production)}</span>
-                          <span>Upkeep: {formatCost(job.upkeep)}</span>
-                        </div>
-                        <div className="population-job__actions">
-                          <button
-                            className="panel__action panel__action--compact"
-                            onClick={() => handlePromotePopulation(job.id)}
-                          >
-                            Promuovi
-                          </button>
-                          {job.id !== 'workers' ? (
-                            <button
-                              className="panel__action panel__action--compact"
-                              onClick={() => handleDemotePopulation(job.id)}
-                            >
-                              Declassa
-                            </button>
-                          ) : null}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              {districtMessage ? (
-                <p className="panel-message">{districtMessage}</p>
-              ) : null}
-              <div className="planet-districts">
-                <h4>Distretti</h4>
-                <ul>
-                  {districtDefinitions.map((definition) => {
-                    const owned =
-                      selectedPlanet.districts[definition.id] ?? 0;
-                    return (
-                      <li key={definition.id}>
-                        <div>
-                          <strong>{definition.label}</strong>
-                          <span className="text-muted">
-                            {definition.description}
-                          </span>
-                        </div>
-                        <div className="planet-district__meta">
-                          <span>Costruiti: {owned}</span>
-                          <span>Costo: {formatCost(definition.cost)}</span>
-                          <span>
-                            Produzione: {formatCost(definition.production)}
-                          </span>
-                          <button
-                            className="panel__action panel__action--compact"
-                            onClick={() => handleQueueDistrict(definition.id)}
-                          >
-                            Costruisci
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              <div className="planet-districts">
-                <h4>Coda costruzione</h4>
-                {planetDistrictQueue.length === 0 ? (
-                  <p className="text-muted">Nessun distretto in costruzione.</p>
-                ) : (
-                  <ul>
-                    {planetDistrictQueue.map((task) => (
-                      <li key={task.id}>
-                        <div className="district-queue__header">
-                          <strong>{task.label}</strong>
-                          <span className="text-muted">
-                            Tick rimanenti: {task.ticksRemaining}/
-                            {task.totalTicks}
-                          </span>
-                        </div>
-                        <div className="progress-bar">
-                          <div
-                            className="progress-bar__fill"
-                            style={{ width: `${Math.round(task.progress * 100)}%` }}
-                          />
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </DraggablePanel>
-        ) : null}
       </div>
     </div>
   );
 };
-
