@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
-import { useGameStore } from '@store/gameStore';
+import { useAppSelector, useGameStore } from '@store/gameStore';
 import type { ScienceShipStatus } from '@domain/types';
+import { selectScienceShips, selectSystems } from '@store/selectors';
 
 const statusLabel: Record<ScienceShipStatus, string> = {
   idle: 'In stazione',
@@ -21,8 +22,8 @@ interface SciencePanelProps {
 
 export const SciencePanel = ({ onFocusSystem }: SciencePanelProps) => {
   const session = useGameStore((state) => state.session);
-  const ships = session?.scienceShips ?? [];
-  const systems = session?.galaxy.systems ?? [];
+  const ships = useAppSelector(selectScienceShips);
+  const systems = useAppSelector(selectSystems);
   const orderScienceShip = useGameStore((state) => state.orderScienceShip);
   const setScienceAutoExplore = useGameStore(
     (state) => state.setScienceAutoExplore,
