@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
-import { useGameStore } from '../../store/gameStore';
+import { useAppSelector } from '@store/gameStore';
+import { selectPlanets } from '@store/selectors';
+import { selectSystemsMap } from '@store/selectors';
 
 const visibilityLabel = {
   unknown: 'Sconosciuto',
@@ -16,25 +18,26 @@ export const SystemPanel = ({
   systemId,
   onFocusPlanet,
 }: SystemPanelProps) => {
-  const session = useGameStore((state) => state.session);
+  const systems = useAppSelector(selectSystemsMap);
+  const planets = useAppSelector(selectPlanets);
 
   const system = useMemo(() => {
-    if (!systemId || !session) {
+    if (!systemId) {
       return null;
     }
-    return session.galaxy.systems.find((entry) => entry.id === systemId) ?? null;
-  }, [session, systemId]);
+    return systems.get(systemId) ?? null;
+  }, [systems, systemId]);
 
   const colonizedPlanets = useMemo(() => {
-    if (!session) {
+    if (!systemId) {
       return new Set<string>();
     }
     return new Set(
-      session.economy.planets
+      planets
         .filter((planet) => planet.systemId === systemId)
         .map((planet) => planet.id),
     );
-  }, [session, systemId]);
+  }, [planets, systemId]);
 
   if (!system) {
     return <p className="text-muted">Seleziona un sistema sulla mappa.</p>;
