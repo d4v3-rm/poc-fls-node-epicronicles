@@ -263,8 +263,14 @@ export const advanceSimulation = (
         });
       });
     }
+    let pendingQueue = updatedSession.events.queue;
+    let activeEvent = updatedSession.events.active;
+    if (!activeEvent && pendingQueue.length > 0) {
+      activeEvent = pendingQueue[0];
+      pendingQueue = pendingQueue.slice(1);
+    }
     const spawnedEvent =
-      updatedSession.events.active === null
+      activeEvent === null
         ? maybeSpawnEvent({
             session: updatedSession,
             config: config.events,
@@ -283,7 +289,7 @@ export const advanceSimulation = (
     if (eventNotification) {
       iterationNotifications.push(eventNotification);
     }
-    const activeEvent = spawnedEvent ?? updatedSession.events.active;
+    activeEvent = activeEvent ?? spawnedEvent ?? null;
 
     updatedSession = {
       ...updatedSession,
@@ -294,6 +300,7 @@ export const advanceSimulation = (
       traditions,
       events: {
         active: activeEvent,
+        queue: pendingQueue,
         log: updatedSession.events.log,
       },
       warEvents: iterationWarEvents.slice(

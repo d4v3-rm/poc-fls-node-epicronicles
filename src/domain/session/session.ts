@@ -119,6 +119,7 @@ export const createSession = ({
     traditions: createInitialTraditions(traditionConfig),
     events: {
       active: null,
+      queue: [],
       log: [],
     },
     warEvents: [],

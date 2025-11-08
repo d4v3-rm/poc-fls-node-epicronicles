@@ -6,7 +6,7 @@ import type {
   GameSession,
   ResourceType,
 } from '@domain/types';
-import type { EventsConfig } from '@config/gameConfig';
+import type { EventsConfig, EventDefinition } from '@config/gameConfig';
 import { canAffordCost, spendResources } from '@domain/economy/economy';
 
 export interface EventState {
@@ -25,35 +25,39 @@ const resourceLabels: Record<ResourceType, string> = {
 const applyEffect = (
   session: GameSession,
   effect: EventOptionEffect,
+  config: EventsConfig,
   fallbackSystemId?: string | null,
-): GameSession => {
+): { session: GameSession; queuedEvent: GameEvent | null } => {
   switch (effect.kind) {
     case 'resource': {
       if (!effect.target) {
-        return session;
+        return { session, queuedEvent: null };
       }
       const delta = effect.amount ?? 0;
       if (delta === 0) {
-        return session;
+        return { session, queuedEvent: null };
       }
       const resources = { ...session.economy.resources };
       const ledger = resources[effect.target];
       if (!ledger) {
-        return session;
+        return { session, queuedEvent: null };
       }
       resources[effect.target] = {
         ...ledger,
         amount: Math.max(0, ledger.amount + delta),
       };
       return {
-        ...session,
-        economy: { ...session.economy, resources },
+        session: {
+          ...session,
+          economy: { ...session.economy, resources },
+        },
+        queuedEvent: null,
       };
     }
     case 'influence': {
       const delta = effect.amount ?? 0;
       if (delta === 0) {
-        return session;
+        return { session, queuedEvent: null };
       }
       const resources = { ...session.economy.resources };
       const ledger = resources.influence;
@@ -62,37 +66,53 @@ const applyEffect = (
         amount: Math.max(0, (ledger?.amount ?? 0) + delta),
       };
       return {
-        ...session,
-        economy: { ...session.economy, resources },
+        session: {
+          ...session,
+          economy: { ...session.economy, resources },
+        },
+        queuedEvent: null,
       };
     }
     case 'hostileSpawn': {
       const targetSystemId = effect.systemId ?? fallbackSystemId;
       const delta = effect.amount ?? 0;
       if (!targetSystemId || delta === 0) {
-        return session;
+        return { session, queuedEvent: null };
       }
       const systems = session.galaxy.systems.map((system) =>
         system.id === targetSystemId
           ? { ...system, hostilePower: Math.max(0, (system.hostilePower ?? 0) + delta) }
           : system,
       );
-      return { ...session, galaxy: { ...session.galaxy, systems } };
+      return {
+        session: { ...session, galaxy: { ...session.galaxy, systems } },
+        queuedEvent: null,
+      };
     }
     case 'stability': {
       const delta = effect.amount ?? 0;
       if (delta === 0) {
-        return session;
+        return { session, queuedEvent: null };
       }
       const planets = session.economy.planets.map((planet) => ({
         ...planet,
         stability: Math.max(20, Math.min(95, planet.stability + delta)),
       }));
-      return { ...session, economy: { ...session.economy, planets } };
+      return {
+        session: { ...session, economy: { ...session.economy, planets } },
+        queuedEvent: null,
+      };
+    }
+    case 'triggerEvent': {
+      if (!effect.nextEventId) {
+        return { session, queuedEvent: null };
+      }
+      const next = instantiateEventById(config, effect.nextEventId, fallbackSystemId ?? undefined);
+      return { session, queuedEvent: next };
     }
     case 'insight':
     default:
-      return session;
+      return { session, queuedEvent: null };
   }
 };
 
@@ -101,15 +121,27 @@ export const resolveEvent = ({
   option,
   activeEvent,
   tick,
+  config,
 }: {
   session: GameSession;
   option: EventOption;
   activeEvent: GameEvent;
   tick: number;
-}): { session: GameSession; logEntry: EventLogEntry } => {
+  config: EventsConfig;
+}): { session: GameSession; logEntry: EventLogEntry; queued: GameEvent[] } => {
   let updatedSession = session;
+  const queued: GameEvent[] = [];
   option.effects.forEach((effect) => {
-    updatedSession = applyEffect(updatedSession, effect, activeEvent.systemId);
+    const { session: nextSession, queuedEvent } = applyEffect(
+      updatedSession,
+      effect,
+      config,
+      activeEvent.systemId,
+    );
+    updatedSession = nextSession;
+    if (queuedEvent) {
+      queued.push(queuedEvent);
+    }
   });
 
   const logEntry: EventLogEntry = {
@@ -118,7 +150,7 @@ export const resolveEvent = ({
     title: activeEvent.title,
     result: option.label,
   };
-  return { session: updatedSession, logEntry };
+  return { session: updatedSession, logEntry, queued };
 };
 
 export const canAffordOption = (
@@ -160,16 +192,32 @@ export const applyOptionCost = (
 const pick = <T>(items: T[]): T | null =>
   items.length === 0 ? null : items[Math.floor(Math.random() * items.length)];
 
+const instantiateEvent = (def: EventDefinition, systemId?: string): GameEvent => ({
+  ...def,
+  id: `${def.id}-${crypto.randomUUID()}`,
+  systemId: systemId ?? null,
+  resolvedOptionId: null,
+});
+
+const instantiateEventById = (
+  config: EventsConfig,
+  id: string,
+  systemId?: string,
+): GameEvent | null => {
+  const source =
+    config.narrative.find((e) => e.id === id) ??
+    config.anomalies.find((e) => e.id === id) ??
+    config.crisis.find((e) => e.id === id);
+  return source ? instantiateEvent(source, systemId) : null;
+};
+
 const createNarrativeEvent = (config: EventsConfig): GameEvent | null => {
   const definitions = config.narrative;
   const def = pick(definitions);
   if (!def) {
     return null;
   }
-  return {
-    ...def,
-    id: `evt-${def.id}-${crypto.randomUUID()}`,
-  };
+  return instantiateEvent(def);
 };
 
 const createAnomalyEvent = (config: EventsConfig, systemId: string): GameEvent | null => {
@@ -177,11 +225,7 @@ const createAnomalyEvent = (config: EventsConfig, systemId: string): GameEvent |
   if (!def) {
     return null;
   }
-  return {
-    ...def,
-    id: `anomaly-${def.id}-${crypto.randomUUID()}`,
-    systemId,
-  };
+  return instantiateEvent(def, systemId);
 };
 
 const createCrisisEvent = (config: EventsConfig, systemId: string): GameEvent | null => {
@@ -189,11 +233,7 @@ const createCrisisEvent = (config: EventsConfig, systemId: string): GameEvent | 
   if (!def) {
     return null;
   }
-  return {
-    ...def,
-    id: `crisis-${def.id}-${crypto.randomUUID()}`,
-    systemId,
-  };
+  return instantiateEvent(def, systemId);
 };
 
 export const maybeSpawnEvent = ({

@@ -21,17 +21,19 @@ export const resolveActiveEvent =
       return { success: false, reason: 'INSUFFICIENT_RESOURCES' };
     }
     const economyAfterCost = applyOptionCost(session, option);
-    const { session: resolvedSession, logEntry } = resolveEvent({
+    const { session: resolvedSession, logEntry, queued } = resolveEvent({
       session: { ...session, economy: economyAfterCost },
       option,
       activeEvent: active,
       tick: session.clock.tick,
+      config: state.config.events,
     });
     dispatch(
       setSessionState({
         ...resolvedSession,
         events: {
           active: null,
+          queue: [...resolvedSession.events.queue, ...queued],
           log: [...resolvedSession.events.log, logEntry].slice(-20),
         },
         notifications: [

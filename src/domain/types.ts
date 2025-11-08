@@ -136,10 +136,12 @@ export interface EventOptionEffect {
     | 'stability'
     | 'hostileSpawn'
     | 'insight'
-    | 'influence';
+    | 'influence'
+    | 'triggerEvent';
   target?: ResourceType;
   amount?: number;
   systemId?: string;
+  nextEventId?: string;
 }
 
 export interface EventOption {
@@ -375,6 +377,7 @@ export interface GameSession {
   traditions: TraditionState;
   events: {
     active: GameEvent | null;
+    queue: GameEvent[];
     log: EventLogEntry[];
   };
   colonizationTasks: ColonizationTask[];
