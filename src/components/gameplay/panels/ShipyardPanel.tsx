@@ -89,7 +89,8 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
       name: customization.name ? customization.name : undefined,
     });
     if (result.success) {
-      setMessage(`Variante ${customization.name || 'custom'} avviata.`);
+      const label = customization.name || designName || 'custom';
+      setMessage(`Variante ${label} avviata.`);
     } else {
       setMessage(buildMessages[result.reason]);
     }

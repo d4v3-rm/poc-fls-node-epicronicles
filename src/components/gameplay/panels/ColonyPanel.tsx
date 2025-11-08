@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
-import { useGameStore, type ColonizationError, useAppSelector } from '@store/gameStore';
+import { useGameStore, useAppSelector } from '@store/gameStore';
 import type { ColonizationStatus, ColonizationTask } from '@domain/types';
 import { formatCost } from './shared/formatters';
 import {
@@ -7,10 +7,11 @@ import {
   selectColonizedSystems,
   selectPlanets,
   selectResources,
+  selectSystems,
 } from '@store/selectors';
-import { selectSystemsMap } from '@store/selectors';
+import type { ColonyResultReason } from '@store/slice/gameSlice';
 
-const colonizationErrors: Record<ColonizationError, string> = {
+const colonizationErrors: Record<ColonyResultReason, string> = {
   NO_SESSION: 'Nessuna sessione.',
   SYSTEM_NOT_FOUND: 'Sistema non trovato.',
   SYSTEM_UNKNOWN: 'Devi prima rivelare il sistema.',
@@ -43,7 +44,7 @@ export const ColonyPanel = ({
   onFocusSystem,
 }: ColonyPanelProps) => {
   const session = useGameStore((state) => state.session);
-  const systems = useAppSelector(selectSystemsMap);
+  const systems = useAppSelector(selectSystems);
   const planets = useAppSelector(selectPlanets);
   const resources = useAppSelector(selectResources);
   const colonizationTasks = useAppSelector(selectColonizationTasks);
@@ -149,7 +150,7 @@ export const ColonyPanel = ({
               ) : (
                 <ul>
                   {colonizationTasks.map((task) => {
-                    const system = systems.get(task.systemId);
+                    const system = systems.find((entry) => entry.id === task.systemId);
                     const missionProgress = missionProgressPercent(task);
                     return (
                       <li key={task.id}>

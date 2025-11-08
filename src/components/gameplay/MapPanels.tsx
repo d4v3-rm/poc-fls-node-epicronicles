@@ -14,17 +14,15 @@ interface MapPanelsProps {
   focusSystemId: string | null;
   viewportWidth: number;
   viewportHeight: number;
-  warEventsRef: React.RefObject<HTMLDivElement>;
+  warEventsRef: React.RefObject<HTMLUListElement | null>;
   unreadWarIds: Set<string>;
   onMarkWarRead: () => void;
   onSelectPlanet: (planetId: string, systemId: string) => void;
   onFocusSystem: (systemId: string) => void;
   onClearFocusTargets: () => void;
   shipyardSystem: StarSystem | null;
-  selectedPlanet: { id: string; name: string } | null;
-  selectedPlanetSystem: StarSystem | null;
   closeShipyard: () => void;
-  closePlanet: () => void;
+  setFocusPlanetId: (id: string) => void;
 }
 
 export const MapPanels = ({
@@ -38,10 +36,8 @@ export const MapPanels = ({
   onFocusSystem,
   onClearFocusTargets,
   shipyardSystem,
-  selectedPlanet,
-  selectedPlanetSystem,
   closeShipyard,
-  closePlanet,
+  setFocusPlanetId,
 }: MapPanelsProps) => (
   <div className="floating-panels">
     <DraggablePanel
@@ -133,16 +129,6 @@ export const MapPanels = ({
         onClose={closeShipyard}
       >
         <ShipyardPanel system={shipyardSystem} />
-      </DraggablePanel>
-    ) : null}
-    {selectedPlanet && selectedPlanetSystem ? (
-      <DraggablePanel
-        title={`${selectedPlanet.name} (${selectedPlanet.id})`}
-        initialX={viewportWidth / 2 - 180}
-        initialY={viewportHeight / 2 - 140}
-        onClose={closePlanet}
-      >
-        {/* Planet detail content remains in GameScreen for now */}
       </DraggablePanel>
     ) : null}
   </div>

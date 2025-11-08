@@ -167,7 +167,7 @@ export const advanceAiWarMoves = ({
         fleet.systemId,
         homeSystem.id,
         session.galaxy,
-        { ...military, fleet: military.fleet },
+        military.fleet,
       );
       fleet.targetSystemId = homeSystem.id;
       fleet.ticksToArrival = Math.max(1, retreatTicks);
@@ -200,7 +200,7 @@ export const advanceAiWarMoves = ({
       fleet.systemId,
       target,
       session.galaxy,
-      { ...military, fleet: military.fleet },
+      military.fleet,
     );
     fleet.targetSystemId = target;
     fleet.ticksToArrival = Math.max(1, travelTicks);

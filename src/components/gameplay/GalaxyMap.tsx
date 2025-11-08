@@ -35,6 +35,12 @@ export const GalaxyMap = ({
   onSystemSelect,
   onClearFocus,
 }: GalaxyMapProps) => {
+  const onSelectRef = useRef(onSystemSelect);
+  const onClearRef = useRef(onClearFocus);
+  useEffect(() => {
+    onSelectRef.current = onSystemSelect;
+    onClearRef.current = onClearFocus;
+  }, [onClearFocus, onSystemSelect]);
   const systems = useGameStore((state) => state.session?.galaxy.systems ?? []);
   const scienceShips = useGameStore(
     (state) => state.session?.scienceShips ?? [],
@@ -167,7 +173,7 @@ export const GalaxyMap = ({
         return Boolean(obj?.userData.systemId);
       });
       if (!hit) {
-        onClearFocus?.();
+        onClearRef.current?.();
         return;
       }
       let targetNode: THREE.Object3D | null = hit.object;
@@ -179,7 +185,7 @@ export const GalaxyMap = ({
       }
 
       if (targetNode.userData.visibility === 'unknown') {
-        onClearFocus?.();
+        onClearRef.current?.();
         return;
       }
       const worldPos = new THREE.Vector3();
@@ -190,7 +196,7 @@ export const GalaxyMap = ({
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
-      onSystemSelect?.(targetNode.userData.systemId as string, {
+      onSelectRef.current?.(targetNode.userData.systemId as string, {
         x: anchorX,
         y: anchorY,
       });
@@ -266,7 +272,7 @@ export const GalaxyMap = ({
       renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
       dispose();
     };
-  }, [onClearFocus, onSystemSelect]);
+  }, []);
 
   useEffect(() => {
     if (!focusSystemId || focusPlanetId) {
@@ -277,7 +283,7 @@ export const GalaxyMap = ({
       return;
     }
     if (target.visibility === 'unknown') {
-      onClearFocus?.();
+      onClearRef.current?.();
       return;
     }
     const pos = toMapPosition(target);
@@ -291,7 +297,7 @@ export const GalaxyMap = ({
       offsetTargetRef.current = new THREE.Vector3(-pos.x, -pos.y, 0);
     }
     zoomTargetRef.current = target.visibility === 'surveyed' ? 90 : 120;
-  }, [focusSystemId, focusPlanetId, onClearFocus, systems]);
+  }, [focusSystemId, focusPlanetId, systems]);
 
   useEffect(() => {
     if (!focusPlanetId) {

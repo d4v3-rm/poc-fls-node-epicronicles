@@ -21,6 +21,7 @@ const createResourceRecord = (): Record<ResourceType, number> => ({
   minerals: 0,
   food: 0,
   research: 0,
+  influence: 0,
 });
 
 const clonePopulation = (planet: Planet) => ({

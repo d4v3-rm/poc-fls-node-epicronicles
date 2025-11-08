@@ -14,7 +14,7 @@ import {
 } from '@store/selectors';
 
 interface FleetAndCombatPanelProps {
-  warEventsRef?: RefObject<HTMLDivElement>;
+  warEventsRef?: RefObject<HTMLUListElement | null>;
   unreadWarIds?: Set<string>;
   onMarkWarRead?: () => void;
 }

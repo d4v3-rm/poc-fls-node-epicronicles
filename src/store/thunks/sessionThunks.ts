@@ -16,10 +16,8 @@ export const startNewSession =
   (dispatch, getState) => {
     const cfg = getState().game.config;
     const preset =
-      (args?.presetId &&
-        cfg.galaxyPresets.find((entry) => entry.id === args.presetId)) ??
-      cfg.galaxyPresets.find((entry) => entry.id === 'standard') ??
-      null;
+      cfg.galaxyPresets.find((entry) => entry.id === (args?.presetId ?? '')) ??
+      cfg.galaxyPresets.find((entry) => entry.id === 'standard');
     const seed = args?.seed ?? preset?.seed ?? cfg.defaultGalaxy.seed;
     const session = createSession({
       seed,

@@ -168,7 +168,7 @@ export const createSystemNode = (
       ),
       ownerMaterials[ownerKey] ?? ownerMaterials.player,
     );
-    ring.rotation.x = Math.PI / 2;
+    ring.material.side = THREE.DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
@@ -182,7 +182,7 @@ export const createSystemNode = (
       ),
       hostileIndicatorMaterial,
     );
-    ring.rotation.x = Math.PI / 2;
+    ring.material.side = THREE.DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
@@ -196,7 +196,7 @@ export const createSystemNode = (
       ),
       combatIndicatorMaterial,
     );
-    ring.rotation.x = Math.PI / 2;
+    ring.material.side = THREE.DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
@@ -209,8 +209,8 @@ export const createSystemNode = (
       ),
       battleIconMaterial,
     );
-    cross.rotation.x = Math.PI / 2;
     cross.position.z = 0.5;
+    cross.material.side = THREE.DoubleSide;
     cross.userData.systemId = system.id;
     battleIconMaterial.depthWrite = false;
     cross.scale.set(1, 0.2, 1);

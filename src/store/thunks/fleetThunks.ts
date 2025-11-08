@@ -48,7 +48,7 @@ export const orderFleetMove =
       fleet.systemId,
       systemId,
       session.galaxy,
-      state.config,
+      state.config.military.fleet,
     );
 
     dispatch(

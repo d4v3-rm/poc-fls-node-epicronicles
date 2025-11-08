@@ -59,7 +59,7 @@ interface WarEventsProps {
   empires: Empire[];
   unreadWarIds?: Set<string>;
   onMarkWarRead?: () => void;
-  warEventsRef?: RefObject<HTMLDivElement>;
+  warEventsRef?: RefObject<HTMLUListElement | null>;
 }
 
 export const WarEvents = ({

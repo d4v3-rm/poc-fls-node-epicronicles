@@ -11,7 +11,7 @@ import type {
   DiplomacyConfig,
   MilitaryConfig,
 } from '@config/gameConfig';
-import { createInitialFleet } from './ships';
+import { createInitialFleet } from '@domain/fleet/ships';
 
 export interface SessionParams {
   seed: string;

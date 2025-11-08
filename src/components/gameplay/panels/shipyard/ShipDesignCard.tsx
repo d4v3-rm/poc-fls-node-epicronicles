@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { ShipDesign, ShipTemplate } from '@domain/types';
+import type { ShipDesign } from '@domain/types';
 import { applyShipTemplate, applyCustomization } from '@domain/fleet/ships';
 import { formatCost } from '../shared/formatters';
+import type { MilitaryConfig } from '@config/gameConfig';
 
 type CustomState = {
   offense: number;
@@ -12,7 +13,7 @@ type CustomState = {
 
 interface ShipDesignCardProps {
   design: ShipDesign;
-  templates: ShipTemplate[];
+  templates: MilitaryConfig['templates'];
   queueLength: number;
   queueLimit: number;
   canAfford: (cost: Record<string, number | undefined>) => boolean;
@@ -20,9 +21,9 @@ interface ShipDesignCardProps {
   onSelectTemplate: (templateId: string) => void;
   customState: CustomState;
   setCustomState: Dispatch<SetStateAction<Record<string, CustomState>>>;
-  onBuild: (designId: string, designName: string) => void;
+  onBuild: (designId: ShipDesign['id'], designName: string) => void;
   onBuildCustom: (
-    designId: string,
+    designId: ShipDesign['id'],
     designName: string,
     customization: CustomState,
     templateId?: string,

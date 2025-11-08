@@ -52,7 +52,7 @@ export const GameScreen = () => {
   const [populationMessage, setPopulationMessage] = useState<string | null>(null);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const focusedSessionRef = useRef<string | null>(null);
-  const warEventsRef = useRef<HTMLDivElement | null>(null);
+  const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
     warUnread,
     unreadWarIds,
@@ -251,21 +251,15 @@ export const GameScreen = () => {
             setShipyardSystemId(null);
             setFocusPlanetId(planetId);
           }}
-          onFocusSystem={(systemId) => {
-            setFocusSystemId(systemId);
-            setFocusPlanetId(null);
-          }}
-          onClearFocusTargets={clearFocusTargets}
-          shipyardSystem={shipyardSystem}
-          selectedPlanet={
-            selectedPlanet
-              ? { id: selectedPlanet.id, name: selectedPlanet.name }
-              : null
-          }
-          selectedPlanetSystem={selectedPlanetSystem}
-          closeShipyard={closeShipyardPanel}
-          closePlanet={closePlanetPanel}
-        />
+        onFocusSystem={(systemId) => {
+          setFocusSystemId(systemId);
+          setFocusPlanetId(null);
+        }}
+        onClearFocusTargets={clearFocusTargets}
+        shipyardSystem={shipyardSystem}
+        closeShipyard={closeShipyardPanel}
+        setFocusPlanetId={setFocusPlanetId}
+      />
         {debugOpen ? (
           <div className="debug-modal">
             <div className="debug-modal__header">

@@ -225,7 +225,7 @@ export const calculateTravelTicks = (
   fromSystemId: string,
   toSystemId: string,
   galaxy: GalaxyState,
-  config: GameConfig,
+  fleetConfig: { baseTravelTicks: number },
 ): number => {
   if (fromSystemId === toSystemId) {
     return 0;
@@ -234,7 +234,7 @@ export const calculateTravelTicks = (
   const from = findSystem(galaxy, fromSystemId);
   const to = findSystem(galaxy, toSystemId);
   if (!from || !to) {
-    return config.military.fleet.baseTravelTicks;
+    return fleetConfig.baseTravelTicks;
   }
 
   const dx = to.position.x - from.position.x;
@@ -244,7 +244,7 @@ export const calculateTravelTicks = (
 
   return Math.max(
     1,
-    Math.round(config.military.fleet.baseTravelTicks + scaled),
+    Math.round(fleetConfig.baseTravelTicks + scaled),
   );
 };
 

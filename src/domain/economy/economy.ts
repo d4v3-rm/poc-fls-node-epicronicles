@@ -352,6 +352,7 @@ export const advanceEconomy = (
     minerals: 0,
     food: 0,
     research: 0,
+    influence: 0,
   };
 
   RESOURCE_TYPES.forEach((type) => {
