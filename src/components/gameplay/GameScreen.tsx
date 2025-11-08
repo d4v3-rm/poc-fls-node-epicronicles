@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PopulationJobId, StarSystem } from '@domain/types';
-import { useGameStore } from '@store/gameStore';
+import { useAppSelector, useGameStore } from '@store/gameStore';
 import { DraggablePanel } from '@components/ui/DraggablePanel';
 import { useGameLoop } from '../../utils/useGameLoop';
 import { DebugConsole } from '../debug/DebugConsole';
@@ -10,6 +10,7 @@ import { MapLayer } from './MapLayer';
 import { MapPanels } from './MapPanels';
 import { PlanetDetail } from './panels/PlanetDetail';
 import { useWarEvents } from './hooks/useWarEvents';
+import { selectColonizedSystems } from '@store/selectors';
 
 export const GameScreen = () => {
   useGameLoop();
@@ -100,10 +101,7 @@ export const GameScreen = () => {
   const viewportHeight =
     typeof window !== 'undefined' ? window.innerHeight : 800;
   const systems = session.galaxy.systems;
-  const colonizedSystems = useMemo(
-    () => new Set(session.economy.planets.map((planet) => planet.systemId)),
-    [session.economy.planets],
-  );
+  const colonizedSystems = useAppSelector(selectColonizedSystems);
   const shipyardSystem: StarSystem | null = shipyardSystemId
     ? systems.find((system) => system.id === shipyardSystemId) ?? null
     : null;
