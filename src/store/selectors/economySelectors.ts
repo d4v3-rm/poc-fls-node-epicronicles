@@ -30,3 +30,9 @@ export const selectNetResources = (state: RootState) => {
   });
   return net;
 };
+
+export const selectDistrictQueue = (state: RootState) =>
+  state.game.session?.districtConstructionQueue ?? [];
+
+export const selectDistrictDefinitions = (state: RootState) =>
+  state.game.config.economy.districts;

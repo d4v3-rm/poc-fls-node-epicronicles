@@ -1,15 +1,22 @@
 import { useMemo, useState } from 'react';
-import { useGameStore } from '../../store/gameStore';
+import { useAppSelector, useGameStore } from '@store/gameStore';
+import {
+  selectDistrictDefinitions,
+  selectDistrictQueue,
+  selectPlanets,
+} from '@store/selectors';
 
 const manageErrors = {
   NO_SESSION: 'Nessuna sessione.',
-  TASK_NOT_FOUND: 'Attività non trovata.',
+  TASK_NOT_FOUND: 'Attivita non trovata.',
   PLANET_NOT_FOUND: 'Pianeta non trovato.',
 } as const;
 
 export const DistrictQueuePanel = () => {
   const session = useGameStore((state) => state.session);
-  const districts = useGameStore((state) => state.config.economy.districts);
+  const districts = useAppSelector(selectDistrictDefinitions);
+  const districtQueue = useAppSelector(selectDistrictQueue);
+  const planets = useAppSelector(selectPlanets);
   const cancelTask = useGameStore((state) => state.cancelDistrictTask);
   const prioritizeTask = useGameStore((state) => state.prioritizeDistrictTask);
   const [message, setMessage] = useState<string | null>(null);
@@ -18,26 +25,23 @@ export const DistrictQueuePanel = () => {
     if (!session) {
       return [];
     }
-    const planetLookup = new Map(
-      session.economy.planets.map((planet) => [planet.id, planet.name]),
-    );
+    const planetLookup = new Map(planets.map((planet) => [planet.id, planet.name]));
     const districtLookup = new Map(
       districts.map((definition) => [definition.id, definition.label]),
     );
-    return session.districtConstructionQueue.map((task) => ({
+    return districtQueue.map((task) => ({
       ...task,
       planetName: planetLookup.get(task.planetId) ?? task.planetId,
       districtLabel: districtLookup.get(task.districtId) ?? task.districtId,
-      progress:
-        1 - task.ticksRemaining / Math.max(1, task.totalTicks),
+      progress: 1 - task.ticksRemaining / Math.max(1, task.totalTicks),
     }));
-  }, [session, districts]);
+  }, [session, districts, districtQueue, planets]);
 
   if (!session) {
     return <p className="text-muted">Nessuna informazione disponibile.</p>;
   }
 
-  const handleAction = async (
+  const handleAction = (
     taskId: string,
     action: 'cancel' | 'prioritize',
   ) => {
@@ -85,7 +89,7 @@ export const DistrictQueuePanel = () => {
                   className="panel__action panel__action--compact"
                   onClick={() => handleAction(entry.id, 'prioritize')}
                 >
-                  Priorità
+                  Priorita
                 </button>
                 <button
                   className="panel__action panel__action--compact"

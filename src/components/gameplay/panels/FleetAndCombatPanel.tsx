@@ -1,8 +1,17 @@
 import type { RefObject } from 'react';
-import { useGameStore } from '@store/gameStore';
+import { useAppSelector, useGameStore } from '@store/gameStore';
 import { WarOverview, WarEvents } from './fleet/WarOverview';
 import { FleetList } from './fleet/FleetList';
 import { CombatReports } from './fleet/CombatReports';
+import {
+  selectCombatReports,
+  selectEmpires,
+  selectFleets,
+  selectScienceShips,
+  selectSessionTick,
+  selectSystems,
+  selectWarEvents,
+} from '@store/selectors';
 
 interface FleetAndCombatPanelProps {
   warEventsRef?: RefObject<HTMLDivElement>;
@@ -15,21 +24,21 @@ export const FleetAndCombatPanel = ({
   unreadWarIds,
   onMarkWarRead,
 }: FleetAndCombatPanelProps) => {
-  const session = useGameStore((state) => state.session);
-  const fleets = session?.fleets ?? [];
-  const systems = session?.galaxy.systems ?? [];
+  const fleets = useAppSelector(selectFleets);
+  const systems = useAppSelector(selectSystems);
   const orderFleetMove = useGameStore((state) => state.orderFleetMove);
   const designs = useGameStore((state) => state.config.military.shipDesigns);
-  const reports = (session?.combatReports ?? []).slice().reverse();
-  const scienceShips = session?.scienceShips ?? [];
-  const empires = session?.empires ?? [];
+  const reports = useAppSelector(selectCombatReports).slice().reverse();
+  const scienceShips = useAppSelector(selectScienceShips);
+  const empires = useAppSelector(selectEmpires);
   const mergeFleetsAction = useGameStore((state) => state.mergeFleets);
   const splitFleetAction = useGameStore((state) => state.splitFleet);
-  const warEvents = (session?.warEvents ?? []).slice().reverse();
+  const warEvents = useAppSelector(selectWarEvents).slice().reverse();
+  const sessionTick = useAppSelector(selectSessionTick);
 
   return (
     <section className="fleet-combat-panel">
-      <WarOverview empires={empires} sessionTick={session?.clock.tick ?? 0} />
+      <WarOverview empires={empires} sessionTick={sessionTick} />
       <WarEvents
         warEvents={warEvents}
         empires={empires}
