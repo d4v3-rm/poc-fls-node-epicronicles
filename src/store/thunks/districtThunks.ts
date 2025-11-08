@@ -7,7 +7,7 @@ import type {
   DistrictQueueManageResult,
   QueueDistrictBuildResult,
 } from '../slice/gameSlice';
-import { appendNotification, refundResourceCost } from '../utils/sessionUtils';
+import { appendNotification, refundResourceCost } from '../utils';
 
 export const queueDistrictConstruction =
   (

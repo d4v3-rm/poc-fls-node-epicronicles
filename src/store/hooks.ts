@@ -30,6 +30,7 @@ import {
   loadSessionFromStorage,
   hasSavedSession,
 } from './thunks';
+export * from './selectors';
 import type {
   StartSessionArgs,
   StartColonizationResult,

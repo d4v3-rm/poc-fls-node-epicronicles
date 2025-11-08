@@ -4,7 +4,7 @@ import { createColonizationTask } from '@domain/session';
 import type { RootState } from '../index';
 import { setSessionState } from '../slice/gameSlice';
 import type { StartColonizationResult } from '../slice/gameSlice';
-import { appendNotification } from '../utils/sessionUtils';
+import { appendNotification } from '../utils';
 import { detachColonyShip } from './helpers';
 
 export const startColonization =

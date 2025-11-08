@@ -3,7 +3,7 @@ import type { PopulationJobId } from '@domain/types';
 import type { RootState } from '../index';
 import { setSessionState } from '../slice/gameSlice';
 import type { PopulationAdjustResult } from '../slice/gameSlice';
-import { updatePopulationCounts } from '../utils/sessionUtils';
+import { updatePopulationCounts } from '../utils';
 
 export const promotePopulation =
   (planetId: string, jobId: PopulationJobId): ThunkAction<PopulationAdjustResult, RootState, unknown, AnyAction> =>

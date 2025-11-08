@@ -25,7 +25,8 @@ Configurati in `tsconfig.app.json` e `vite.config.ts`:
   - `diplomacyThunks.ts`,
   - `persistenceThunks.ts`,
   - `helpers.ts` (utility comuni), `index.ts` (barrel).
-- `src/store/utils/sessionUtils.ts`: helper condivisi (notifiche, war events, refund risorse, update popolazione).
+- `src/store/utils/`: helper condivisi per notifiche (`notificationUtils`), eventi di guerra (`warUtils`), economia (`economyUtils`), popolazione (`populationUtils`), barrel `index.ts`.
+- `src/store/selectors/`: selector memorizzati per sessione/economia/war log.
 - `src/store/hooks.ts`: hook `useGameStore`, `useAppDispatch`, `useAppSelector`.
 - `src/store/gameStore.ts`: shim di compatibilita' che re-esporta `store` e `useGameStore` per non toccare gli import storici.
 

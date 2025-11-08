@@ -3,7 +3,7 @@ import { applyWarPressureToGalaxy } from '@domain/diplomacy';
 import type { RootState } from '../index';
 import { setSessionState } from '../slice/gameSlice';
 import type { DiplomacyActionResult } from '../slice/gameSlice';
-import { appendNotification, appendWarEvent } from '../utils/sessionUtils';
+import { appendNotification, appendWarEvent } from '../utils';
 import { setEmpireWarStatus } from './helpers';
 
 export const declareWarOnEmpire =
