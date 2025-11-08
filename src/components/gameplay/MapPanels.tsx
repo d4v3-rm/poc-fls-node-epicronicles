@@ -9,6 +9,7 @@ import { FleetAndCombatPanel } from './panels/FleetAndCombatPanel';
 import { DiplomacyPanel } from './panels/DiplomacyPanel';
 import { ShipyardPanel } from './panels/ShipyardPanel';
 import { TechPanel } from './panels/TechPanel';
+import { EventPanel } from './panels/EventPanel';
 import type { StarSystem } from '@domain/types';
 
 interface MapPanelsProps {
@@ -130,6 +131,15 @@ export const MapPanels = ({
       initialHeight={320}
     >
       <TechPanel />
+    </DraggablePanel>
+    <DraggablePanel
+      title="Eventi & Anomalie"
+      initialX={Math.max(12, viewportWidth - 320)}
+      initialY={Math.max(120, viewportHeight - 380)}
+      initialWidth={340}
+      initialHeight={320}
+    >
+      <EventPanel />
     </DraggablePanel>
     {shipyardSystem ? (
       <DraggablePanel

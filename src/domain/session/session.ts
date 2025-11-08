@@ -117,6 +117,10 @@ export const createSession = ({
     empires: createEmpires(seed, diplomacyConfig),
     research: createInitialResearch(researchConfig),
     traditions: createInitialTraditions(traditionConfig),
+    events: {
+      active: null,
+      log: [],
+    },
     warEvents: [],
     clock: createClock(),
     scienceShips: createInitialScienceShips(galaxy),

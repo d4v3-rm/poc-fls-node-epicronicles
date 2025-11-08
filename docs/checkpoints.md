@@ -56,8 +56,8 @@ Stato sintetico per fasi, con feature flaggate tramite checkbox `[x]` (complete)
 - [x] Tradizioni/perk con progressione dedicata
 
 ## Fase 6 - Eventi, Anomalie avanzate e Crisi
-- [ ] Sistema eventi generico con condizioni, opzioni, effetti e log
-- [ ] Anomalie avanzate e catene multi-step
+- [x] Sistema eventi generico con condizioni, opzioni, effetti e log
+- [x] Anomalie avanzate e catene multi-step
 - [ ] Crisi di fine partita con IA dedicata e overlay mappa
 
 ## Fase 7 - UI/UX, Tutorial, Bilanciamento e Polish

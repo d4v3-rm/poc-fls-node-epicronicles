@@ -178,6 +178,16 @@ export type UnlockTraditionResult =
   | { success: true }
   | { success: false; reason: TraditionActionReason };
 
+export type ResolveEventReason =
+  | 'NO_SESSION'
+  | 'NO_EVENT'
+  | 'OPTION_NOT_FOUND'
+  | 'INSUFFICIENT_RESOURCES';
+
+export type ResolveEventResult =
+  | { success: true }
+  | { success: false; reason: ResolveEventReason };
+
 export type PopulationJobId =
   | 'workers'
   | 'specialists'

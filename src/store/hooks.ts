@@ -36,6 +36,7 @@ import {
   hasSavedSession,
   beginResearch,
   unlockTraditionPerk,
+  resolveActiveEvent,
 } from './thunks';
 export * from './selectors';
 import type {
@@ -54,6 +55,7 @@ import type {
   LoadGameResult,
   StartResearchResult,
   UnlockTraditionResult,
+  ResolveEventResult,
 } from './thunks';
 
 export const useAppDispatch: () => AppDispatch = () => useDispatch<AppDispatch>();
@@ -118,6 +120,7 @@ interface HookState {
   hasSavedSession: () => boolean;
   beginResearch: (branch: ResearchBranch, techId: string) => StartResearchResult;
   unlockTraditionPerk: (perkId: string) => UnlockTraditionResult;
+  resolveActiveEvent: (optionId: string) => ResolveEventResult;
 }
 
 export const useGameStore = <T>(selector: (state: HookState) => T): T => {
@@ -179,6 +182,8 @@ export const useGameStore = <T>(selector: (state: HookState) => T): T => {
         dispatch(beginResearch(branch, techId)),
       unlockTraditionPerk: (perkId: string) =>
         dispatch(unlockTraditionPerk(perkId)),
+      resolveActiveEvent: (optionId: string) =>
+        dispatch(resolveActiveEvent(optionId)),
     }),
     [dispatch],
   );

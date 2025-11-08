@@ -126,7 +126,47 @@ export type NotificationKind =
   | 'warDeclared'
   | 'peaceAccepted'
   | 'researchComplete'
-  | 'traditionUnlocked';
+  | 'traditionUnlocked'
+  | 'eventStarted'
+  | 'eventResolved';
+
+export interface EventOptionEffect {
+  kind:
+    | 'resource'
+    | 'stability'
+    | 'hostileSpawn'
+    | 'insight'
+    | 'influence';
+  target?: ResourceType;
+  amount?: number;
+  systemId?: string;
+}
+
+export interface EventOption {
+  id: string;
+  label: string;
+  description: string;
+  effects: EventOptionEffect[];
+}
+
+export type EventKind = 'narrative' | 'anomaly' | 'crisis';
+
+export interface GameEvent {
+  id: string;
+  kind: EventKind;
+  title: string;
+  description: string;
+  systemId?: string | null;
+  options: EventOption[];
+  resolvedOptionId?: string | null;
+}
+
+export interface EventLogEntry {
+  id: string;
+  tick: number;
+  title: string;
+  result: string;
+}
 
 export interface GameNotification {
   id: string;
@@ -333,6 +373,10 @@ export interface GameSession {
   economy: EconomyState;
   research: ResearchState;
   traditions: TraditionState;
+  events: {
+    active: GameEvent | null;
+    log: EventLogEntry[];
+  };
   colonizationTasks: ColonizationTask[];
   fleets: Fleet[];
   shipyardQueue: ShipyardTask[];

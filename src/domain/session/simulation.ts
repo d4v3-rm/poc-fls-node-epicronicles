@@ -15,6 +15,7 @@ import { autoBalancePopulation } from '@domain/economy/population';
 import { advanceResearch } from '@domain/research/research';
 import { advanceTraditions } from '@domain/traditions/traditions';
 import { deriveProgressionModifiers } from '@domain/progression/modifiers';
+import { maybeSpawnEvent } from '@domain/events/events';
 import {
   advanceDiplomacy,
   applyWarPressureToGalaxy,
@@ -262,6 +263,27 @@ export const advanceSimulation = (
         });
       });
     }
+    const spawnedEvent =
+      updatedSession.events.active === null
+        ? maybeSpawnEvent({
+            session: updatedSession,
+            config: config.events,
+            tick: currentTick,
+          })
+        : null;
+    const eventNotification =
+      spawnedEvent !== null
+        ? {
+            id: `notif-evt-${spawnedEvent.id}`,
+            tick: currentTick,
+            kind: 'eventStarted' as const,
+            message: `Nuovo evento: ${spawnedEvent.title}`,
+          }
+        : null;
+    if (eventNotification) {
+      iterationNotifications.push(eventNotification);
+    }
+    const activeEvent = spawnedEvent ?? updatedSession.events.active;
 
     updatedSession = {
       ...updatedSession,
@@ -270,6 +292,10 @@ export const advanceSimulation = (
       empires: diplomacy.empires,
       research: researchAdvance.research,
       traditions,
+      events: {
+        active: activeEvent,
+        log: updatedSession.events.log,
+      },
       warEvents: iterationWarEvents.slice(
         -config.diplomacy.warEventLogLimit,
       ),

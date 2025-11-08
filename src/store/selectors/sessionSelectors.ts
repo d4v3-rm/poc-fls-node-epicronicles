@@ -9,6 +9,7 @@ export const selectResearch = (state: RootState) =>
   state.game.session?.research;
 export const selectTraditions = (state: RootState) =>
   state.game.session?.traditions;
+export const selectEvents = (state: RootState) => state.game.session?.events;
 export const selectCombatReports = (state: RootState) =>
   state.game.session?.combatReports ?? [];
 export const selectSessionTick = (state: RootState) =>

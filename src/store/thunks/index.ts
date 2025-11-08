@@ -8,6 +8,7 @@ export * from './scienceThunks';
 export * from './populationThunks';
 export * from './persistenceThunks';
 export * from './progressionThunks';
+export * from './eventThunks';
 
 export type {
   StartSessionArgs,
@@ -28,6 +29,7 @@ export type {
   ShipClassId,
   StartResearchResult,
   UnlockTraditionResult,
+  ResolveEventResult,
 } from '../slice/gameSlice';
 export type { GameConfig } from '@config/gameConfig';
 export type { GameSession, EconomyState } from '@domain/types';

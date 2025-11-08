@@ -1133,6 +1133,64 @@ body {
   border-color: rgba(77, 226, 255, 0.5);
   color: #4de2ff;
 }
+.event-panel .panel__action {
+  text-align: left;
+}
+.event-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.event-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+}
+.event-card__title {
+  font-weight: 600;
+}
+.event-card__badge {
+  border: 1px solid rgba(127, 227, 143, 0.5);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #7fe38f;
+}
+.event-card__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.event-card__option-title {
+  font-weight: 600;
+}
+.event-log ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.event-log li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+.event-log__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.event-log__title {
+  font-weight: 600;
+}
 .sentiment-positive {
   color: #7fe38f;
 }
