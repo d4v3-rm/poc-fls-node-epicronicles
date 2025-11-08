@@ -1,7 +1,7 @@
-import { resourceLabels } from '@domain/shared/resourceMetadata';
 import { RESOURCE_TYPES, computePlanetProduction } from '@domain/economy/economy';
 import type { PopulationJobId, Planet } from '@domain/types';
 import type { EconomyConfig } from '@domain/economy/economy';
+import { formatCost, formatSigned } from './shared/formatters';
 
 interface PlanetDetailProps {
   planet: Planet;
@@ -22,33 +22,6 @@ interface PlanetDetailProps {
   populationMessage: string | null;
   onQueueDistrict: (districtId: string) => void;
 }
-
-const formatCost = (cost: Record<string, number | undefined>) => {
-  const entries = Object.entries(cost).filter(
-    ([, amount]) => amount && amount > 0,
-  );
-  if (entries.length === 0) {
-    return 'N/A';
-  }
-  return entries
-    .map(
-      ([type, amount]) =>
-        `${resourceLabels[type as keyof typeof resourceLabels]} ${amount}`,
-    )
-    .join(' | ');
-};
-
-const formatSigned = (value: number) => {
-  if (Math.abs(value) < 0.001) {
-    return '+0';
-  }
-  const magnitude = Math.abs(value);
-  const isInteger = Math.abs(Math.round(magnitude) - magnitude) < 0.01;
-  const formatted = isInteger
-    ? Math.round(magnitude).toString()
-    : magnitude.toFixed(1);
-  return `${value >= 0 ? '+' : '-'}${formatted}`;
-};
 
 export const PlanetDetail = ({
   planet,

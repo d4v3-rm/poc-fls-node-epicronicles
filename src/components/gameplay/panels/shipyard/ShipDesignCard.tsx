@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { ShipDesign, ShipTemplate } from '@domain/types';
 import { applyShipTemplate, applyCustomization } from '@domain/fleet/ships';
-import { formatCost } from './costUtils';
+import { formatCost } from '../shared/formatters';
 
 type CustomState = {
   offense: number;

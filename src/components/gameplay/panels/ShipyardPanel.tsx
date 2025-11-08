@@ -3,7 +3,6 @@ import { useGameStore } from '@store/gameStore';
 import type { ShipClassId, StarSystem } from '@domain/types';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
 import { BuildQueue } from './shipyard/BuildQueue';
-import { formatCost } from './shipyard/costUtils';
 
 const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
