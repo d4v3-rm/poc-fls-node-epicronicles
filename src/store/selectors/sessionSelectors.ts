@@ -11,3 +11,5 @@ export const selectSessionTick = (state: RootState) =>
   state.game.session?.clock.tick ?? 0;
 export const selectPlayerEmpire = (state: RootState) =>
   state.game.session?.empires.find((empire) => empire.kind === 'player') ?? null;
+export const selectShipyardQueue = (state: RootState) =>
+  state.game.session?.shipyardQueue ?? [];

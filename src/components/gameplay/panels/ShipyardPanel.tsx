@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { useGameStore } from '@store/gameStore';
+import { useAppSelector, useGameStore } from '@store/gameStore';
 import type { ShipClassId, StarSystem } from '@domain/types';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
 import { BuildQueue } from './shipyard/BuildQueue';
+import { selectResources, selectShipyardQueue } from '@store/selectors';
 
 const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
@@ -37,8 +38,8 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
     >
   >({});
 
-  const resources = session?.economy.resources;
-  const queue = session?.shipyardQueue ?? [];
+  const resources = useAppSelector(selectResources);
+  const queue = useAppSelector(selectShipyardQueue);
 
   const canAfford = (designCost: Record<string, number | undefined>) => {
     if (!resources) {
