@@ -9,8 +9,8 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop.
 
 ## React/UI
-- [ ] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log.
-- [ ] Lazy load dei pannelli poco usati (shipyard, research, eventi) con dynamic import.
+- [x] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log (memo ColonyPanel, FleetAndCombatPanel; ancora da valutare virtualizzazione log).
+- [x] Lazy load dei pannelli poco usati (shipyard, research, eventi) con dynamic import.
 
 ## Store/Simulazione
 - [ ] Batching tick e debounce notifiche/war log in late game.
@@ -24,8 +24,8 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Altri split per pannelli UI (code splitting a route/chunk).
 
 ## Mappa interattiva
-- [ ] LOD label/orbite basato su zoom e campo visivo.
-- [ ] Raycast solo su sistemi (disabilitare orbits per hit test).
+- [x] LOD label/orbite basato su zoom e campo visivo.
+- [x] Raycast solo su sistemi (disabilitare orbits per hit test).
 
 ## Clock/loop
 - [x] Tick rate adattivo (pausa in background, riduzione tps in idle: pausa quando tab non visibile).

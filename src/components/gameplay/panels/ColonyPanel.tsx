@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
+import { memo } from 'react';
 import { useGameStore, useAppSelector } from '@store/gameStore';
 import type { ColonizationStatus, ColonizationTask } from '@domain/types';
 import { formatCost } from './shared/formatters';
@@ -39,7 +40,7 @@ interface ColonyPanelProps {
   onFocusSystem: (systemId: string) => void;
 }
 
-export const ColonyPanel = ({
+const ColonyPanelComponent = ({
   onSelectPlanet,
   onFocusSystem,
 }: ColonyPanelProps) => {
@@ -266,3 +267,4 @@ export const ColonyPanel = ({
   );
 };
 
+export const ColonyPanel = memo(ColonyPanelComponent);

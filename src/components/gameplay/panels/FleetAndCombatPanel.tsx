@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import { memo } from 'react';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import { WarOverview, WarEvents } from './fleet/WarOverview';
 import { FleetList } from './fleet/FleetList';
@@ -19,7 +20,7 @@ interface FleetAndCombatPanelProps {
   onMarkWarRead?: () => void;
 }
 
-export const FleetAndCombatPanel = ({
+const FleetAndCombatPanelComponent = ({
   warEventsRef,
   unreadWarIds,
   onMarkWarRead,
@@ -59,3 +60,5 @@ export const FleetAndCombatPanel = ({
     </section>
   );
 };
+
+export const FleetAndCombatPanel = memo(FleetAndCombatPanelComponent);
