@@ -9,6 +9,8 @@ import {
   MeshBasicMaterial,
   Group,
   DoubleSide,
+  Object3D,
+  PlaneGeometry,
 } from 'three';
 import type { OrbitingPlanet, StarSystem } from '@domain/types';
 import {
@@ -20,8 +22,8 @@ import {
 } from './materials';
 
 const orbitPalette = ['#72fcd5', '#f9d976', '#f58ef6', '#8ec5ff', '#c7ddff'];
-const planetGeometryCache = new Map<number, THREE.SphereGeometry>();
-const ringGeometryCache = new Map<string, THREE.RingGeometry>();
+const planetGeometryCache = new Map<number, SphereGeometry>();
+const ringGeometryCache = new Map<string, RingGeometry>();
 
 export const createLabelSprite = (text: string) => {
   const canvas = document.createElement('canvas');
@@ -65,7 +67,7 @@ export const createOrbitingPlanets = (
   baseSpeed: number,
   systemId: string,
   angleStore: Map<string, number>,
-  planetLookup: Map<string, THREE.Object3D>,
+  planetLookup: Map<string, Object3D>,
 ) => {
   const group = new Group();
   group.name = 'orbits';
@@ -146,11 +148,11 @@ export const createSystemNode = (
   system: StarSystem,
   orbitBaseSpeed: number,
   angleStore: Map<string, number>,
-  planetLookup: Map<string, THREE.Object3D>,
+  planetLookup: Map<string, Object3D>,
   recentCombatSystems: Set<string>,
   activeBattles: Set<string>,
-): THREE.Group => {
-  const node = new THREE.Group();
+): Group => {
+  const node = new Group();
   node.name = system.id;
   node.userData.systemId = system.id;
   node.userData.visibility = system.visibility;
@@ -164,7 +166,7 @@ export const createSystemNode = (
   };
   const baseSize = starSizes[system.starClass] ?? 1.8;
   const sizeMultiplier = system.visibility === 'unknown' ? 0.55 : 1;
-  const geometry = new THREE.SphereGeometry(
+  const geometry = new SphereGeometry(
     baseSize * sizeMultiplier,
     20,
     20,
@@ -180,7 +182,7 @@ export const createSystemNode = (
         ? materialCache.friendly
         : materialCache.revealed;
 
-  const starMesh = new THREE.Mesh(geometry, starMaterial);
+  const starMesh = new Mesh(geometry, starMaterial);
   starMesh.userData.systemId = system.id;
   node.add(starMesh);
 
@@ -191,57 +193,57 @@ export const createSystemNode = (
 
   if (system.ownerId) {
     const ownerKey = system.ownerId === 'player' ? 'player' : 'ai';
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(
+    const ring = new Mesh(
+      new RingGeometry(
         starMesh.geometry.parameters.radius + 3.6,
         starMesh.geometry.parameters.radius + 5.2,
         32,
       ),
       ownerMaterials[ownerKey] ?? ownerMaterials.player,
     );
-    ring.material.side = THREE.DoubleSide;
+    ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
 
   if (system.hostilePower && system.hostilePower > 0) {
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(
+    const ring = new Mesh(
+      new RingGeometry(
         starMesh.geometry.parameters.radius + 1.2,
         starMesh.geometry.parameters.radius + 2.1,
         24,
       ),
       hostileIndicatorMaterial,
     );
-    ring.material.side = THREE.DoubleSide;
+    ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
 
   if (recentCombatSystems.has(system.id)) {
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(
+    const ring = new Mesh(
+      new RingGeometry(
         starMesh.geometry.parameters.radius + 2.2,
         starMesh.geometry.parameters.radius + 3.6,
         24,
       ),
       combatIndicatorMaterial,
     );
-    ring.material.side = THREE.DoubleSide;
+    ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
     node.add(ring);
   }
 
   if (activeBattles.has(system.id)) {
-    const cross = new THREE.Mesh(
-      new THREE.PlaneGeometry(
+    const cross = new Mesh(
+      new PlaneGeometry(
         (starMesh.geometry.parameters.radius + 3) * 1.6,
         (starMesh.geometry.parameters.radius + 3) * 1.6,
       ),
       battleIconMaterial,
     );
     cross.position.z = 0.5;
-    cross.material.side = THREE.DoubleSide;
+    cross.material.side = DoubleSide;
     cross.userData.systemId = system.id;
     battleIconMaterial.depthWrite = false;
     cross.scale.set(1, 0.2, 1);
