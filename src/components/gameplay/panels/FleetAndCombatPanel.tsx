@@ -30,7 +30,7 @@ const FleetAndCombatPanelComponent = ({
   const systems = useAppSelector(selectSystems);
   const orderFleetMove = useGameStore((state) => state.orderFleetMove);
   const designs = useGameStore((state) => state.config.military.shipDesigns);
-  const reports = useAppSelector(selectCombatReports).slice().reverse();
+  const reports = useAppSelector(selectCombatReports).slice().reverse().slice(0, 30);
   const scienceShips = useAppSelector(selectScienceShips);
   const empires = useAppSelector(selectEmpires);
   const mergeFleetsAction = useGameStore((state) => state.mergeFleets);
