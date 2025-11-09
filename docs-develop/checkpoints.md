@@ -13,7 +13,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [x] Lazy load dei pannelli poco usati (shipyard, research, eventi) con dynamic import.
 
 ## Store/Simulazione
-- [ ] Batching tick e debounce notifiche/war log in late game.
+- [x] Batching tick e debounce notifiche/war log in late game (cap a 5 tick per ciclo).
 - [x] Precompute lookup (hostileSystems, fleetsBySystem) per ridurre ricerche ripetute (map indice sistemi per advanceFleets).
 - [x] Debounce spawn eventi in guerra intensa / late game.
 - [x] Clamp risorse/net per evitare overflow o valori estremi.

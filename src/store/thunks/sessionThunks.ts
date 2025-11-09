@@ -81,7 +81,14 @@ export const advanceClockBy =
       now,
     });
 
-    const ticksAdvanced = updatedClock.tick - session.clock.tick;
+    const ticksAdvanced = Math.min(
+      updatedClock.tick - session.clock.tick,
+      5,
+    );
+    const adjustedClock =
+      ticksAdvanced < updatedClock.tick - session.clock.tick
+        ? { ...updatedClock, tick: session.clock.tick + ticksAdvanced }
+        : updatedClock;
     const simulatedSession =
       ticksAdvanced > 0
         ? advanceSimulation(session, ticksAdvanced, state.config)
@@ -90,7 +97,7 @@ export const advanceClockBy =
     dispatch(
       setSessionState({
         ...simulatedSession,
-        clock: updatedClock,
+        clock: adjustedClock,
       }),
     );
   };
