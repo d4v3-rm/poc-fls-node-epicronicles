@@ -9,6 +9,8 @@ import {
 } from './materials';
 
 const orbitPalette = ['#72fcd5', '#f9d976', '#f58ef6', '#8ec5ff', '#c7ddff'];
+const planetGeometryCache = new Map<number, THREE.SphereGeometry>();
+const ringGeometryCache = new Map<string, THREE.RingGeometry>();
 
 export const createLabelSprite = (text: string) => {
   const canvas = document.createElement('canvas');
@@ -66,11 +68,17 @@ export const createOrbitingPlanets = (
     const initialAngle =
       angleStore.get(planet.id) ?? Math.random() * Math.PI * 2;
     angleStore.set(planet.id, initialAngle);
-    const meshMaterial = new THREE.MeshStandardMaterial({ color: planet.color ?? orbitPalette[seed % orbitPalette.length] });
-    const planetMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(planet.size, 16, 16),
-      meshMaterial,
-    );
+    const meshMaterial = new THREE.MeshStandardMaterial({
+      color: planet.color ?? orbitPalette[seed % orbitPalette.length],
+    });
+    const baseGeom =
+      planetGeometryCache.get(planet.size) ??
+      (() => {
+        const geom = new THREE.SphereGeometry(planet.size, 16, 16);
+        planetGeometryCache.set(planet.size, geom);
+        return geom;
+      })();
+    const planetMesh = new THREE.Mesh(baseGeom, meshMaterial);
     planetMesh.raycast = () => null;
     const orbitSpeed = base * planet.orbitSpeed;
     planetMesh.userData = {
@@ -90,12 +98,20 @@ export const createOrbitingPlanets = (
     planetLookup.set(planet.id, planetMesh);
     group.add(planetMesh);
 
+    const ringKey = `${planet.orbitRadius.toFixed(2)}`;
+    const ringGeometry =
+      ringGeometryCache.get(ringKey) ??
+      (() => {
+        const geom = new THREE.RingGeometry(
+          planet.orbitRadius - 0.1,
+          planet.orbitRadius + 0.1,
+          32,
+        );
+        ringGeometryCache.set(ringKey, geom);
+        return geom;
+      })();
     const orbitRing = new THREE.Mesh(
-      new THREE.RingGeometry(
-        planet.orbitRadius - 0.1,
-        planet.orbitRadius + 0.1,
-        32,
-      ),
+      ringGeometry,
       new THREE.MeshBasicMaterial({
         color: '#345',
         side: THREE.DoubleSide,

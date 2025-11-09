@@ -6,7 +6,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Instancing per marker sistemi/flotte (sostituire mesh singole con `InstancedMesh`).
 - [x] LOD/visibilità: disattivare label/orbite su zoom alto, raycast limitato al gruppo sistemi.
 - [ ] Batch update nodi mappa (evitare rebuild intero gruppo a ogni tick).
-- [ ] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop.
+- [x] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop (cache geometrie pianeti/anelli).
 
 ## React/UI
 - [x] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log (memo ColonyPanel, FleetAndCombatPanel; war log limitato a 20 eventi).
