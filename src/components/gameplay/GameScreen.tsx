@@ -87,6 +87,16 @@ export const GameScreen = () => {
   }, [sessionId, setSimulationRunning]);
 
   useEffect(() => {
+    const handleVisibility = () => {
+      setSimulationRunning(!document.hidden, Date.now());
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [setSimulationRunning]);
+
+  useEffect(() => {
     if (!session) {
       focusedSessionRef.current = null;
       return;

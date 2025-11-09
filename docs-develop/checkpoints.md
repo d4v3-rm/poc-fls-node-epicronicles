@@ -28,7 +28,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Raycast solo su sistemi (disabilitare orbits per hit test).
 
 ## Clock/loop
-- [ ] Tick rate adattivo (pausa in background, riduzione tps in idle).
+- [x] Tick rate adattivo (pausa in background, riduzione tps in idle: pausa quando tab non visibile).
 - [ ] Valutare worker per `advanceSimulation` (se serve isolare main thread).
 
 ## Profilazione
