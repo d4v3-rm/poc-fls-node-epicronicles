@@ -58,6 +58,8 @@ export const createOrbitingPlanets = (
   group.name = 'orbits';
   group.userData.systemId = systemId;
   group.visible = false;
+   // Disabilita il raycast sugli elementi di orbita per velocizzare i click di selezione sistema
+  group.raycast = () => null;
   const base = baseSpeed + (seed % 7) * 0.0004;
 
   planets.forEach((planet) => {
@@ -69,6 +71,7 @@ export const createOrbitingPlanets = (
       new THREE.SphereGeometry(planet.size, 16, 16),
       meshMaterial,
     );
+    planetMesh.raycast = () => null;
     const orbitSpeed = base * planet.orbitSpeed;
     planetMesh.userData = {
       ...planetMesh.userData,
@@ -100,6 +103,7 @@ export const createOrbitingPlanets = (
         opacity: 0.3,
       }),
     );
+    orbitRing.raycast = () => null;
     orbitRing.userData = {
       ...orbitRing.userData,
       kind: 'ring',

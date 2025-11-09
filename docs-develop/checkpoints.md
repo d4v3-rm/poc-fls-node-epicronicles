@@ -4,7 +4,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 
 ## Rendering / Three.js
 - [ ] Instancing per marker sistemi/flotte (sostituire mesh singole con `InstancedMesh`).
-- [ ] LOD/visibilità: disattivare label/orbite su zoom alto, raycast limitato al gruppo sistemi.
+- [x] LOD/visibilità: disattivare label/orbite su zoom alto, raycast limitato al gruppo sistemi.
 - [ ] Batch update nodi mappa (evitare rebuild intero gruppo a ogni tick).
 - [ ] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop.
 
@@ -16,6 +16,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Batching tick e debounce notifiche/war log in late game.
 - [ ] Precompute lookup (hostileSystems, fleetsBySystem) per ridurre ricerche ripetute.
 - [ ] Debounce spawn eventi in guerra intensa / late game.
+- [ ] Clamp risorse/net per evitare overflow o valori estremi (parziale: ledger clamp).
 
 ## Build/Bundle
 - [x] Rollup manualChunks per split `three` e `react`, chunkSizeWarningLimit alzato.

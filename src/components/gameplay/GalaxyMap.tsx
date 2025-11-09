@@ -212,44 +212,51 @@ export const GalaxyMap = ({
       systemGroup.position.lerp(offsetTargetRef.current, 0.08);
       camera.position.z += (zoomTargetRef.current - camera.position.z) * 0.08;
 
-      const showOrbits = camera.position.z < 110;
-      const labelScale = THREE.MathUtils.clamp(150 / camera.position.z, 0.4, 2.5);
+      const showOrbits = camera.position.z < 105;
+      const showLabels = camera.position.z < 240;
+      const labelScale = showLabels
+        ? THREE.MathUtils.clamp(150 / camera.position.z, 0.4, 2.5)
+        : 1;
 
       systemGroup.children.forEach((node) => {
         const label = node.getObjectByName('label') as THREE.Sprite;
         if (label) {
-          label.visible = camera.position.z < 260;
-          label.scale.set(
-            label.userData.baseWidth * labelScale,
-            label.userData.baseHeight * labelScale,
-            1,
-          );
+          label.visible = showLabels;
+          if (showLabels) {
+            label.scale.set(
+              label.userData.baseWidth * labelScale,
+              label.userData.baseHeight * labelScale,
+              1,
+            );
+          }
         }
 
         const orbitGroup = node.getObjectByName('orbits') as THREE.Group;
         if (orbitGroup) {
           orbitGroup.visible = showOrbits;
-          orbitGroup.children.forEach((child) => {
-            const orbitData = child.userData;
-            if (
-              orbitData?.kind === 'planet' &&
-              typeof orbitData.orbitRadius === 'number'
-            ) {
-              const orbitSpeed = orbitData.orbitSpeed ?? 0;
-              const nextAngle =
-                (orbitData.orbitAngle ?? 0) + orbitSpeed * deltaFactor;
-              orbitData.orbitAngle = nextAngle;
-              planetAngleRef.current.set(
-                orbitData.planetId as string,
-                nextAngle,
-              );
-              child.position.set(
-                Math.cos(nextAngle) * orbitData.orbitRadius,
-                Math.sin(nextAngle) * orbitData.orbitRadius,
-                0,
-              );
-            }
-          });
+          if (showOrbits) {
+            orbitGroup.children.forEach((child) => {
+              const orbitData = child.userData;
+              if (
+                orbitData?.kind === 'planet' &&
+                typeof orbitData.orbitRadius === 'number'
+              ) {
+                const orbitSpeed = orbitData.orbitSpeed ?? 0;
+                const nextAngle =
+                  (orbitData.orbitAngle ?? 0) + orbitSpeed * deltaFactor;
+                orbitData.orbitAngle = nextAngle;
+                planetAngleRef.current.set(
+                  orbitData.planetId as string,
+                  nextAngle,
+                );
+                child.position.set(
+                  Math.cos(nextAngle) * orbitData.orbitRadius,
+                  Math.sin(nextAngle) * orbitData.orbitRadius,
+                  0,
+                );
+              }
+            });
+          }
         }
       });
 

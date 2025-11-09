@@ -296,6 +296,9 @@ const applyIncomeMultiplier = (
   return value * (1 + mult);
 };
 
+const clampLedger = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+
 export const advanceEconomy = (
   state: EconomyState,
   config: EconomyConfig,
@@ -391,10 +394,13 @@ export const advanceEconomy = (
     const net = income - upkeep;
     netProduction[type] = net;
     const current = resources[type] ?? { amount: 0, income: 0, upkeep: 0 };
+    const boundedIncome = clampLedger(income, -99999, 99999);
+    const boundedUpkeep = clampLedger(upkeep, -99999, 99999);
+    const boundedAmount = clampLedger(current.amount + net, 0, 999999);
     resources[type] = {
-      amount: Math.max(0, current.amount + net),
-      income,
-      upkeep,
+      amount: boundedAmount,
+      income: boundedIncome,
+      upkeep: boundedUpkeep,
     };
   });
 

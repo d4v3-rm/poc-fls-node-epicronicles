@@ -5,12 +5,30 @@ import { EconomyPanel } from './panels/EconomyPanel';
 import { DistrictQueuePanel } from './panels/DistrictQueuePanel';
 import { SciencePanel } from './panels/SciencePanel';
 import { SystemPanel } from './panels/SystemPanel';
-import { FleetAndCombatPanel } from './panels/FleetAndCombatPanel';
-import { DiplomacyPanel } from './panels/DiplomacyPanel';
-import { ShipyardPanel } from './panels/ShipyardPanel';
-import { TechPanel } from './panels/TechPanel';
-import { EventPanel } from './panels/EventPanel';
+import React, { Suspense, lazy } from 'react';
 import type { StarSystem } from '@domain/types';
+
+const FleetAndCombatPanel = lazy(() =>
+  import('./panels/FleetAndCombatPanel').then((m) => ({
+    default: m.FleetAndCombatPanel,
+  })),
+);
+const DiplomacyPanel = lazy(() =>
+  import('./panels/DiplomacyPanel').then((m) => ({
+    default: m.DiplomacyPanel,
+  })),
+);
+const ShipyardPanel = lazy(() =>
+  import('./panels/ShipyardPanel').then((m) => ({
+    default: m.ShipyardPanel,
+  })),
+);
+const TechPanel = lazy(() =>
+  import('./panels/TechPanel').then((m) => ({ default: m.TechPanel })),
+);
+const EventPanel = lazy(() =>
+  import('./panels/EventPanel').then((m) => ({ default: m.EventPanel })),
+);
 
 interface MapPanelsProps {
   focusSystemId: string | null;
@@ -108,11 +126,13 @@ export const MapPanels = ({
       initialX={Math.max(12, viewportWidth - 320)}
       initialY={320}
     >
-      <FleetAndCombatPanel
-        warEventsRef={warEventsRef}
-        unreadWarIds={unreadWarIds}
-        onMarkWarRead={onMarkWarRead}
-      />
+      <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
+        <FleetAndCombatPanel
+          warEventsRef={warEventsRef}
+          unreadWarIds={unreadWarIds}
+          onMarkWarRead={onMarkWarRead}
+        />
+      </Suspense>
     </DraggablePanel>
     <DraggablePanel
       title="Diplomazia"
@@ -121,7 +141,9 @@ export const MapPanels = ({
       initialWidth={300}
       initialHeight={220}
     >
-      <DiplomacyPanel />
+      <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
+        <DiplomacyPanel />
+      </Suspense>
     </DraggablePanel>
     <DraggablePanel
       title="Ricerca & Tradizioni"
@@ -130,7 +152,9 @@ export const MapPanels = ({
       initialWidth={360}
       initialHeight={320}
     >
-      <TechPanel />
+      <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
+        <TechPanel />
+      </Suspense>
     </DraggablePanel>
     <DraggablePanel
       title="Eventi & Anomalie"
@@ -139,7 +163,9 @@ export const MapPanels = ({
       initialWidth={340}
       initialHeight={320}
     >
-      <EventPanel />
+      <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
+        <EventPanel />
+      </Suspense>
     </DraggablePanel>
     {shipyardSystem ? (
       <DraggablePanel
@@ -148,7 +174,9 @@ export const MapPanels = ({
         initialY={viewportHeight / 2 - 200}
         onClose={closeShipyard}
       >
-        <ShipyardPanel system={shipyardSystem} />
+        <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
+          <ShipyardPanel system={shipyardSystem} />
+        </Suspense>
       </DraggablePanel>
     ) : null}
   </div>
