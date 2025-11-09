@@ -35,7 +35,7 @@ const FleetAndCombatPanelComponent = ({
   const empires = useAppSelector(selectEmpires);
   const mergeFleetsAction = useGameStore((state) => state.mergeFleets);
   const splitFleetAction = useGameStore((state) => state.splitFleet);
-  const warEvents = useAppSelector(selectWarEvents).slice().reverse();
+  const warEvents = useAppSelector(selectWarEvents).slice().reverse().slice(0, 20);
   const sessionTick = useAppSelector(selectSessionTick);
 
   return (

@@ -9,14 +9,14 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [ ] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop.
 
 ## React/UI
-- [x] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log (memo ColonyPanel, FleetAndCombatPanel; ancora da valutare virtualizzazione log).
+- [x] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log (memo ColonyPanel, FleetAndCombatPanel; war log limitato a 20 eventi).
 - [x] Lazy load dei pannelli poco usati (shipyard, research, eventi) con dynamic import.
 
 ## Store/Simulazione
 - [ ] Batching tick e debounce notifiche/war log in late game.
 - [x] Precompute lookup (hostileSystems, fleetsBySystem) per ridurre ricerche ripetute (map indice sistemi per advanceFleets).
 - [x] Debounce spawn eventi in guerra intensa / late game.
-- [ ] Clamp risorse/net per evitare overflow o valori estremi (parziale: ledger clamp).
+- [x] Clamp risorse/net per evitare overflow o valori estremi.
 
 ## Build/Bundle
 - [x] Rollup manualChunks per split `three` e `react`, chunkSizeWarningLimit alzato.
