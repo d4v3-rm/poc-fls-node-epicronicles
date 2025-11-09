@@ -88,6 +88,7 @@ export const GalaxyMap = ({
   const planetLookupRef = useRef(new Map<string, THREE.Object3D>());
   const clockRef = useRef<THREE.Clock | null>(null);
   const vectorPoolRef = useRef<THREE.Vector3[]>([]);
+  const matrixPoolRef = useRef<THREE.Matrix4[]>([]);
 
   const getVector = () => {
     const pool = vectorPoolRef.current;
@@ -97,6 +98,16 @@ export const GalaxyMap = ({
   const releaseVector = (vec: THREE.Vector3) => {
     vec.set(0, 0, 0);
     vectorPoolRef.current.push(vec);
+  };
+
+  const getMatrix = () => {
+    const pool = matrixPoolRef.current;
+    return pool.pop() ?? new THREE.Matrix4();
+  };
+
+  const releaseMatrix = (m: THREE.Matrix4) => {
+    m.identity();
+    matrixPoolRef.current.push(m);
   };
 
   useEffect(() => {
@@ -375,97 +386,108 @@ export const GalaxyMap = ({
       positions.set(system.id, node.position.clone());
     });
 
-    const scienceGroup = new THREE.Group();
-    scienceGroup.name = 'scienceShips';
+    const scienceTargetGroup = new THREE.Group();
+    scienceTargetGroup.name = 'scienceTargets';
     const shipGeometry = new THREE.SphereGeometry(0.6, 12, 12);
     const targetMarkerGeometry = new THREE.SphereGeometry(0.35, 10, 10);
-    const targetGroup = new THREE.Group();
-    targetGroup.name = 'scienceTargets';
 
-    scienceShips.forEach((ship) => {
-      const position = positions.get(ship.currentSystemId);
-      if (position) {
-        const material =
-          scienceMaterials[ship.status] ?? scienceMaterials.idle;
-        const marker = new THREE.Mesh(shipGeometry, material);
-        marker.position.set(position.x, position.y, position.z + 4);
-        scienceGroup.add(marker);
+    (['idle', 'traveling', 'surveying'] as const).forEach((status) => {
+      const list = scienceShips.filter((ship) => ship.status === status);
+      if (list.length === 0) {
+        return;
       }
-
-      if (ship.targetSystemId && ship.targetSystemId !== ship.currentSystemId) {
-        const from = positions.get(ship.currentSystemId);
-        const to = positions.get(ship.targetSystemId);
-        if (from && to) {
-          const a = getVector().set(from.x, from.y, from.z + 0.5);
-          const b = getVector().set(to.x, to.y, to.z + 0.5);
-          const points = [a, b];
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          const lineMaterial =
-            scienceLineMaterials[ship.status] ?? scienceLineMaterials.idle;
-          const line = new THREE.Line(geometry, lineMaterial);
-          targetGroup.add(line);
-
-          const targetMarker = new THREE.Mesh(
-            targetMarkerGeometry,
-            scienceMaterials[ship.status] ?? scienceMaterials.idle,
-          );
-          targetMarker.position.set(to.x, to.y, to.z + 1.5);
-          targetGroup.add(targetMarker);
-          releaseVector(a);
-          releaseVector(b);
+      const mesh = new THREE.InstancedMesh(
+        shipGeometry,
+        scienceMaterials[status] ?? scienceMaterials.idle,
+        list.length,
+      );
+      list.forEach((ship, idx) => {
+        const pos = positions.get(ship.currentSystemId);
+        if (!pos) {
+          return;
         }
-      }
-    });
-    group.add(targetGroup);
-    group.add(scienceGroup);
+        const matrix = getMatrix().setPosition(pos.x, pos.y, pos.z + 4);
+        mesh.setMatrixAt(idx, matrix);
+        releaseMatrix(matrix);
+        if (ship.targetSystemId && ship.targetSystemId !== ship.currentSystemId) {
+          const from = positions.get(ship.currentSystemId);
+          const to = positions.get(ship.targetSystemId);
+          if (from && to) {
+            const a = getVector().set(from.x, from.y, from.z + 0.5);
+            const b = getVector().set(to.x, to.y, to.z + 0.5);
+            const points = [a, b];
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMaterial =
+              scienceLineMaterials[status] ?? scienceLineMaterials.idle;
+            const line = new THREE.Line(geometry, lineMaterial);
+            scienceTargetGroup.add(line);
 
-    const fleetGroup = new THREE.Group();
-    fleetGroup.name = 'fleets';
+            const targetMarker = new THREE.Mesh(
+              targetMarkerGeometry,
+              scienceMaterials[status] ?? scienceMaterials.idle,
+            );
+            targetMarker.position.set(to.x, to.y, to.z + 1.5);
+            scienceTargetGroup.add(targetMarker);
+            releaseVector(a);
+            releaseVector(b);
+          }
+        }
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      group.add(mesh);
+    });
+    group.add(scienceTargetGroup);
+
     const fleetTargetGroup = new THREE.Group();
     fleetTargetGroup.name = 'fleetTargets';
     const fleetGeometry = new THREE.SphereGeometry(0.8, 12, 12);
     const fleetTargetGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 
-    fleets.forEach((fleet) => {
-      const position = positions.get(fleet.systemId);
-      if (position) {
-        const marker = new THREE.Mesh(
-          fleetGeometry,
-          empireWar ? fleetMaterials.war : fleetMaterials.idle,
-        );
-        marker.position.set(position.x, position.y, position.z + 3);
-        fleetGroup.add(marker);
+    (['idle', 'war'] as const).forEach((status) => {
+      const list = fleets.filter((fleet) =>
+        status === 'war' ? empireWar : !empireWar,
+      );
+      if (list.length === 0) {
+        return;
       }
-      if (
-        fleet.targetSystemId &&
-        fleet.targetSystemId !== fleet.systemId
-      ) {
-        const from = positions.get(fleet.systemId);
-        const to = positions.get(fleet.targetSystemId);
-        if (from && to) {
-          const a = getVector().set(from.x, from.y, from.z + 0.2);
-          const b = getVector().set(to.x, to.y, to.z + 0.2);
-          const points = [a, b];
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          const line = new THREE.Line(
-            geometry,
-            empireWar ? fleetMaterials.warLine : fleetMaterials.line,
-          );
-          fleetTargetGroup.add(line);
-
-          const targetMarker = new THREE.Mesh(
-            fleetTargetGeometry,
-            empireWar ? fleetMaterials.war : fleetMaterials.idle,
-          );
-          targetMarker.position.set(to.x, to.y, to.z + 1.5);
-          fleetTargetGroup.add(targetMarker);
-          releaseVector(a);
-          releaseVector(b);
+      const material = status === 'war' ? fleetMaterials.war : fleetMaterials.idle;
+      const mesh = new THREE.InstancedMesh(fleetGeometry, material, list.length);
+      list.forEach((fleet, idx) => {
+        const pos = positions.get(fleet.systemId);
+        if (pos) {
+          const matrix = getMatrix().setPosition(pos.x, pos.y, pos.z + 3);
+          mesh.setMatrixAt(idx, matrix);
+          releaseMatrix(matrix);
         }
-      }
+        if (fleet.targetSystemId && fleet.targetSystemId !== fleet.systemId) {
+          const from = positions.get(fleet.systemId);
+          const to = positions.get(fleet.targetSystemId);
+          if (from && to) {
+            const a = getVector().set(from.x, from.y, from.z + 0.2);
+            const b = getVector().set(to.x, to.y, to.z + 0.2);
+            const points = [a, b];
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(
+              geometry,
+              status === 'war' ? fleetMaterials.warLine : fleetMaterials.line,
+            );
+            fleetTargetGroup.add(line);
+
+            const targetMarker = new THREE.Mesh(
+              fleetTargetGeometry,
+              status === 'war' ? fleetMaterials.war : fleetMaterials.idle,
+            );
+            targetMarker.position.set(to.x, to.y, to.z + 1.5);
+            fleetTargetGroup.add(targetMarker);
+            releaseVector(a);
+            releaseVector(b);
+          }
+        }
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      group.add(mesh);
     });
     group.add(fleetTargetGroup);
-    group.add(fleetGroup);
 
   }, [
     systems,

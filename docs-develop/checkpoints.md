@@ -3,7 +3,7 @@
 Stato sintetico delle attività per migliorare drasticamente le performance. Aggiorna le checkbox man mano che completi i task.
 
 ## Rendering / Three.js
-- [ ] Instancing per marker sistemi/flotte (sostituire mesh singole con `InstancedMesh`).
+- [x] Instancing per marker sistemi/flotte (sostituire mesh singole con `InstancedMesh`) per science ships e flotte.
 - [x] LOD/visibilità: disattivare label/orbite su zoom alto, raycast limitato al gruppo sistemi.
 - [ ] Batch update nodi mappa (evitare rebuild intero gruppo a ogni tick).
 - [x] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop (cache geometrie pianeti/anelli, vector pool per linee).
