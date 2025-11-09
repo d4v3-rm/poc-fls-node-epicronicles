@@ -4,6 +4,7 @@ import { useAppSelector, useGameStore } from '@store/gameStore';
 import { WarOverview, WarEvents } from './fleet/WarOverview';
 import { FleetList } from './fleet/FleetList';
 import { CombatReports } from './fleet/CombatReports';
+import { WarEventsMemo } from './war/WarEventsMemo';
 import {
   selectCombatReports,
   selectEmpires,
@@ -40,8 +41,8 @@ const FleetAndCombatPanelComponent = ({
   return (
     <section className="fleet-combat-panel">
       <WarOverview empires={empires} sessionTick={sessionTick} />
-      <WarEvents
-        warEvents={warEvents}
+      <WarEventsMemo
+        events={warEvents}
         empires={empires}
         unreadWarIds={unreadWarIds}
         onMarkWarRead={onMarkWarRead}
