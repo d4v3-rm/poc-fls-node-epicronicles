@@ -1,0 +1,34 @@
+# Checkpoints performance & ottimizzazioni
+
+Stato sintetico delle attività per migliorare drasticamente le performance. Aggiorna le checkbox man mano che completi i task.
+
+## Rendering / Three.js
+- [ ] Instancing per marker sistemi/flotte (sostituire mesh singole con `InstancedMesh`).
+- [ ] LOD/visibilità: disattivare label/orbite su zoom alto, raycast limitato al gruppo sistemi.
+- [ ] Batch update nodi mappa (evitare rebuild intero gruppo a ogni tick).
+- [ ] Pooling di geometrie/materiali e vector per ridurre allocazioni in loop.
+
+## React/UI
+- [ ] `React.memo`/memo selectors su liste grandi (colonie, flotte, log) e virtualizzazione log.
+- [ ] Lazy load dei pannelli poco usati (shipyard, research, eventi) con dynamic import.
+
+## Store/Simulazione
+- [ ] Batching tick e debounce notifiche/war log in late game.
+- [ ] Precompute lookup (hostileSystems, fleetsBySystem) per ridurre ricerche ripetute.
+- [ ] Debounce spawn eventi in guerra intensa / late game.
+
+## Build/Bundle
+- [x] Rollup manualChunks per split `three` e `react`, chunkSizeWarningLimit alzato.
+- [ ] Tree-shake mirato su import Three (evitare wildcard).
+- [ ] Altri split per pannelli UI (code splitting a route/chunk).
+
+## Mappa interattiva
+- [ ] LOD label/orbite basato su zoom e campo visivo.
+- [ ] Raycast solo su sistemi (disabilitare orbits per hit test).
+
+## Clock/loop
+- [ ] Tick rate adattivo (pausa in background, riduzione tps in idle).
+- [ ] Valutare worker per `advanceSimulation` (se serve isolare main thread).
+
+## Profilazione
+- [ ] Profilare con Chrome DevTools (Timeline/Allocations) su scenari 30+ sistemi e molte flotte; annotare hot path.
