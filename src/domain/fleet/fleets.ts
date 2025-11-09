@@ -112,8 +112,13 @@ export const advanceFleets = ({
   const updatedFleets: Fleet[] = fleets.map(cloneFleet);
   const hostilesCleared: string[] = [];
 
+  const systemIndexMap = new Map<string, number>();
+  updatedGalaxySystems.forEach((system, index) => {
+    systemIndexMap.set(system.id, index);
+  });
+
   const getSystemIndex = (systemId: string) =>
-    updatedGalaxySystems.findIndex((system) => system.id === systemId);
+    systemIndexMap.get(systemId) ?? -1;
 
   const ensureSystemsCloned = () => {
     if (!systemsCloned) {
