@@ -245,6 +245,17 @@ export const maybeSpawnEvent = ({
   config: EventsConfig;
   tick: number;
 }): GameEvent | null => {
+  const lastLogTick = session.events.log.at(-1)?.tick ?? null;
+  if (lastLogTick !== null && tick - lastLogTick < 8) {
+    return null;
+  }
+  const lastWarEventTick =
+    session.warEvents.length > 0
+      ? session.warEvents[session.warEvents.length - 1].tick
+      : null;
+  if (lastWarEventTick !== null && tick - lastWarEventTick < 5) {
+    return null;
+  }
   if (session.notifications.some((n) => n.kind === 'eventStarted' && tick - n.tick < 4)) {
     return null;
   }

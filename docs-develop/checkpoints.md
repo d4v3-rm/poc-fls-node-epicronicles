@@ -15,7 +15,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 ## Store/Simulazione
 - [ ] Batching tick e debounce notifiche/war log in late game.
 - [ ] Precompute lookup (hostileSystems, fleetsBySystem) per ridurre ricerche ripetute.
-- [ ] Debounce spawn eventi in guerra intensa / late game.
+- [x] Debounce spawn eventi in guerra intensa / late game.
 - [ ] Clamp risorse/net per evitare overflow o valori estremi (parziale: ledger clamp).
 
 ## Build/Bundle
