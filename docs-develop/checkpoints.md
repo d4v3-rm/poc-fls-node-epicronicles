@@ -29,7 +29,7 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 
 ## Clock/loop
 - [x] Tick rate adattivo (pausa in background, riduzione tps in idle: pausa quando tab non visibile).
-- [ ] Valutare worker per `advanceSimulation` (se serve isolare main thread).
+- [x] Worker per `advanceSimulation` (isolamento main thread con fallback).
 
 ## Profilazione
 - [ ] Profilare con Chrome DevTools (Timeline/Allocations) su scenari 30+ sistemi e molte flotte; annotare hot path.

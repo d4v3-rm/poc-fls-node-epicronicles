@@ -11,6 +11,79 @@ import {
 import type { StartSessionArgs } from '../slice/gameSlice';
 import { tickDurationMs } from './helpers';
 
+type SimulationWorkerMessage =
+  | { type: 'ready' }
+  | { type: 'result'; id: number; session: GameSession };
+
+type SimulationWorkerRequest = {
+  type: 'simulate';
+  id: number;
+  session: GameSession;
+  ticks: number;
+  config: RootState['game']['config'];
+};
+
+let simulationWorker: Worker | null = null;
+let workerIdCounter = 0;
+const workerPending = new Map<
+  number,
+  { resolve: (session: GameSession) => void; reject: (err: Error) => void }
+>();
+
+const getSimulationWorker = () => {
+  if (simulationWorker) {
+    return simulationWorker;
+  }
+  simulationWorker = new Worker(
+    new URL('../../workers/simulationWorker.ts', import.meta.url),
+    { type: 'module' },
+  );
+  simulationWorker.onmessage = (event: MessageEvent<SimulationWorkerMessage>) => {
+    const data = event.data;
+    if (data.type !== 'result') {
+      return;
+    }
+    const pending = workerPending.get(data.id);
+    if (pending) {
+      pending.resolve(data.session);
+      workerPending.delete(data.id);
+    }
+  };
+  simulationWorker.onerror = (err) => {
+    workerPending.forEach(({ reject }) =>
+      reject(new Error(`Simulation worker error: ${err.message}`)),
+    );
+    workerPending.clear();
+    simulationWorker?.terminate();
+    simulationWorker = null;
+  };
+  return simulationWorker;
+};
+
+const simulateInWorker = (
+  session: GameSession,
+  ticks: number,
+  config: RootState['game']['config'],
+): Promise<GameSession> => {
+  return new Promise((resolve, reject) => {
+    try {
+      const worker = getSimulationWorker();
+      const id = ++workerIdCounter;
+      workerPending.set(id, { resolve, reject });
+      const message: SimulationWorkerRequest = {
+        type: 'simulate',
+        id,
+        session,
+        ticks,
+        config,
+      };
+      worker.postMessage(message);
+    } catch (err) {
+      reject(err as Error);
+    }
+  });
+};
+
 export const startNewSession =
   (args?: StartSessionArgs): ThunkAction<void, RootState, unknown, AnyAction> =>
   (dispatch, getState) => {
@@ -67,7 +140,7 @@ export const setSpeedMultiplier =
 
 export const advanceClockBy =
   (elapsedMs: number, now: number): ThunkAction<void, RootState, unknown, AnyAction> =>
-  (dispatch, getState) => {
+  async (dispatch, getState) => {
     const state = getState().game;
     const session = state.session;
     if (!session) {
@@ -89,10 +162,19 @@ export const advanceClockBy =
       ticksAdvanced < updatedClock.tick - session.clock.tick
         ? { ...updatedClock, tick: session.clock.tick + ticksAdvanced }
         : updatedClock;
-    const simulatedSession =
-      ticksAdvanced > 0
-        ? advanceSimulation(session, ticksAdvanced, state.config)
-        : session;
+    let simulatedSession = session;
+    if (ticksAdvanced > 0) {
+      try {
+        simulatedSession = await simulateInWorker(
+          session,
+          ticksAdvanced,
+          state.config,
+        );
+      } catch (err) {
+        // fallback su main thread in caso di errore worker
+        simulatedSession = advanceSimulation(session, ticksAdvanced, state.config);
+      }
+    }
 
     dispatch(
       setSessionState({

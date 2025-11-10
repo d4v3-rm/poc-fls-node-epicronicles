@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import { memo } from 'react';
 import { useAppSelector, useGameStore } from '@store/gameStore';
-import { WarOverview, WarEvents } from './fleet/WarOverview';
+import { WarOverview } from './fleet/WarOverview';
 import { FleetList } from './fleet/FleetList';
 import { CombatReports } from './fleet/CombatReports';
 import { WarEventsMemo } from './war/WarEventsMemo';
