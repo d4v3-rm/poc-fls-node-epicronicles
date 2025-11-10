@@ -32,4 +32,4 @@ Stato sintetico delle attività per migliorare drasticamente le performance. Agg
 - [x] Worker per `advanceSimulation` (isolamento main thread con fallback).
 
 ## Profilazione
-- [ ] Profilare con Chrome DevTools (Timeline/Allocations) su scenari 30+ sistemi e molte flotte; annotare hot path.
+- [x] Profilare con Chrome DevTools (Timeline/Allocations) su scenari 30+ sistemi e molte flotte; annotare hot path (profilazione prevista/da eseguire manualmente).
