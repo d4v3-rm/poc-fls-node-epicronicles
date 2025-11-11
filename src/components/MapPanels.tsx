@@ -17,9 +17,6 @@ const ShipyardPanel = lazy(() =>
     default: m.ShipyardPanel,
   })),
 );
-const TechPanel = lazy(() =>
-  import('@panels/TechPanel').then((m) => ({ default: m.TechPanel })),
-);
 
 interface MapPanelsProps {
   focusSystemId: string | null;
@@ -116,17 +113,6 @@ export const MapPanels = ({
           unreadWarIds={unreadWarIds}
           onMarkWarRead={onMarkWarRead}
         />
-      </Suspense>
-    </DraggablePanel>
-    <DraggablePanel
-      title="Ricerca & Tradizioni"
-      initialX={Math.max(12, viewportWidth - 640)}
-      initialY={600}
-      initialWidth={360}
-      initialHeight={320}
-    >
-      <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
-        <TechPanel />
       </Suspense>
     </DraggablePanel>
     {shipyardSystem ? (

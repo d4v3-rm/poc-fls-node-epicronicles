@@ -16,6 +16,7 @@ import { SideDock } from './SideDock';
 import { DiplomacyPanel } from '@panels/DiplomacyPanel';
 import { EconomyPanel } from '@panels/EconomyPanel';
 import { EventPanel } from '@panels/EventPanel';
+import { TechPanel } from '@panels/TechPanel';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -60,6 +61,7 @@ export const GameScreen = () => {
   const [eventsOpen, setEventsOpen] = useState(false);
   const [diplomacyOpen, setDiplomacyOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
+  const [researchOpen, setResearchOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -225,6 +227,7 @@ export const GameScreen = () => {
         onOpenEvents={() => setEventsOpen(true)}
         onOpenDiplomacy={() => setDiplomacyOpen(true)}
         onOpenEconomy={() => setEconomyOpen(true)}
+        onOpenResearch={() => setResearchOpen(true)}
       />
       <MapLayer
         focusSystemId={focusSystemId}
@@ -334,6 +337,18 @@ export const GameScreen = () => {
             onClose={() => setEconomyOpen(false)}
           >
             <EconomyPanel />
+          </DraggablePanel>
+        ) : null}
+        {researchOpen ? (
+          <DraggablePanel
+            title="Ricerca & Tradizioni"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(60, viewportHeight / 2 - 260)}
+            initialWidth={720}
+            initialHeight={520}
+            onClose={() => setResearchOpen(false)}
+          >
+            <TechPanel />
           </DraggablePanel>
         ) : null}
         {debugOpen ? (
