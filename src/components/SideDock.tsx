@@ -4,6 +4,7 @@ interface SideDockProps {
   onOpenDiplomacy: () => void;
   onOpenEconomy: () => void;
   onOpenResearch: () => void;
+  onOpenGalaxy: () => void;
 }
 
 export const SideDock = ({
@@ -12,6 +13,7 @@ export const SideDock = ({
   onOpenDiplomacy,
   onOpenEconomy,
   onOpenResearch,
+  onOpenGalaxy,
 }: SideDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
@@ -59,6 +61,15 @@ export const SideDock = ({
         data-tooltip="Ricerca & Tradizioni"
       >
         R
+      </button>
+      <button
+        type="button"
+        className="side-dock__btn"
+        onClick={onOpenGalaxy}
+        aria-label="Panoramica galassia"
+        data-tooltip="Panoramica galassia"
+      >
+        G
       </button>
     </div>
   </aside>

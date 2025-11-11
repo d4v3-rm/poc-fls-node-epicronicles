@@ -1,13 +1,13 @@
-﻿import { useMemo } from 'react';
-import { useGameStore } from '@store/gameStore';
-import type { ScienceShip, StarClass, SystemVisibility } from '@domain/types';
+import { useMemo } from "react";
+import { useGameStore } from "@store/gameStore";
+import type { ScienceShip, StarClass, SystemVisibility } from "@domain/types";
 
-const VIEWPORT_SIZE = 320;
+const MAP_SIZE = 360;
 
 const systemClassColor: Record<StarClass, string> = {
-  mainSequence: '#70c1ff',
-  giant: '#ffa94d',
-  dwarf: '#d8b4ff',
+  mainSequence: "#70c1ff",
+  giant: "#ffa94d",
+  dwarf: "#d8b4ff",
 };
 
 const visibilityOpacity: Record<SystemVisibility, number> = {
@@ -22,10 +22,10 @@ const visibilityRadius: Record<SystemVisibility, number> = {
   surveyed: 6,
 };
 
-const shipStatusLabel: Record<ScienceShip['status'], string> = {
-  idle: 'In attesa',
-  traveling: 'In viaggio',
-  surveying: 'Analisi',
+const shipStatusLabel: Record<ScienceShip["status"], string> = {
+  idle: "In attesa",
+  traveling: "In viaggio",
+  surveying: "Analisi",
 };
 
 interface GalaxyOverviewProps {
@@ -55,162 +55,170 @@ export const GalaxyOverview = ({ onFocusSystem }: GalaxyOverviewProps) => {
 
     return systems.map((system) => ({
       ...system,
-      screenX:
-        ((system.position.x - minX) / spanX) * (VIEWPORT_SIZE - 20) + 10,
-      screenY:
-        ((system.position.y - minY) / spanY) * (VIEWPORT_SIZE - 20) + 10,
+      screenX: ((system.position.x - minX) / spanX) * (MAP_SIZE - 30) + 15,
+      screenY: ((system.position.y - minY) / spanY) * (MAP_SIZE - 30) + 15,
     }));
   }, [systems]);
 
-  const systemById = useMemo(() => {
+  const mappedById = useMemo(() => {
     const map = new Map<string, (typeof mappedSystems)[number]>();
     mappedSystems.forEach((system) => map.set(system.id, system));
     return map;
   }, [mappedSystems]);
 
-  const colonies = useMemo(
-    () =>
-      planets.map((planet) => ({
-        ...planet,
-        systemName:
-          systems.find((system) => system.id === planet.systemId)?.name ??
-          planet.systemId,
-      })),
-    [planets, systems],
-  );
-
   const surveyedCount = systems.filter(
-    (system) => system.visibility === 'surveyed',
+    (system) => system.visibility === "surveyed",
   ).length;
   const revealedCount = systems.filter(
-    (system) => system.visibility !== 'unknown',
+    (system) => system.visibility !== "unknown",
   ).length;
+  const hostile = systems.filter((system) => (system.hostilePower ?? 0) > 0);
+
+  const shipCards = scienceShips.map((ship) => {
+    const currentSystem = mappedById.get(ship.currentSystemId) ?? null;
+    const target = ship.targetSystemId
+      ? mappedById.get(ship.targetSystemId) ?? null
+      : null;
+    return {
+      ship,
+      currentSystem,
+      target,
+    };
+  });
 
   return (
-    <section className="galaxy-overview">
-      <div className="galaxy-overview__map" aria-label="Mappa galattica">
-        <svg viewBox={`0 0 ${VIEWPORT_SIZE} ${VIEWPORT_SIZE}`} role="presentation">
-          <rect
-            width={VIEWPORT_SIZE}
-            height={VIEWPORT_SIZE}
-            fill="rgba(255,255,255,0.02)"
-            stroke="rgba(255,255,255,0.1)"
-          />
-          {mappedSystems.map((system) => (
-            <g key={system.id}>
-              {system.hostilePower && system.hostilePower > 0 ? (
+    <section className="galaxy-modal">
+      <header className="galaxy-modal__header">
+        <div>
+          <p className="galaxy-modal__eyebrow">Situazione galattica</p>
+          <h2>Panoramica galassia</h2>
+          <p className="text-muted">
+            Stato di sistemi, colonie e navi scientifiche. Clicca su un sistema noto per centrare la mappa.
+          </p>
+        </div>
+        <div className="galaxy-modal__summary">
+          <span className="pill">
+            Sistemi: <strong>{systems.length}</strong>
+          </span>
+          <span className="pill pill--success">
+            Sondati: <strong>{surveyedCount}</strong>
+          </span>
+          <span className="pill">
+            Rivelati: <strong>{revealedCount}</strong>
+          </span>
+          <span className="pill pill--alert">
+            Ostili: <strong>{hostile.length}</strong>
+          </span>
+          <span className="pill">
+            Colonie: <strong>{planets.length}</strong>
+          </span>
+        </div>
+      </header>
+
+      <div className="galaxy-modal__content">
+        <div className="galaxy-modal__map" aria-label="Mappa galattica">
+          <svg viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} role="presentation">
+            <rect
+              width={MAP_SIZE}
+              height={MAP_SIZE}
+              fill="rgba(255,255,255,0.02)"
+              stroke="rgba(255,255,255,0.1)"
+            />
+            {mappedSystems.map((system) => (
+              <g key={system.id} className="galaxy-modal__system">
+                {system.hostilePower && system.hostilePower > 0 ? (
+                  <circle
+                    cx={system.screenX}
+                    cy={system.screenY}
+                    r={visibilityRadius[system.visibility] + 5}
+                    className="galaxy-modal__hostile"
+                  />
+                ) : null}
                 <circle
                   cx={system.screenX}
                   cy={system.screenY}
-                  r={visibilityRadius[system.visibility] + 4}
-                  className="galaxy-overview__hostile"
+                  r={visibilityRadius[system.visibility]}
+                  fill={systemClassColor[system.starClass]}
+                  opacity={visibilityOpacity[system.visibility]}
                 />
-              ) : null}
-              <circle
-                cx={system.screenX}
-                cy={system.screenY}
-                r={visibilityRadius[system.visibility]}
-                fill={systemClassColor[system.starClass]}
-                opacity={visibilityOpacity[system.visibility]}
-              />
-              <text
-                x={system.screenX + 8}
-                y={system.screenY + 4}
-                className="galaxy-overview__label"
-              >
-                {system.name}
-              </text>
-              {onFocusSystem ? (
+                <text
+                  x={system.screenX + 8}
+                  y={system.screenY + 4}
+                  className="galaxy-modal__label"
+                >
+                  {system.name}
+                </text>
+                {onFocusSystem ? (
+                  <circle
+                    cx={system.screenX}
+                    cy={system.screenY}
+                    r={visibilityRadius[system.visibility] + 8}
+                    className="galaxy-modal__focus"
+                    onClick={() =>
+                      system.visibility !== "unknown"
+                        ? onFocusSystem(system.id)
+                        : null
+                    }
+                  />
+                ) : null}
+              </g>
+            ))}
+            {shipCards.map(({ ship, currentSystem }) => {
+              if (!currentSystem) return null;
+              return (
                 <circle
-                  cx={system.screenX}
-                  cy={system.screenY}
-                  r={visibilityRadius[system.visibility] + 2}
-                  className="galaxy-overview__focus"
-                  onClick={() =>
-                    system.visibility !== 'unknown' ? onFocusSystem(system.id) : null
-                  }
-                />
-              ) : null}
-            </g>
-          ))}
-          {scienceShips.map((ship) => {
-            const currentSystem = systemById.get(ship.currentSystemId);
-            if (!currentSystem) {
-              return null;
-            }
-            return (
-              <g key={ship.id}>
-                <circle
+                  key={ship.id}
                   cx={currentSystem.screenX}
                   cy={currentSystem.screenY}
-                  r={3}
-                  className="galaxy-overview__ship"
+                  r={4}
+                  className="galaxy-modal__ship"
                 />
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-      <div className="galaxy-overview__list">
-        <header className="galaxy-overview__header">
-          <h3>Sistemi monitorati</h3>
-          <p className="galaxy-overview__hint">
-            {surveyedCount}/{systems.length} sondati &middot; {revealedCount} rivelati
-          </p>
-        </header>
-        <div className="galaxy-overview__cols">
-          <div className="galaxy-overview__col">
-            <h4>Colonie attive</h4>
-            <ul className="galaxy-overview__colonies">
-              {colonies.length === 0 ? (
-                <li className="text-muted">Nessuna colonia attiva.</li>
+              );
+            })}
+          </svg>
+        </div>
+        <div className="galaxy-modal__lists">
+          <div className="galaxy-modal__block">
+            <h3>Sistemi ostili</h3>
+            <ul className="galaxy-modal__list">
+              {hostile.length === 0 ? (
+                <li className="text-muted">Nessuna minaccia rilevata.</li>
               ) : (
-                colonies.map((colony) => (
-                  <li key={colony.id}>
-                    <strong>{colony.name}</strong>
-                    <span className="text-muted">
-                      Sistema: {colony.systemName}
-                    </span>
-                    <span className="text-muted">
-                      Popolazione: {colony.population.workers} lavoratori /{' '}
-                      {colony.population.researchers} ricercatori
-                    </span>
+                hostile.map((system) => (
+                  <li key={system.id}>
+                    <div className="galaxy-list__row">
+                      <span>{system.name}</span>
+                      <span className="galaxy-list__tag">{system.hostilePower} forza</span>
+                    </div>
+                    <small className="text-muted">Stato: {system.visibility}</small>
                   </li>
                 ))
               )}
             </ul>
           </div>
-          <div className="galaxy-overview__col">
-            <h4>Navi scientifiche</h4>
-            <ul>
-              {scienceShips.map((ship) => {
-                const currentSystem = systems.find(
-                  (system) => system.id === ship.currentSystemId,
-                );
-                const target = ship.targetSystemId
-                  ? systems.find((system) => system.id === ship.targetSystemId)
-                  : null;
-                return (
+          <div className="galaxy-modal__block">
+            <h3>Navi scientifiche</h3>
+            <ul className="galaxy-modal__list">
+              {shipCards.length === 0 ? (
+                <li className="text-muted">Nessuna nave scientifica attiva.</li>
+              ) : (
+                shipCards.map(({ ship, currentSystem, target }) => (
                   <li key={ship.id}>
-                    <div className="ship-row">
-                      <span className="ship-name">{ship.name}</span>
+                    <div className="galaxy-list__row">
+                      <span>{ship.name}</span>
                       <span className={`ship-status ship-status--${ship.status}`}>
                         {shipStatusLabel[ship.status]}
                       </span>
                     </div>
-                    <p>
-                      Sistema attuale: {currentSystem ? currentSystem.name : '???'}
-                    </p>
-                    {target ? (
-                      <p className="ship-target">
-                        Obiettivo: {target.name} ({ship.ticksRemaining} tick)
-                      </p>
-                    ) : (
-                      <p className="ship-target">Nessun obiettivo attivo</p>
-                    )}
+                    <small className="text-muted">
+                      Presente in: {currentSystem ? currentSystem.name : "???"}
+                    </small>
+                    <small className="text-muted">
+                      Obiettivo: {target ? `${target.name} (${ship.ticksRemaining} tick)` : "Nessuno"}
+                    </small>
                   </li>
-                );
-              })}
+                ))
+              )}
             </ul>
           </div>
         </div>
@@ -218,4 +226,3 @@ export const GalaxyOverview = ({ onFocusSystem }: GalaxyOverviewProps) => {
     </section>
   );
 };
-

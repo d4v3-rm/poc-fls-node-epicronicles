@@ -13,6 +13,7 @@ interface DraggablePanelProps {
 
 const MIN_WIDTH = 240;
 const MIN_HEIGHT = 160;
+let zIndexSeed = 10;
 
 export const DraggablePanel = ({
   title,
@@ -28,6 +29,7 @@ export const DraggablePanel = ({
     width: initialWidth,
     height: initialHeight,
   });
+  const [zIndex, setZIndex] = useState(() => ++zIndexSeed);
   const draggingRef = useRef(false);
   const resizingRef = useRef(false);
   const offsetRef = useRef({ x: 0, y: 0 });
@@ -62,6 +64,7 @@ export const DraggablePanel = ({
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      setZIndex(++zIndexSeed);
       draggingRef.current = true;
       offsetRef.current = {
         x: event.clientX - position.x,
@@ -104,7 +107,9 @@ export const DraggablePanel = ({
         transform: `translate(${position.x}px, ${position.y}px)`,
         width: `${size.width}px`,
         height: `${size.height}px`,
+        zIndex,
       }}
+      onMouseDown={() => setZIndex(++zIndexSeed)}
     >
       <div className="draggable-panel__header" onMouseDown={handleMouseDown}>
         <span>{title}</span>
