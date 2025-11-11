@@ -1,9 +1,14 @@
 interface SideDockProps {
   onOpenMissions: () => void;
   onOpenDiplomacy: () => void;
+  onOpenEconomy: () => void;
 }
 
-export const SideDock = ({ onOpenMissions, onOpenDiplomacy }: SideDockProps) => (
+export const SideDock = ({
+  onOpenMissions,
+  onOpenDiplomacy,
+  onOpenEconomy,
+}: SideDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
       <button
@@ -23,6 +28,15 @@ export const SideDock = ({ onOpenMissions, onOpenDiplomacy }: SideDockProps) => 
         data-tooltip="Diplomazia"
       >
         🤝
+      </button>
+      <button
+        type="button"
+        className="side-dock__btn"
+        onClick={onOpenEconomy}
+        aria-label="Bilancio economico"
+        data-tooltip="Bilancio economico"
+      >
+        💹
       </button>
     </div>
   </aside>

@@ -14,6 +14,7 @@ import { useWarEvents } from '@hooks/useWarEvents';
 import { MissionsPanel } from '@panels/MissionsPanel';
 import { SideDock } from './SideDock';
 import { DiplomacyPanel } from '@panels/DiplomacyPanel';
+import { EconomyPanel } from '@panels/EconomyPanel';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -56,6 +57,7 @@ export const GameScreen = () => {
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [missionsOpen, setMissionsOpen] = useState(false);
   const [diplomacyOpen, setDiplomacyOpen] = useState(false);
+  const [economyOpen, setEconomyOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -219,6 +221,7 @@ export const GameScreen = () => {
       <SideDock
         onOpenMissions={() => setMissionsOpen(true)}
         onOpenDiplomacy={() => setDiplomacyOpen(true)}
+        onOpenEconomy={() => setEconomyOpen(true)}
       />
       <MapLayer
         focusSystemId={focusSystemId}
@@ -304,6 +307,18 @@ export const GameScreen = () => {
             onClose={() => setDiplomacyOpen(false)}
           >
             <DiplomacyPanel />
+          </DraggablePanel>
+        ) : null}
+        {economyOpen ? (
+          <DraggablePanel
+            title="Bilancio economico"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(60, viewportHeight / 2 - 260)}
+            initialWidth={720}
+            initialHeight={520}
+            onClose={() => setEconomyOpen(false)}
+          >
+            <EconomyPanel />
           </DraggablePanel>
         ) : null}
         {debugOpen ? (

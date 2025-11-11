@@ -1,17 +1,20 @@
-﻿import { useMemo } from 'react';
-import { useAppSelector } from '@store/gameStore';
-import { resourceLabels } from '@domain/shared/resourceMetadata';
-import type { ResourceType } from '@domain/types';
-import { formatSigned } from './shared/formatters';
-import { selectNetResources, selectPlanets, selectResources } from '@store/selectors';
+import { useMemo } from "react";
+import { useAppSelector } from "@store/gameStore";
+import { resourceLabels } from "@domain/shared/resourceMetadata";
+import type { ResourceType } from "@domain/types";
+import { formatSigned } from "./shared/formatters";
+import { selectNetResources, selectPlanets, selectResources } from "@store/selectors";
 
 const RESOURCE_DISPLAY_ORDER: ResourceType[] = [
-  'energy',
-  'minerals',
-  'food',
-  'research',
-  'influence',
+  "energy",
+  "minerals",
+  "food",
+  "research",
+  "influence",
 ];
+
+const trendClass = (value: number) =>
+  value >= 0 ? "economy-pill is-positive" : "economy-pill is-negative";
 
 export const EconomyPanel = () => {
   const resources = useAppSelector(selectResources);
@@ -29,41 +32,63 @@ export const EconomyPanel = () => {
     return <p className="text-muted">Nessuna informazione economica.</p>;
   }
 
+  const totalStock = RESOURCE_DISPLAY_ORDER.reduce(
+    (sum, type) => sum + aggregate.resources[type].amount,
+    0,
+  );
+
   return (
-    <section className="economy-panel">
-      <header>
-        <h3>Bilancio risorse</h3>
-        <p className="text-muted">Colonie attive: {planets.length}</p>
+    <section className="economy-modal">
+      <header className="economy-modal__header">
+        <div>
+          <p className="economy-modal__eyebrow">Risorse & flussi</p>
+          <h2>Bilancio economico</h2>
+          <p className="text-muted">
+            Produzione, consumi e riserve aggregate. Colonie attive: {planets.length}
+          </p>
+        </div>
+        <div className="economy-modal__summary">
+          <span className="pill pill--success">
+            Riserve totali: <strong>{totalStock.toFixed(0)}</strong>
+          </span>
+          <span className="pill">
+            Risorse monitorate: <strong>{RESOURCE_DISPLAY_ORDER.length}</strong>
+          </span>
+        </div>
       </header>
-      <ul>
+      <div className="economy-grid">
         {RESOURCE_DISPLAY_ORDER.map((type) => {
           const ledger = aggregate.resources[type];
+          const netValue = aggregate.net[type];
           return (
-            <li key={type}>
-              <div>
-                <strong>{resourceLabels[type]}</strong>
-                <span className="text-muted">
-                  In magazzino: {ledger.amount.toFixed(1)}
-                </span>
+            <div className="economy-card" key={type}>
+              <div className="economy-card__head">
+                <div>
+                  <p className="economy-card__eyebrow">{resourceLabels[type]}</p>
+                  <h3>{ledger.amount.toFixed(1)}</h3>
+                  <span className={trendClass(netValue)}>
+                    Net {formatSigned(netValue)}
+                  </span>
+                </div>
               </div>
-              <div className="economy-panel__values">
-                <span>Produzione: +{ledger.income.toFixed(1)}</span>
-                <span>Consumo: -{ledger.upkeep.toFixed(1)}</span>
-                <span
-                  className={
-                    aggregate.net[type] >= 0
-                      ? 'economy-panel__net is-positive'
-                      : 'economy-panel__net is-negative'
-                  }
-                >
-                  Net: {formatSigned(aggregate.net[type])}
-                </span>
+              <div className="economy-card__body">
+                <div className="economy-meta">
+                  <span>Produzione: +{ledger.income.toFixed(1)}</span>
+                  <span>Consumo: -{ledger.upkeep.toFixed(1)}</span>
+                </div>
+                <div className="economy-progress">
+                  <div
+                    className="economy-progress__fill"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, ledger.income))}%`,
+                    }}
+                  />
+                </div>
               </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </section>
   );
 };
-

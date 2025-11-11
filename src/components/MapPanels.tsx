@@ -1,7 +1,6 @@
 import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { ColonyPanel } from '@panels/ColonyPanel';
 import { GalaxyOverview } from '@panels/GalaxyOverview';
-import { EconomyPanel } from '@panels/EconomyPanel';
 import { DistrictQueuePanel } from '@panels/DistrictQueuePanel';
 import { SciencePanel } from '@panels/SciencePanel';
 import { SystemPanel } from '@panels/SystemPanel';
@@ -77,15 +76,6 @@ export const MapPanels = ({
       initialHeight={280}
     >
       <GalaxyOverview onFocusSystem={onFocusSystem} />
-    </DraggablePanel>
-    <DraggablePanel
-      title="Bilancio economico"
-      initialX={leftOffset}
-      initialY={640}
-      initialWidth={320}
-      initialHeight={260}
-    >
-      <EconomyPanel />
     </DraggablePanel>
     <DraggablePanel
       title="Coda distretti"
