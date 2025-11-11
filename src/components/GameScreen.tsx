@@ -18,6 +18,7 @@ import { EconomyPanel } from '@panels/EconomyPanel';
 import { EventPanel } from '@panels/EventPanel';
 import { TechPanel } from '@panels/TechPanel';
 import { GalaxyOverview } from '@panels/GalaxyOverview';
+import { ColonizationPanel } from '@panels/ColonizationPanel';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -64,6 +65,7 @@ export const GameScreen = () => {
   const [economyOpen, setEconomyOpen] = useState(false);
   const [researchOpen, setResearchOpen] = useState(false);
   const [galaxyOpen, setGalaxyOpen] = useState(false);
+  const [colonizationOpen, setColonizationOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -231,6 +233,7 @@ export const GameScreen = () => {
         onOpenEconomy={() => setEconomyOpen(true)}
         onOpenResearch={() => setResearchOpen(true)}
         onOpenGalaxy={() => setGalaxyOpen(true)}
+        onOpenColonization={() => setColonizationOpen(true)}
       />
       <MapLayer
         focusSystemId={focusSystemId}
@@ -366,6 +369,24 @@ export const GameScreen = () => {
             <GalaxyOverview
               onFocusSystem={(systemId) => {
                 setGalaxyOpen(false);
+                setFocusSystemId(systemId);
+                setFocusPlanetId(null);
+              }}
+            />
+          </DraggablePanel>
+        ) : null}
+        {colonizationOpen ? (
+          <DraggablePanel
+            title="Colonizzazione"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(60, viewportHeight / 2 - 260)}
+            initialWidth={760}
+            initialHeight={560}
+            onClose={() => setColonizationOpen(false)}
+          >
+            <ColonizationPanel
+              onFocusSystem={(systemId) => {
+                setColonizationOpen(false);
                 setFocusSystemId(systemId);
                 setFocusPlanetId(null);
               }}

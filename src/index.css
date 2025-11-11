@@ -1326,9 +1326,8 @@ body {
 
 .side-dock {
   position: absolute;
-  top: 64px;
+  top: 50%;
   left: 0;
-  bottom: 72px;
   width: 72px;
   z-index: 4;
   pointer-events: auto;
@@ -1337,6 +1336,7 @@ body {
   align-items: center;
   padding: 0.4rem 0.35rem;
   gap: 0.5rem;
+  transform: translateY(-50%);
 }
 
 .side-dock__items {

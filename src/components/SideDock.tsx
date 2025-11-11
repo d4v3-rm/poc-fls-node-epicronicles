@@ -1,3 +1,5 @@
+import { SatelliteDish, Sparkles, Handshake, LineChart, FlaskConical, Orbit, Flag } from 'lucide-react';
+
 interface SideDockProps {
   onOpenMissions: () => void;
   onOpenEvents: () => void;
@@ -5,6 +7,7 @@ interface SideDockProps {
   onOpenEconomy: () => void;
   onOpenResearch: () => void;
   onOpenGalaxy: () => void;
+  onOpenColonization: () => void;
 }
 
 export const SideDock = ({
@@ -14,6 +17,7 @@ export const SideDock = ({
   onOpenEconomy,
   onOpenResearch,
   onOpenGalaxy,
+  onOpenColonization,
 }: SideDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
@@ -24,7 +28,7 @@ export const SideDock = ({
         aria-label="Missioni in corso"
         data-tooltip="Missioni in corso"
       >
-        M
+        <SatelliteDish size={18} />
       </button>
       <button
         type="button"
@@ -33,7 +37,7 @@ export const SideDock = ({
         aria-label="Eventi e anomalie"
         data-tooltip="Eventi e anomalie"
       >
-        E
+        <Sparkles size={18} />
       </button>
       <button
         type="button"
@@ -42,7 +46,7 @@ export const SideDock = ({
         aria-label="Diplomazia"
         data-tooltip="Diplomazia"
       >
-        D
+        <Handshake size={18} />
       </button>
       <button
         type="button"
@@ -51,7 +55,7 @@ export const SideDock = ({
         aria-label="Bilancio economico"
         data-tooltip="Bilancio economico"
       >
-        $
+        <LineChart size={18} />
       </button>
       <button
         type="button"
@@ -60,7 +64,16 @@ export const SideDock = ({
         aria-label="Ricerca & Tradizioni"
         data-tooltip="Ricerca & Tradizioni"
       >
-        R
+        <FlaskConical size={18} />
+      </button>
+      <button
+        type="button"
+        className="side-dock__btn"
+        onClick={onOpenColonization}
+        aria-label="Colonizzazione"
+        data-tooltip="Colonizzazione"
+      >
+        <Flag size={18} />
       </button>
       <button
         type="button"
@@ -69,7 +82,7 @@ export const SideDock = ({
         aria-label="Panoramica galassia"
         data-tooltip="Panoramica galassia"
       >
-        G
+        <Orbit size={18} />
       </button>
     </div>
   </aside>
