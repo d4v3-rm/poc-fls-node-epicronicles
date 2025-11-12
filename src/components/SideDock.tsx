@@ -1,5 +1,4 @@
-import { SatelliteDish, Sparkles, Handshake, LineChart, FlaskConical, Orbit, Flag } from 'lucide-react';
-import { Swords } from 'lucide-react';
+import { SatelliteDish, Sparkles, Handshake, LineChart, FlaskConical, Orbit, Flag, Swords, ScrollText } from 'lucide-react';
 
 interface SideDockProps {
   onOpenMissions: () => void;
@@ -10,6 +9,7 @@ interface SideDockProps {
   onOpenGalaxy: () => void;
   onOpenColonization: () => void;
   onOpenBattles: () => void;
+  onOpenLog: () => void;
 }
 
 export const SideDock = ({
@@ -21,6 +21,7 @@ export const SideDock = ({
   onOpenGalaxy,
   onOpenColonization,
   onOpenBattles,
+  onOpenLog,
 }: SideDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
@@ -77,6 +78,15 @@ export const SideDock = ({
         data-tooltip="Colonizzazione"
       >
         <Flag size={18} />
+      </button>
+      <button
+        type="button"
+        className="side-dock__btn"
+        onClick={onOpenLog}
+        aria-label="Log eventi"
+        data-tooltip="Log eventi"
+      >
+        <ScrollText size={18} />
       </button>
       <button
         type="button"

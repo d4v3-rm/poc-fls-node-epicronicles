@@ -20,6 +20,7 @@ import { TechPanel } from '@panels/TechPanel';
 import { GalaxyOverview } from '@panels/GalaxyOverview';
 import { ColonizationPanel } from '@panels/ColonizationPanel';
 import { BattlesPanel } from '@panels/BattlesPanel';
+import { LogPanel } from '@panels/LogPanel';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -68,6 +69,7 @@ export const GameScreen = () => {
   const [galaxyOpen, setGalaxyOpen] = useState(false);
   const [colonizationOpen, setColonizationOpen] = useState(false);
   const [battlesOpen, setBattlesOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -237,6 +239,7 @@ export const GameScreen = () => {
         onOpenGalaxy={() => setGalaxyOpen(true)}
         onOpenColonization={() => setColonizationOpen(true)}
         onOpenBattles={() => setBattlesOpen(true)}
+        onOpenLog={() => setLogOpen(true)}
       />
       <MapLayer
         focusSystemId={focusSystemId}
@@ -407,6 +410,18 @@ export const GameScreen = () => {
               unreadWarIds={unreadWarIds}
               onMarkWarRead={markWarsRead}
             />
+          </DraggablePanel>
+        ) : null}
+        {logOpen ? (
+          <DraggablePanel
+            title="Log eventi"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(60, viewportHeight / 2 - 260)}
+            initialWidth={760}
+            initialHeight={560}
+            onClose={() => setLogOpen(false)}
+          >
+            <LogPanel />
           </DraggablePanel>
         ) : null}
         {debugOpen ? (
