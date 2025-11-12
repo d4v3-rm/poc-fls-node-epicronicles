@@ -3,7 +3,7 @@ import { ColonyPanel } from '@panels/ColonyPanel';
 import { DistrictQueuePanel } from '@panels/DistrictQueuePanel';
 import { SciencePanel } from '@panels/SciencePanel';
 import { SystemPanel } from '@panels/SystemPanel';
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import type { StarSystem } from '@domain/types';
 
 const FleetAndCombatPanel = lazy(() =>
@@ -22,9 +22,6 @@ interface MapPanelsProps {
   leftOffset: number;
   viewportWidth: number;
   viewportHeight: number;
-  warEventsRef: React.RefObject<HTMLUListElement | null>;
-  unreadWarIds: Set<string>;
-  onMarkWarRead: () => void;
   onSelectPlanet: (planetId: string, systemId: string) => void;
   onFocusSystem: (systemId: string) => void;
   onClearFocusTargets: () => void;
@@ -38,9 +35,6 @@ export const MapPanels = ({
   leftOffset,
   viewportWidth,
   viewportHeight,
-  warEventsRef,
-  unreadWarIds,
-  onMarkWarRead,
   onSelectPlanet,
   onFocusSystem,
   onClearFocusTargets,
@@ -98,11 +92,7 @@ export const MapPanels = ({
       initialY={320}
     >
       <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
-        <FleetAndCombatPanel
-          warEventsRef={warEventsRef}
-          unreadWarIds={unreadWarIds}
-          onMarkWarRead={onMarkWarRead}
-        />
+        <FleetAndCombatPanel />
       </Suspense>
     </DraggablePanel>
     {shipyardSystem ? (

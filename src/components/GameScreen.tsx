@@ -19,6 +19,7 @@ import { EventPanel } from '@panels/EventPanel';
 import { TechPanel } from '@panels/TechPanel';
 import { GalaxyOverview } from '@panels/GalaxyOverview';
 import { ColonizationPanel } from '@panels/ColonizationPanel';
+import { BattlesPanel } from '@panels/BattlesPanel';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -66,6 +67,7 @@ export const GameScreen = () => {
   const [researchOpen, setResearchOpen] = useState(false);
   const [galaxyOpen, setGalaxyOpen] = useState(false);
   const [colonizationOpen, setColonizationOpen] = useState(false);
+  const [battlesOpen, setBattlesOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -234,6 +236,7 @@ export const GameScreen = () => {
         onOpenResearch={() => setResearchOpen(true)}
         onOpenGalaxy={() => setGalaxyOpen(true)}
         onOpenColonization={() => setColonizationOpen(true)}
+        onOpenBattles={() => setBattlesOpen(true)}
       />
       <MapLayer
         focusSystemId={focusSystemId}
@@ -279,9 +282,6 @@ export const GameScreen = () => {
           leftOffset={panelOffset}
           viewportWidth={viewportWidth}
           viewportHeight={viewportHeight}
-          warEventsRef={warEventsRef}
-          unreadWarIds={unreadWarIds}
-          onMarkWarRead={markWarsRead}
           onSelectPlanet={(planetId, systemId) => {
             setFocusSystemId(systemId);
             setSelectedPlanetId(planetId);
@@ -390,6 +390,22 @@ export const GameScreen = () => {
                 setFocusSystemId(systemId);
                 setFocusPlanetId(null);
               }}
+            />
+          </DraggablePanel>
+        ) : null}
+        {battlesOpen ? (
+          <DraggablePanel
+            title="Flotte & Battaglie"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(60, viewportHeight / 2 - 260)}
+            initialWidth={760}
+            initialHeight={560}
+            onClose={() => setBattlesOpen(false)}
+          >
+            <BattlesPanel
+              warEventsRef={warEventsRef}
+              unreadWarIds={unreadWarIds}
+              onMarkWarRead={markWarsRead}
             />
           </DraggablePanel>
         ) : null}
