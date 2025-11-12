@@ -53,7 +53,6 @@ export const GameScreen = () => {
   const demotePopulationJob = useGameStore(
     (state) => state.demotePopulation,
   );
-  const [debugOpen, setDebugOpen] = useState(false);
   const [focusSystemId, setFocusSystemId] = useState<string | null>(null);
   const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
@@ -70,6 +69,7 @@ export const GameScreen = () => {
   const [colonizationOpen, setColonizationOpen] = useState(false);
   const [battlesOpen, setBattlesOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [debugModalOpen, setDebugModalOpen] = useState(false);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -268,8 +268,8 @@ export const GameScreen = () => {
         onClearFocus={clearFocusTargets}
       />
       <HudBottomBar
-        onToggleDebug={() => setDebugOpen((value) => !value)}
-        debugOpen={debugOpen}
+        onToggleDebug={() => setDebugModalOpen(true)}
+        debugOpen={debugModalOpen}
         onShowWars={() => {
           const target = warEventsRef.current;
           if (target) {
@@ -424,21 +424,17 @@ export const GameScreen = () => {
             <LogPanel />
           </DraggablePanel>
         ) : null}
-        {debugOpen ? (
-          <div className="debug-modal">
-            <div className="debug-modal__header">
-              <h3>Console debug</h3>
-              <button
-                className="panel__action panel__action--compact"
-                onClick={() => setDebugOpen(false)}
-              >
-                Chiudi
-              </button>
-            </div>
-            <div className="debug-modal__content">
-              <DebugConsole />
-            </div>
-          </div>
+        {debugModalOpen ? (
+          <DraggablePanel
+            title="Console debug"
+            initialX={Math.max(40, viewportWidth / 2 - 360)}
+            initialY={Math.max(40, viewportHeight / 2 - 280)}
+            initialWidth={760}
+            initialHeight={560}
+            onClose={() => setDebugModalOpen(false)}
+          >
+            <DebugConsole />
+          </DraggablePanel>
         ) : null}
         {selectedPlanet && selectedPlanetSystem ? (
           <DraggablePanel

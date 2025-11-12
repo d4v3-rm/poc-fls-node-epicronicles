@@ -28,6 +28,15 @@ export const SideDock = ({
       <button
         type="button"
         className="side-dock__btn"
+        onClick={onOpenLog}
+        aria-label="Log eventi"
+        data-tooltip="Log eventi"
+      >
+        <ScrollText size={18} />
+      </button>
+      <button
+        type="button"
+        className="side-dock__btn"
         onClick={onOpenMissions}
         aria-label="Missioni in corso"
         data-tooltip="Missioni in corso"
