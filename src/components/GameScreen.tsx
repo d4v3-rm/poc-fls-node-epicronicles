@@ -140,6 +140,17 @@ export const GameScreen = () => {
     typeof window !== 'undefined' ? window.innerHeight : 800;
   const dockWidth = 76;
   const panelOffset = dockWidth + 12;
+
+  const sizeFor = (w: number, h: number) => {
+    const width = Math.min(w, viewportWidth - 40);
+    const height = Math.min(h, viewportHeight - 80);
+    const initialX = Math.max(20, (viewportWidth - width) / 2);
+    const initialY = Math.max(20, (viewportHeight - height) / 2);
+    return { width, height, initialX, initialY };
+  };
+
+  const large = sizeFor(1000, 700);
+  const medium = sizeFor(840, 620);
   if (!session) {
     return (
       <div className="game-layout">
@@ -303,10 +314,10 @@ export const GameScreen = () => {
         {missionsOpen ? (
           <DraggablePanel
             title="Missioni in corso"
-            initialX={Math.max(40, viewportWidth / 2 - 380)}
-            initialY={Math.max(40, viewportHeight / 2 - 280)}
-            initialWidth={840}
-            initialHeight={620}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setMissionsOpen(false)}
           >
             <MissionsPanel />
@@ -315,10 +326,10 @@ export const GameScreen = () => {
         {eventsOpen ? (
           <DraggablePanel
             title="Eventi & Anomalie"
-            initialX={Math.max(40, viewportWidth / 2 - 400)}
-            initialY={Math.max(40, viewportHeight / 2 - 300)}
-            initialWidth={880}
-            initialHeight={640}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setEventsOpen(false)}
           >
             <EventPanel />
@@ -327,10 +338,10 @@ export const GameScreen = () => {
         {diplomacyOpen ? (
           <DraggablePanel
             title="Diplomazia"
-            initialX={Math.max(40, viewportWidth / 2 - 400)}
-            initialY={Math.max(40, viewportHeight / 2 - 300)}
-            initialWidth={880}
-            initialHeight={640}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setDiplomacyOpen(false)}
           >
             <DiplomacyPanel />
@@ -339,10 +350,10 @@ export const GameScreen = () => {
         {economyOpen ? (
           <DraggablePanel
             title="Bilancio economico"
-            initialX={Math.max(40, viewportWidth / 2 - 400)}
-            initialY={Math.max(40, viewportHeight / 2 - 300)}
-            initialWidth={880}
-            initialHeight={640}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setEconomyOpen(false)}
           >
             <EconomyPanel />
@@ -351,10 +362,10 @@ export const GameScreen = () => {
         {researchOpen ? (
           <DraggablePanel
             title="Ricerca & Tradizioni"
-            initialX={Math.max(40, viewportWidth / 2 - 400)}
-            initialY={Math.max(40, viewportHeight / 2 - 300)}
-            initialWidth={880}
-            initialHeight={640}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setResearchOpen(false)}
           >
             <TechPanel />
@@ -363,10 +374,10 @@ export const GameScreen = () => {
         {galaxyOpen ? (
           <DraggablePanel
             title="Panoramica galassia"
-            initialX={Math.max(40, viewportWidth / 2 - 420)}
-            initialY={Math.max(40, viewportHeight / 2 - 320)}
-            initialWidth={900}
-            initialHeight={680}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setGalaxyOpen(false)}
           >
             <GalaxyOverview
@@ -381,10 +392,10 @@ export const GameScreen = () => {
         {colonizationOpen ? (
           <DraggablePanel
             title="Colonizzazione"
-            initialX={Math.max(40, viewportWidth / 2 - 420)}
-            initialY={Math.max(40, viewportHeight / 2 - 320)}
-            initialWidth={900}
-            initialHeight={680}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setColonizationOpen(false)}
           >
             <ColonizationPanel
@@ -399,10 +410,10 @@ export const GameScreen = () => {
         {battlesOpen ? (
           <DraggablePanel
             title="Flotte & Battaglie"
-            initialX={Math.max(40, viewportWidth / 2 - 420)}
-            initialY={Math.max(40, viewportHeight / 2 - 320)}
-            initialWidth={900}
-            initialHeight={680}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setBattlesOpen(false)}
           >
             <BattlesPanel
@@ -415,10 +426,10 @@ export const GameScreen = () => {
         {logOpen ? (
           <DraggablePanel
             title="Log eventi"
-            initialX={Math.max(40, viewportWidth / 2 - 420)}
-            initialY={Math.max(40, viewportHeight / 2 - 320)}
-            initialWidth={900}
-            initialHeight={680}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setLogOpen(false)}
           >
             <LogPanel />
@@ -427,10 +438,10 @@ export const GameScreen = () => {
         {debugModalOpen ? (
           <DraggablePanel
             title="Console debug"
-            initialX={Math.max(40, viewportWidth / 2 - 420)}
-            initialY={Math.max(40, viewportHeight / 2 - 320)}
-            initialWidth={900}
-            initialHeight={680}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
             onClose={() => setDebugModalOpen(false)}
           >
             <DebugConsole />
@@ -439,8 +450,10 @@ export const GameScreen = () => {
         {selectedPlanet && selectedPlanetSystem ? (
           <DraggablePanel
             title={`${selectedPlanet.name} (${selectedPlanetSystem.name})`}
-            initialX={viewportWidth / 2 - 180}
-            initialY={viewportHeight / 2 - 140}
+            initialX={medium.initialX}
+            initialY={medium.initialY}
+            initialWidth={medium.width}
+            initialHeight={medium.height}
             onClose={closePlanetPanel}
           >
             <PlanetDetail

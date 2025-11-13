@@ -41,8 +41,13 @@ export const MapPanels = ({
   shipyardSystem,
   closeShipyard,
   setFocusPlanetId,
-}: MapPanelsProps) => (
-  <div className="floating-panels">
+}: MapPanelsProps) => {
+  const modalWidth = Math.min(840, viewportWidth - 40);
+  const modalHeight = Math.min(620, viewportHeight - 80);
+  const modalX = Math.max(20, (viewportWidth - modalWidth) / 2);
+  const modalY = Math.max(20, (viewportHeight - modalHeight) / 2);
+  return (
+    <div className="floating-panels">
     <DraggablePanel
       title="Colonie"
       initialX={leftOffset}
@@ -98,8 +103,10 @@ export const MapPanels = ({
     {shipyardSystem ? (
       <DraggablePanel
         title={`Cantieri - ${shipyardSystem.name}`}
-        initialX={viewportWidth / 2 - 180}
-        initialY={viewportHeight / 2 - 200}
+        initialX={modalX}
+        initialY={modalY}
+        initialWidth={modalWidth}
+        initialHeight={modalHeight}
         onClose={closeShipyard}
       >
         <Suspense fallback={<p className="text-muted">Caricamento...</p>}>
@@ -108,4 +115,4 @@ export const MapPanels = ({
       </DraggablePanel>
     ) : null}
   </div>
-);
+)};
