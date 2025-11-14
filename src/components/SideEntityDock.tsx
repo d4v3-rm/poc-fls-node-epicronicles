@@ -19,19 +19,18 @@ interface SideEntityDockProps {
 }
 
 export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockProps) => {
-  const planets = useAppSelector(selectPlanets);
-  const colonized = useAppSelector(selectColonizedSystems);
+  useAppSelector(selectPlanets);
+  useAppSelector(selectColonizedSystems);
   const systems = useAppSelector(selectSystems);
   const scienceShips = useAppSelector(selectScienceShips);
   const session = useGameStore((state) => state.session);
 
-  const colonyEntries = planets
-    .filter((planet) => colonized.has(planet.systemId))
-    .map((planet) => ({
+  const colonyEntries =
+    session?.economy.planets.map((planet) => ({
       id: planet.id,
       name: planet.name,
       systemId: planet.systemId,
-    }));
+    })) ?? [];
 
   const getSystemName = (id: string) =>
     systems.find((s) => s.id === id)?.name ?? id;
