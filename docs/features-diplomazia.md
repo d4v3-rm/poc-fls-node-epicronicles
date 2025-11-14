@@ -1,19 +1,6 @@
-# Diplomazia e multi-impero
+﻿# Diplomazia e relazioni
 
-## Imperi e stato relazionale
-- Imperi: player + due AI generate da seed, con colore, personality, opinion, warStatus.
-- Opinion drift configurato (range min/max, war/peace threshold, check interval).
-- War events loggati con badge “unread”; warSince per durata.
-
-## Azioni diplomatiche (thunk)
-- `declareWarOnEmpire`, `proposePeaceWithEmpire`, `requestBorderAccess` con validazioni (empire esistente, stato corrente).
-- Risultati con reason specifico; update warStatus e notifiche/log guerra.
-
-## War zones e confini
-- `assignBordersToPlayer`: assegna sistemi colonizzati al player.
-- War zones: generazione potenza ostile in base a guerre attive, intensificazione periodica; impatto su movimenti e combattimenti IA.
-- Accesso confini: IA usa warStatus/borderAccess per decidere targeting e movimenti.
-
-## UI diplomazia
-- DiplomacyPanel: elenco imperi con opinione, stato (guerra/pace), pulsanti azioni (guerra/pace/accesso), messaggi di esito.
-- HUD bottom: badge guerre attive, war log con scroll-to da bottone notifiche.
+- **Engine**: `src/engines/diplomacy/diplomacy.ts` gestisce stati pace/guerra, opinione e personalità IA; helper in `store/utils/warUtils.ts`.
+- **UI**: pannello `src/panels/DiplomacyPanel.tsx` (relazioni, sentiment, azioni), stato guerre in `BattlesPanel.tsx` e badge HUD `HudBottomBar.tsx` (warUnread).
+- **IA avversari**: comportamenti in `src/engines/ai/ai.ts` includono decisioni diplomatiche e guerre.
+- **Thunks**: `src/store/thunks/diplomacyThunks.ts` per dichiarazioni e trattati; selettori `warSelectors.ts` per opinioni e guerre attive.

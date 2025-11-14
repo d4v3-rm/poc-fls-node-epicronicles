@@ -1,26 +1,7 @@
-# Economia, pianeti, popolazione e colonie
+﻿# Economia e risorse
 
-## Risorse e produzione
-- Risorse globali: energia, minerali, cibo, ricerca, influenza (ledger amount/income/upkeep).
-- Calcolo produzione per pianeta: baseProduction + distretti + popolazione – upkeep, con modificatore morale.
-- Modificatori di progressione (tech/perk) applicati come multipliers per income e bonus flat influenza.
-- Net per tick sommato a stock con clamp a zero.
-
-## Pianeti e distretti
-- Homeworld configurato (nome, size, habitability, distretti iniziali, produzione/upkeep).
-- Distretti: generator/mining/farm/research con costi/buildTime/production/upkeep; optional requiresColonists.
-- Coda costruzione distretti: add, cancel, prioritize; avanzamento per tick, applicazione distretto se requisiti rispettati; notifiche `districtComplete`.
-
-## Popolazione e morale
-- Ruoli: workers, specialists, researchers con produzione/upkeep dedicati.
-- Automazione: priorities (food, energy, minerals, research) con threshold deficit/surplus; riassegnazione worker/specialist/researcher.
-- Morale/happiness: penalità overcrowding, deficit risorse, habitability bassa; bonus specialisti; clamp min/max; influenza produzione tramite modifier stabilità.
-
-## Colonizzazione
-- Config colonization: costi risorse, preparation/travel/duration ticks.
-- Nave colonia iniziale/configurabile; ordine colonizza valida sistema sondato, disponibilità nave e risorse.
-- Missione con stati preparing/traveling/colonizing, progress per tick; aggiunge pianeta e assegna confini player a completamento; notifiche start/complete.
-
-## Notifiche e HUD economia
-- HUD risorse mostra amount e net/tick; notifiche per distretti completati, colonizzazione start/complete, sospensioni per risorse insufficienti.
-- EconomyPanel: elenco ledger con income/upkeep/net; DistrictQueuePanel con progress e azioni; PlanetDetail/ColonyPanel mostrano produzione breakdown, coda distretti, popolazione e morale.
+- **Engine**: `src/engines/economy/economy.ts` calcola produzione/consumi per energia, minerali, cibo, ricerca, influenza; distretti da `economy/districts.ts` e popolazione da `economy/population.ts`.
+- **Bilancio**: pannello `src/panels/EconomyPanel.tsx` mostra ledger e net; HUD top bar `src/components/HudTopBar.tsx` con risorse e delta colori.
+- **Costi e upkeep**: costi distretti e navi da `gameConfig.ts` e `economyUtils.ts`; upkeep flotte in `engines/fleet/ships.ts`.
+- **Notifiche economiche**: util `src/store/utils/notificationUtils.ts` e selettori `src/store/selectors/economySelectors.ts`.
+- **Shipyard**: produzione navi in `src/engines/fleet/shipyard.ts`, UI `src/panels/shipyard/*` e modale `ShipyardPanel.tsx`.
