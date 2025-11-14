@@ -81,9 +81,12 @@ export const GalaxyMap = ({
   const orbitBaseSpeed = useGameStore((state) => state.config.map.orbitSpeed);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const systemGroupRef = useRef<THREE.Group | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const animationRef = useRef<number | null>(null);
   const offsetTargetRef = useRef(new THREE.Vector3(0, 0, 0));
   const zoomTargetRef = useRef(170);
+  const lastFocusSystemRef = useRef<string | null>(null);
+  const lastFocusPlanetRef = useRef<string | null>(null);
   const planetAngleRef = useRef(new Map<string, number>());
   const planetLookupRef = useRef(new Map<string, THREE.Object3D>());
   const clockRef = useRef<THREE.Clock | null>(null);
@@ -129,6 +132,7 @@ export const GalaxyMap = ({
     }
 
     const { scene, camera, renderer, dispose } = createScene(container);
+    cameraRef.current = camera;
     clockRef.current = new THREE.Clock();
 
     const systemGroup = new THREE.Group();
@@ -317,6 +321,12 @@ export const GalaxyMap = ({
 
   useEffect(() => {
     if (!focusSystemId || focusPlanetId) {
+      if (!focusSystemId) {
+        lastFocusSystemRef.current = null;
+      }
+      return;
+    }
+    if (lastFocusSystemRef.current === focusSystemId) {
       return;
     }
     const target = systems.find((system) => system.id === focusSystemId);
@@ -333,15 +343,25 @@ export const GalaxyMap = ({
       const local = new THREE.Vector3(pos.x, pos.y, pos.z);
       const world = local.clone();
       group.localToWorld(world);
-      offsetTargetRef.current = group.position.clone().sub(world);
+      const desiredOffset = new THREE.Vector3(-world.x, -world.y, 0);
+      offsetTargetRef.current.copy(desiredOffset);
+      group.position.copy(desiredOffset);
     } else {
-      offsetTargetRef.current = new THREE.Vector3(-pos.x, -pos.y, 0);
+      offsetTargetRef.current.set(-pos.x, -pos.y, 0);
     }
     zoomTargetRef.current = target.visibility === 'surveyed' ? 90 : 120;
-  }, [focusSystemId, focusPlanetId, systems]);
+    if (cameraRef.current) {
+      cameraRef.current.position.z = zoomTargetRef.current;
+    }
+    lastFocusSystemRef.current = focusSystemId;
+  }, [focusSystemId, focusPlanetId, systems, onClearRef]);
 
   useEffect(() => {
     if (!focusPlanetId) {
+      lastFocusPlanetRef.current = null;
+      return;
+    }
+    if (lastFocusPlanetRef.current === focusPlanetId) {
       return;
     }
     const planet = planetLookupRef.current.get(focusPlanetId);
@@ -352,11 +372,17 @@ export const GalaxyMap = ({
     planet.getWorldPosition(worldPos);
     const group = systemGroupRef.current;
     if (group) {
-      offsetTargetRef.current = group.position.clone().sub(worldPos);
+      const desiredOffset = new THREE.Vector3(-worldPos.x, -worldPos.y, 0);
+      offsetTargetRef.current.copy(desiredOffset);
+      group.position.copy(desiredOffset);
     } else {
-      offsetTargetRef.current = new THREE.Vector3(-worldPos.x, -worldPos.y, 0);
+      offsetTargetRef.current.set(-worldPos.x, -worldPos.y, 0);
     }
     zoomTargetRef.current = 70;
+    if (cameraRef.current) {
+      cameraRef.current.position.z = zoomTargetRef.current;
+    }
+    lastFocusPlanetRef.current = focusPlanetId;
   }, [focusPlanetId, systems]);
 
   useEffect(() => {

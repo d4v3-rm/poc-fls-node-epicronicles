@@ -1,4 +1,4 @@
-import { useAppSelector, useGameStore } from '@store/gameStore';
+﻿import { useAppSelector, useGameStore } from '@store/gameStore';
 import {
   selectColonizedSystems,
   selectPlanets,
@@ -118,7 +118,7 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
                     </div>
                   </div>
                   <small className="text-muted">
-                    {getSystemName(fleet.systemId)} • Navi: {fleet.ships.length}
+                    {getSystemName(fleet.systemId)} - Navi: {fleet.ships.length}
                   </small>
                 </li>
               ))
@@ -165,7 +165,7 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
                   </div>
                 </div>
                 <small className="text-muted">
-                  {getSystemName(ship.currentSystemId)} • {ship.status}
+                  {getSystemName(ship.currentSystemId)} - {ship.status}
                 </small>
               </li>
             ))
@@ -175,3 +175,8 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
     </aside>
   );
 };
+
+
+
+
+

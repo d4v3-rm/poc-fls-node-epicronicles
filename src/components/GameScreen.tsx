@@ -22,7 +22,8 @@ import { ColonizationPanel } from '@panels/ColonizationPanel';
 import { BattlesPanel } from '@panels/BattlesPanel';
 import { LogPanel } from '@panels/LogPanel';
 import { SideEntityDock } from './SideEntityDock';
-import { FleetList } from '@panels/fleet/FleetList';
+import { FleetDetailPanel } from '@panels/fleet/FleetDetailPanel';
+import { ScienceShipDetailPanel } from '@panels/fleet/ScienceShipDetailPanel';
 import { selectScienceShips } from '@store/selectors';
 import {
   selectColonizedSystems,
@@ -279,13 +280,10 @@ export const GameScreen = () => {
             setFocusSystemId(systemId);
             setFocusPlanetId(planetId ?? null);
             setDockSelection(null);
-            setSelectedPlanetId(planetId ?? null);
           }}
           onSelect={(selection) => {
             if (selection.kind === 'colony') {
               setSelectedPlanetId(selection.planetId);
-              setFocusSystemId(selection.systemId);
-              setFocusPlanetId(selection.planetId);
               setDockSelection(null);
             }
           }}
@@ -298,7 +296,6 @@ export const GameScreen = () => {
           }}
           onSelect={(selection) => {
             setDockSelection(selection);
-            setFocusSystemId(selection.systemId);
             setFocusPlanetId(null);
           }}
         />
@@ -310,7 +307,6 @@ export const GameScreen = () => {
           }}
           onSelect={(selection) => {
             setDockSelection(selection);
-            setFocusSystemId(selection.systemId);
             setFocusPlanetId(null);
           }}
         />
@@ -488,51 +484,38 @@ export const GameScreen = () => {
         ) : null}
         {dockSelection && dockSelection.kind === 'fleet' ? (
           <div className="dock-detail-modal">
-            <div className="dock-detail__header">
-              <h4>Dettagli flotta</h4>
-              <button className="dock-detail__close" onClick={() => setDockSelection(null)}>
-                X
-              </button>
-            </div>
-            <div className="dock-detail__content">
-              {selectedFleet ? (
-                <FleetList
-                  fleets={[selectedFleet]}
-                  systems={systems}
-                  scienceShips={scienceShips}
-                  designs={shipDesigns}
-                  onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
-                  onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
-                  onSplit={(fleetId) => splitFleet(fleetId)}
-                />
-              ) : (
+            {selectedFleet ? (
+              <FleetDetailPanel
+                fleet={selectedFleet}
+                fleets={session.fleets}
+                systems={systems}
+                scienceShips={scienceShips}
+                designs={shipDesigns}
+                onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
+                onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
+                onSplit={(fleetId) => splitFleet(fleetId)}
+                onClose={() => setDockSelection(null)}
+              />
+            ) : (
+              <div className="dock-detail__content">
                 <p className="text-muted">Flotta non trovata.</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         ) : null}
         {dockSelection && dockSelection.kind === 'science' ? (
           <div className="dock-detail-modal">
-            <div className="dock-detail__header">
-              <h4>Dettagli nave scientifica</h4>
-              <button className="dock-detail__close" onClick={() => setDockSelection(null)}>
-                X
-              </button>
-            </div>
-            <div className="dock-detail__content">
-              {selectedScienceShip ? (
-                <>
-                  <p className="text-muted">Nave: {selectedScienceShip.name ?? selectedScienceShip.id}</p>
-                  <p className="text-muted">Sistema: {selectedScienceShip.currentSystemId}</p>
-                  <p className="text-muted">Stato: {selectedScienceShip.status}</p>
-                  <p className="text-muted">
-                    Destinazione: {selectedScienceShip.targetSystemId ?? 'Nessuna'}
-                  </p>
-                </>
-              ) : (
+            {selectedScienceShip ? (
+              <ScienceShipDetailPanel
+                ship={selectedScienceShip}
+                systems={systems}
+                onClose={() => setDockSelection(null)}
+              />
+            ) : (
+              <div className="dock-detail__content">
                 <p className="text-muted">Nave non trovata.</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         ) : null}
         {debugModalOpen ? (
