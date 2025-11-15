@@ -1,4 +1,15 @@
-import { SatelliteDish, Sparkles, Handshake, LineChart, FlaskConical, Orbit, Flag, Swords, ScrollText } from 'lucide-react';
+import {
+  SatelliteDish,
+  Sparkles,
+  Handshake,
+  LineChart,
+  FlaskConical,
+  Orbit,
+  Flag,
+  Swords,
+  ScrollText,
+} from 'lucide-react';
+import '../styles/components/SideDock.scss';
 
 interface SideDockProps {
   onOpenMissions: () => void;

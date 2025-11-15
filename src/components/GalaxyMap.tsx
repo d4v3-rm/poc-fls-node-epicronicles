@@ -8,6 +8,7 @@ import {
   fleetMaterials,
 } from '@three/materials';
 import { createScene } from '@three/scene';
+import '../styles/components/GalaxyMap.scss';
 import { createSystemNode } from '@three/mapUtils';
 
 const clamp = (value: number, min: number, max: number) =>

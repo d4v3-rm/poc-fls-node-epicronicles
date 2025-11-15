@@ -12,6 +12,7 @@ import {
   Bug,
   LogOut,
 } from 'lucide-react';
+import '../styles/components/HudBottomBar.scss';
 
 interface HudBottomBarProps {
   onToggleDebug: () => void;

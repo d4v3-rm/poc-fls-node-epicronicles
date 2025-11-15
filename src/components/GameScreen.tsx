@@ -31,6 +31,7 @@ import {
   selectPlanets,
   selectSystems,
 } from '@store/selectors';
+import '../styles/components/GameScreen.scss';
 
 export const GameScreen = () => {
   useGameLoop();
