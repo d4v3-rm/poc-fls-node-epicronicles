@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+import '../../styles/components/DraggablePanel.scss';
+
 interface DraggablePanelProps {
   title: string;
   initialX: number;
