@@ -1,0 +1,84 @@
+@use './tokens';
+
+:root {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-shell--menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.panel {
+  background: rgba(3, 8, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  width: min(420px, 90vw);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+}
+
+.panel__action {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(14, 40, 82, 0.8);
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.panel__action:hover:enabled {
+  background: rgba(25, 80, 160, 0.9);
+  transform: translateY(-1px);
+}
+
+.panel__action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.panel__action--compact {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.panel__action--inline {
+  width: auto;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(6, 8, 16, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 140, 200, 0.6);
+  border-radius: 999px;
+}
