@@ -1,0 +1,44 @@
+@use "../_tokens";
+
+.economy-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    li {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 0.5rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+
+  &__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+  &__net {
+    font-weight: 600;
+
+    &.is-positive {
+      color: #7fe38f;
+    }
+
+    &.is-negative {
+      color: #ff9b8a;
+    }
+  }
+}

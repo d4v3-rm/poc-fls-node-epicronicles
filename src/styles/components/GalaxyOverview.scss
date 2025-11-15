@@ -1,0 +1,56 @@
+@use "../_tokens";
+
+.galaxy-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  &__map {
+    flex: 0 0 auto;
+  }
+
+  &__list {
+    flex: 1;
+    min-width: 320px;
+  }
+
+  &__cols {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__col {
+    flex: 1;
+    min-width: 220px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: rgba(4, 7, 16, 0.6);
+  }
+
+  &__colonies {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    li {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 0.4rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+  }
+
+  &__focus {
+    fill: transparent;
+    stroke: rgba(255, 255, 255, 0.25);
+    stroke-dasharray: 4;
+    pointer-events: auto;
+  }
+}

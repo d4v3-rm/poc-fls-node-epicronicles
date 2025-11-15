@@ -1,0 +1,47 @@
+@use "../_tokens";
+
+.system-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.system-panel__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+}
+
+.system-panel__section {
+  margin-top: 0.75rem;
+}
+
+.system-panel__planets {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  li {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+}
+
+.system-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.65rem;
+  border-radius: 999px;
+  background: rgba(127, 227, 143, 0.15);
+  border: 1px solid rgba(127, 227, 143, 0.3);
+}
