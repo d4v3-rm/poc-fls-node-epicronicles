@@ -90,6 +90,10 @@ export const GalaxyMap = ({
   const zoomTargetRef = useRef(170);
   const lastFocusSystemRef = useRef<string | null>(null);
   const lastFocusPlanetRef = useRef<string | null>(null);
+  const lastFocusAppliedRef = useRef<{ id: string | null; trigger: number }>({
+    id: null,
+    trigger: -1,
+  });
   const planetAngleRef = useRef(new Map<string, number>());
   const planetLookupRef = useRef(new Map<string, THREE.Object3D>());
   const clockRef = useRef<THREE.Clock | null>(null);
@@ -326,7 +330,14 @@ export const GalaxyMap = ({
     if (!focusSystemId || focusPlanetId) {
       if (!focusSystemId) {
         lastFocusSystemRef.current = null;
+        lastFocusAppliedRef.current = { id: null, trigger: -1 };
       }
+      return;
+    }
+    const alreadyApplied =
+      lastFocusAppliedRef.current.id === focusSystemId &&
+      lastFocusAppliedRef.current.trigger === focusTrigger;
+    if (alreadyApplied) {
       return;
     }
     const target = systems.find((system) => system.id === focusSystemId);
@@ -354,6 +365,7 @@ export const GalaxyMap = ({
       cameraRef.current.position.z = zoomTargetRef.current;
     }
     lastFocusSystemRef.current = focusSystemId;
+    lastFocusAppliedRef.current = { id: focusSystemId, trigger: focusTrigger };
   }, [focusSystemId, focusPlanetId, systems, onClearRef, focusTrigger]);
 
   useEffect(() => {
