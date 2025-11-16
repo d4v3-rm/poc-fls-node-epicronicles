@@ -134,10 +134,10 @@ export const GalaxyMap = ({
   );
 
   const colonizedLookup = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, { id: string; name: string }>();
     colonies.forEach((planet) => {
       if (planet.systemId) {
-        map.set(planet.systemId, planet.id);
+        map.set(planet.systemId, { id: planet.id, name: planet.name });
       }
     });
     return map;
@@ -310,6 +310,25 @@ export const GalaxyMap = ({
                   Math.sin(nextAngle) * orbitData.orbitRadius,
                   0,
                 );
+
+                const planetLabel = (child as THREE.Object3D).getObjectByName(
+                  'planetLabel',
+                ) as THREE.Sprite | null;
+                if (planetLabel) {
+                  planetLabel.visible = showLabels;
+                  if (showLabels) {
+                    const scale = THREE.MathUtils.clamp(
+                      120 / camera.position.z,
+                      0.35,
+                      2,
+                    );
+                    planetLabel.scale.set(
+                      planetLabel.userData.baseWidth * scale,
+                      planetLabel.userData.baseHeight * scale,
+                      1,
+                    );
+                  }
+                }
               }
             });
           }
@@ -452,7 +471,7 @@ export const GalaxyMap = ({
     const positions = new Map<string, THREE.Vector3>();
 
     systems.forEach((system) => {
-      const colonizedPlanetId = colonizedLookup.get(system.id);
+      const colonizedPlanet = colonizedLookup.get(system.id);
       const node = createSystemNode(
         system,
         orbitBaseSpeed,
@@ -460,7 +479,7 @@ export const GalaxyMap = ({
         planetLookupRef.current,
         recentCombatSystems,
         activeBattles,
-        colonizedPlanetId,
+        colonizedPlanet,
       );
       group.add(node);
       positions.set(system.id, node.position.clone());

@@ -68,6 +68,7 @@ export const createOrbitingPlanets = (
   systemId: string,
   angleStore: Map<string, number>,
   planetLookup: Map<string, Object3D>,
+  colonizedPlanet?: { id: string; name: string } | null,
 ) => {
   const group = new Group();
   group.name = 'orbits';
@@ -109,6 +110,39 @@ export const createOrbitingPlanets = (
       0,
     );
     planetLookup.set(planet.id, planetMesh);
+
+    if (colonizedPlanet && colonizedPlanet.id === planet.id) {
+      const ringGeom = new RingGeometry(
+        planet.size * 1.35,
+        planet.size * 1.65,
+        32,
+      );
+      const ring = new Mesh(
+        ringGeom,
+        new MeshBasicMaterial({
+          color: '#6fe6a5',
+          transparent: true,
+          opacity: 0.8,
+          side: DoubleSide,
+        }),
+      );
+      ring.name = 'colonizedRing';
+      ring.userData = {
+        ...ring.userData,
+        systemId,
+        planetId: planet.id,
+      };
+      ring.rotation.x = Math.PI / 2;
+      planetMesh.add(ring);
+
+      const label = createLabelSprite(colonizedPlanet.name);
+      if (label) {
+        label.name = 'planetLabel';
+        label.position.set(0, planet.size + 3, 0.2);
+        planetMesh.add(label);
+      }
+    }
+
     group.add(planetMesh);
 
     const ringKey = `${planet.orbitRadius.toFixed(2)}`;
@@ -151,7 +185,7 @@ export const createSystemNode = (
   planetLookup: Map<string, Object3D>,
   recentCombatSystems: Set<string>,
   activeBattles: Set<string>,
-  colonizedPlanetId?: string | null,
+  colonizedPlanet?: { id: string; name: string } | null,
 ): Group => {
   const node = new Group();
   node.name = system.id;
@@ -259,23 +293,8 @@ export const createSystemNode = (
       system.id,
       angleStore,
       planetLookup,
+      colonizedPlanet ?? null,
     );
-    if (colonizedPlanetId) {
-      const colonizedRing = new Mesh(
-        new RingGeometry(baseSize * 2.4, baseSize * 2.9, 40),
-        new MeshBasicMaterial({
-          color: '#6fe6a5',
-          transparent: true,
-          opacity: 0.8,
-          side: DoubleSide,
-        }),
-      );
-      colonizedRing.position.set(baseSize * 4.8, 0, 0.2);
-      colonizedRing.userData.systemId = system.id;
-      colonizedRing.userData.planetId = colonizedPlanetId;
-      planetLookup.set(colonizedPlanetId, colonizedRing);
-      orbitGroup.add(colonizedRing);
-    }
     node.add(orbitGroup);
   }
 
