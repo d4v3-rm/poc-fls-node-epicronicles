@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useGameStore } from '@store/gameStore';
-
-import '../styles/components/MainMenu.scss';
+import { MainMenuLanding } from './MainMenuLanding';
+import { MainMenuSetup } from './MainMenuSetup';
 
 const BACKGROUNDS = [
   '/pages/main-menu/backgrounds/main-menu-background-1.png',
@@ -16,6 +16,8 @@ const BACKGROUNDS = [
   '/pages/main-menu/backgrounds/main-menu-background-10.png',
 ];
 
+type MenuStage = 'landing' | 'setup';
+
 export const MainMenu = () => {
   const startNewSession = useGameStore((state) => state.startNewSession);
   const loadSession = useGameStore((state) => state.loadSession);
@@ -27,8 +29,8 @@ export const MainMenu = () => {
     config.galaxyPresets[0]?.id ??
     'standard';
   const [presetId, setPresetId] = useState(defaultPresetId);
+  const [stage, setStage] = useState<MenuStage>('landing');
   const [message, setMessage] = useState<string | null>(null);
-  const [showSetup, setShowSetup] = useState(false);
 
   const background = useMemo(
     () => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)],
@@ -42,6 +44,7 @@ export const MainMenu = () => {
         ? 'Ultimo salvataggio caricato.'
         : 'Nessun salvataggio disponibile o file non valido.',
     );
+    setStage('landing');
   };
 
   const handleStart = () => {
@@ -49,94 +52,27 @@ export const MainMenu = () => {
     setMessage(null);
   };
 
-  return (
-    <div
-      className="main-menu"
-      style={{ backgroundImage: `url(${background})` }}
-    >
-      <div className="main-menu__overlay" />
-
-      <header className="main-menu__brand">
-        <img
-          src="/pages/main-menu/logo-full.png"
-          alt="FLS Node Epicrnoicles logo"
-          className="main-menu__logo"
-        />
-      </header>
-
-      <div className="main-menu__dock">
-        <div className="main-menu__dock-title">Mission Control</div>
-        <button
-          className="main-menu__action"
-          onClick={() => setShowSetup(true)}
-        >
-          Inizia partita
-        </button>
-        <button
-          className="main-menu__action"
-          onClick={handleLoad}
-          disabled={!hasSavedSession()}
-        >
-          Carica
-        </button>
-      </div>
-
-      {showSetup ? (
-        <div className="main-menu__card">
-          <div className="main-menu__card-head">
-            <div>
-              <h1 className="main-menu__title">Configura la sessione</h1>
-              <p className="main-menu__subtitle">
-                Scegli seed e preset della galassia, poi avvia.
-              </p>
-            </div>
-          </div>
-
-          <div className="main-menu__form">
-            <label className="main-menu__field">
-              <span>Galaxy seed</span>
-              <input
-                value={seed}
-                onChange={(event) => setSeed(event.target.value)}
-                aria-label="Galaxy seed"
-              />
-            </label>
-
-            <label className="main-menu__field">
-              <span>Galaxy preset</span>
-              <select
-                value={presetId}
-                onChange={(event) => setPresetId(event.target.value)}
-                aria-label="Galaxy preset"
-              >
-                {config.galaxyPresets.map((preset) => (
-                  <option key={preset.id} value={preset.id}>
-                    {preset.label} ({preset.systemCount} sistemi)
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="main-menu__actions">
-            <button className="main-menu__primary" onClick={handleStart}>
-              Avvia sessione
-            </button>
-            <button
-              className="main-menu__ghost"
-              onClick={() => setShowSetup(false)}
-            >
-              Annulla
-            </button>
-          </div>
-
-          {message ? <p className="panel-message">{message}</p> : null}
-        </div>
-      ) : null}
-
-      {message && !showSetup ? (
-        <div className="main-menu__toast">{message}</div>
-      ) : null}
-    </div>
+  return stage === 'landing' ? (
+    <MainMenuLanding
+      background={background}
+      canLoad={hasSavedSession()}
+      onStart={() => {
+        setStage('setup');
+        setMessage(null);
+      }}
+      onLoad={handleLoad}
+      toast={message}
+    />
+  ) : (
+    <MainMenuSetup
+      background={background}
+      seed={seed}
+      presetId={presetId}
+      presets={config.galaxyPresets}
+      onSeedChange={setSeed}
+      onPresetChange={setPresetId}
+      onConfirm={handleStart}
+      onBack={() => setStage('landing')}
+    />
   );
 };
