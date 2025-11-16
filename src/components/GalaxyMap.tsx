@@ -372,6 +372,23 @@ export const GalaxyMap = ({
     }
     const planet = planetLookupRef.current.get(focusPlanetId);
     if (!planet) {
+      const system =
+        focusSystemId !== undefined && focusSystemId !== null
+          ? systems.find((entry) => entry.id === focusSystemId)
+          : null;
+      if (system) {
+        const pos = toMapPosition(system);
+        offsetTargetRef.current.set(-pos.x, -pos.y, 0);
+        const group = systemGroupRef.current;
+        if (group) {
+          group.position.copy(offsetTargetRef.current);
+        }
+        zoomTargetRef.current = 60;
+        if (cameraRef.current) {
+          cameraRef.current.position.z = zoomTargetRef.current;
+        }
+      }
+      lastFocusPlanetRef.current = focusPlanetId;
       return;
     }
     const worldPos = new THREE.Vector3();
