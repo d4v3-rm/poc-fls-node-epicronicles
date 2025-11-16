@@ -83,21 +83,18 @@ export const MainMenu = () => {
 
       {showSetup ? (
         <div className="main-menu__card">
+          <div className="main-menu__decor">
+            <span className="main-menu__dot" />
+            <span className="main-menu__dot" />
+            <span className="main-menu__dot" />
+          </div>
           <div className="main-menu__card-head">
             <div>
-              <p className="main-menu__eyebrow">Nuova partita</p>
               <h1 className="main-menu__title">Configura la sessione</h1>
               <p className="main-menu__subtitle">
                 Scegli seed e preset della galassia, poi avvia.
               </p>
             </div>
-            <button
-              className="main-menu__close"
-              onClick={() => setShowSetup(false)}
-              aria-label="Chiudi configurazione"
-            >
-              ×
-            </button>
           </div>
 
           <div className="main-menu__form">
