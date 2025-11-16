@@ -296,6 +296,7 @@ export const GameScreen = () => {
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
             setFocusTrigger((value) => value + 1);
+            setFocusPlanetId(null);
             setDockSelection(null);
           }}
           onSelect={(selection) => {
@@ -308,6 +309,7 @@ export const GameScreen = () => {
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
             setFocusTrigger((value) => value + 1);
+            setFocusPlanetId(null);
             setDockSelection(null);
           }}
           onSelect={(selection) => {

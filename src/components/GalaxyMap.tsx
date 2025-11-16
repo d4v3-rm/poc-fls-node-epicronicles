@@ -349,18 +349,12 @@ export const GalaxyMap = ({
       return;
     }
     const pos = toMapPosition(target);
+    offsetTargetRef.current.set(-pos.x, -pos.y, 0);
     const group = systemGroupRef.current;
     if (group) {
-      const local = new THREE.Vector3(pos.x, pos.y, pos.z);
-      const world = local.clone();
-      group.localToWorld(world);
-      const desiredOffset = new THREE.Vector3(-world.x, -world.y, 0);
-      offsetTargetRef.current.copy(desiredOffset);
-      group.position.copy(desiredOffset);
-    } else {
-      offsetTargetRef.current.set(-pos.x, -pos.y, 0);
+      group.position.copy(offsetTargetRef.current);
     }
-    zoomTargetRef.current = target.visibility === 'surveyed' ? 90 : 120;
+    zoomTargetRef.current = 60;
     if (cameraRef.current) {
       cameraRef.current.position.z = zoomTargetRef.current;
     }
