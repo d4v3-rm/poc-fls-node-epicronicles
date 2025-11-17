@@ -78,6 +78,11 @@ export const createOrbitingPlanets = (
   group.raycast = () => null;
   const base = baseSpeed + (seed % 7) * 0.0004;
 
+  const colonizedAnchorId =
+    colonizedPlanet && planets.length > 0
+      ? planets.find((p) => p.id === colonizedPlanet.id)?.id ?? planets[0]?.id ?? null
+      : null;
+
   planets.forEach((planet) => {
     const initialAngle =
       angleStore.get(planet.id) ?? Math.random() * Math.PI * 2;
@@ -111,8 +116,8 @@ export const createOrbitingPlanets = (
     );
     planetLookup.set(planet.id, planetMesh);
 
-    const isColonized = colonizedPlanet?.id === planet.id;
-    const displayName = isColonized ? colonizedPlanet.name : planet.name;
+    const isColonizedAnchor = colonizedAnchorId === planet.id;
+    const displayName = isColonizedAnchor ? colonizedPlanet?.name ?? planet.name : planet.name;
     const label = createLabelSprite(displayName);
     if (label) {
       label.name = 'planetLabel';
@@ -120,7 +125,7 @@ export const createOrbitingPlanets = (
       planetMesh.add(label);
     }
 
-    if (isColonized) {
+    if (isColonizedAnchor) {
       const ring = new Mesh(
         new RingGeometry(planet.size * 1.3, planet.size * 1.6, 40),
         new MeshBasicMaterial({
@@ -137,6 +142,11 @@ export const createOrbitingPlanets = (
         systemId,
       };
       planetMesh.add(ring);
+
+      // Map colonized id to this mesh for focus
+      if (colonizedPlanet) {
+        planetLookup.set(colonizedPlanet.id, planetMesh);
+      }
     }
 
     group.add(planetMesh);
@@ -170,19 +180,6 @@ export const createOrbitingPlanets = (
     };
   group.add(orbitRing);
 });
-
-  if (colonizedPlanet) {
-    const marker = planetLookup.get(colonizedPlanet.id);
-    if (!marker) {
-      // ensure lookup maps colonized id to the attached mesh
-      const attached = group.children.find(
-        (child) => child.userData?.planetId === colonizedPlanet.id,
-      );
-      if (attached) {
-        planetLookup.set(colonizedPlanet.id, attached as Object3D);
-      }
-    }
-  }
 
   return group;
 };
@@ -295,20 +292,8 @@ export const createSystemNode = (
   }
 
   if (isSurveyed && system.orbitingPlanets.length > 0) {
-    const planets = [...system.orbitingPlanets];
-    if (colonizedPlanet && !planets.find((p) => p.id === colonizedPlanet.id)) {
-      planets.unshift({
-        id: colonizedPlanet.id,
-        name: colonizedPlanet.name,
-        orbitRadius: planets[0]?.orbitRadius ?? 10,
-        size: Math.max(0.9, Math.min(2.4, (system.habitableWorld?.size ?? 10) / 8)),
-        color: '#6fe6a5',
-        orbitSpeed: planets[0]?.orbitSpeed ?? 0.7,
-      });
-    }
-
     const orbitGroup = createOrbitingPlanets(
-      planets,
+      system.orbitingPlanets,
       system.id.charCodeAt(0),
       orbitBaseSpeed,
       system.id,
