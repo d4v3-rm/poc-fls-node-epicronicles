@@ -87,6 +87,9 @@ export const GameScreen = () => {
   const mergeFleets = useGameStore((state) => state.mergeFleets);
   const splitFleet = useGameStore((state) => state.splitFleet);
   const shipDesigns = useGameStore((state) => state.config.military.shipDesigns);
+  const orderScienceShip = useGameStore((state) => state.orderScienceShip);
+  const setScienceAutoExplore = useGameStore((state) => state.setScienceAutoExplore);
+  const stopScienceShip = useGameStore((state) => state.stopScienceShip);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -517,6 +520,9 @@ export const GameScreen = () => {
               <ScienceShipDetailPanel
                 ship={selectedScienceShip}
                 systems={systems}
+                onOrder={(systemId) => orderScienceShip(selectedScienceShip.id, systemId)}
+                onToggleAuto={(auto) => setScienceAutoExplore(selectedScienceShip.id, auto)}
+                onStop={() => stopScienceShip(selectedScienceShip.id)}
                 onClose={() => setDockSelection(null)}
               />
             ) : (

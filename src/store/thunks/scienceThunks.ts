@@ -95,3 +95,28 @@ export const setScienceAutoExplore =
       }),
     );
   };
+
+export const stopScienceShip =
+  (shipId: string): ThunkAction<void, RootState, unknown, AnyAction> =>
+  (dispatch, getState) => {
+    const session = getState().game.session;
+    if (!session) {
+      return;
+    }
+    const updatedShips = session.scienceShips.map((ship) =>
+      ship.id === shipId
+        ? {
+            ...ship,
+            status: 'idle' as ScienceShipStatus,
+            targetSystemId: null,
+            ticksRemaining: 0,
+          }
+        : ship,
+    );
+    dispatch(
+      setSessionState({
+        ...session,
+        scienceShips: updatedShips,
+      }),
+    );
+  };
