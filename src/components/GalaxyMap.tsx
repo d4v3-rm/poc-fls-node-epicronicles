@@ -294,22 +294,23 @@ export const GalaxyMap = ({
             orbitGroup.children.forEach((child) => {
               const orbitData = child.userData;
               if (
-                orbitData?.kind === 'planet' &&
+                (orbitData?.kind === 'planet' || orbitData?.kind === 'colonized') &&
                 typeof orbitData.orbitRadius === 'number'
               ) {
                 const orbitSpeed = orbitData.orbitSpeed ?? 0;
                 const nextAngle =
                   (orbitData.orbitAngle ?? 0) + orbitSpeed * deltaFactor;
                 orbitData.orbitAngle = nextAngle;
-                planetAngleRef.current.set(
-                  orbitData.planetId as string,
-                  nextAngle,
-                );
-                child.position.set(
-                  Math.cos(nextAngle) * orbitData.orbitRadius,
-                  Math.sin(nextAngle) * orbitData.orbitRadius,
-                  0,
-                );
+                const targetX = Math.cos(nextAngle) * orbitData.orbitRadius;
+                const targetY = Math.sin(nextAngle) * orbitData.orbitRadius;
+                child.position.set(targetX, targetY, 0);
+
+                if (orbitData.kind === 'planet') {
+                  planetAngleRef.current.set(
+                    orbitData.planetId as string,
+                    nextAngle,
+                  );
+                }
 
                 const planetLabel = (child as THREE.Object3D).getObjectByName(
                   'planetLabel',
