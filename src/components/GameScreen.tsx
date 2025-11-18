@@ -169,6 +169,7 @@ export const GameScreen = () => {
 
   const large = sizeFor(1000, 700);
   const medium = sizeFor(840, 620);
+  const wide = sizeFor(1180, 720);
   if (!session) {
     return (
       <div className="game-layout">
@@ -552,10 +553,10 @@ export const GameScreen = () => {
         {selectedPlanet && selectedPlanetSystem ? (
           <DraggablePanel
             title={`${selectedPlanet.name} (${selectedPlanetSystem.name})`}
-            initialX={medium.initialX}
-            initialY={medium.initialY}
-            initialWidth={medium.width}
-            initialHeight={medium.height}
+            initialX={wide.initialX}
+            initialY={wide.initialY}
+            initialWidth={wide.width}
+            initialHeight={wide.height}
             onClose={closePlanetPanel}
           >
             <PlanetDetail

@@ -155,7 +155,7 @@
 
 .planet-detail {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 360px 1fr;
   gap: 1rem;
   height: 100%;
 }
@@ -211,6 +211,21 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   font-size: 0.8rem;
+}
+
+.planet-body__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.planet-body__meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .planet-production--vertical {

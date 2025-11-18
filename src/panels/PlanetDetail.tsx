@@ -62,9 +62,6 @@ export const PlanetDetail = ({
               {planet.name} <span className="planet-detail__system">({systemName})</span>
             </h3>
           </div>
-          <div className="planet-detail__pill">
-            Stabilita {Math.round(planet.stability)} | Felicita {Math.round(planet.happiness)}
-          </div>
         </div>
         {planetProductionSummary ? (
           <div className="planet-production planet-production--vertical">
@@ -103,6 +100,27 @@ export const PlanetDetail = ({
       </aside>
 
       <div className="planet-detail__body">
+        <div className="planet-body__header">
+          <div>
+            <p className="planet-detail__eyebrow">Dettagli pianeta</p>
+            <h3 className="planet-detail__title">
+              {planet.name} <span className="planet-detail__system">({systemName})</span>
+            </h3>
+          </div>
+          <div className="planet-body__meta">
+            <span className="planet-detail__pill">
+              Stabilita {Math.round(planet.stability)}
+            </span>
+            <span className="planet-detail__pill">
+              Felicita {Math.round(planet.happiness)}
+            </span>
+            <span className="planet-detail__pill">Tipo: {planet.kind}</span>
+            <span className="planet-detail__pill">
+              Pop: {planet.population.workers} L / {planet.population.specialists} S / {planet.population.researchers} R
+            </span>
+          </div>
+        </div>
+
         <div className="planet-meta">
           <span>
             Popolazione: {planet.population.workers} L / {planet.population.specialists} S /{' '}
