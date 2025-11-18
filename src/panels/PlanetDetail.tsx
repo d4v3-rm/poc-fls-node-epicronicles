@@ -55,14 +55,6 @@ export const PlanetDetail = ({
   return (
     <div className="planet-detail">
       <aside className="planet-detail__production">
-        <div className="planet-detail__header">
-          <div>
-            <p className="planet-detail__eyebrow">Colonia</p>
-            <h3 className="planet-detail__title">
-              {planet.name} <span className="planet-detail__system">({systemName})</span>
-            </h3>
-          </div>
-        </div>
         {planetProductionSummary ? (
           <div className="planet-production planet-production--vertical">
             <h4>Produzione netta</h4>
