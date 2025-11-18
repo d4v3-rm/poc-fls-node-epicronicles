@@ -523,6 +523,11 @@ export const GameScreen = () => {
                 onOrder={(systemId) => orderScienceShip(selectedScienceShip.id, systemId)}
                 onToggleAuto={(auto) => setScienceAutoExplore(selectedScienceShip.id, auto)}
                 onStop={() => stopScienceShip(selectedScienceShip.id)}
+                onCenter={(systemId) => {
+                  setFocusSystemId(systemId);
+                  setFocusPlanetId(null);
+                  setFocusTrigger((value) => value + 1);
+                }}
                 onClose={() => setDockSelection(null)}
               />
             ) : (

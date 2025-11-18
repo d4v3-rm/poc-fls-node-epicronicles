@@ -8,6 +8,7 @@ interface ScienceShipDetailPanelProps {
   onOrder: (systemId: string) => void;
   onToggleAuto: (auto: boolean) => void;
   onStop: () => void;
+  onCenter?: (systemId: string) => void;
   onClose: () => void;
 }
 
@@ -23,6 +24,7 @@ export const ScienceShipDetailPanel = ({
   onOrder,
   onToggleAuto,
   onStop,
+  onCenter,
   onClose,
 }: ScienceShipDetailPanelProps) => {
   const resolveName = (systemId: string | null | undefined) =>
@@ -59,6 +61,15 @@ export const ScienceShipDetailPanel = ({
               {ship.targetSystemId ? resolveName(ship.targetSystemId) : 'Nessuna'}
             </p>
           </div>
+        </div>
+        <div className="science-detail__row">
+          <button
+            className="hud-icon-btn"
+            onClick={() => onCenter?.(ship.currentSystemId)}
+            data-tooltip="Centra sulla nave"
+          >
+            Center
+          </button>
         </div>
         <div className="science-detail__controls">
           <label className="science-detail__field">
