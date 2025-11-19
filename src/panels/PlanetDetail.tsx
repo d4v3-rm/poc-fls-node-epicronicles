@@ -89,6 +89,31 @@ export const PlanetDetail = ({
             </div>
           </div>
         ) : null}
+        <div className="planet-districts planet-districts--compact">
+          <h4>Coda costruzione</h4>
+          {planetDistrictQueue.length === 0 ? (
+            <p className="text-muted">Nessun distretto in costruzione.</p>
+          ) : (
+            <ul>
+              {planetDistrictQueue.map((task) => (
+                <li key={task.id}>
+                  <div className="district-queue__header">
+                    <strong>{task.label}</strong>
+                    <span className="text-muted">
+                      Tick rimanenti: {task.ticksRemaining}/{task.totalTicks}
+                    </span>
+                  </div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-bar__fill"
+                      style={{ width: `${Math.round(task.progress * 100)}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </aside>
 
       <div className="planet-detail__body">
@@ -121,6 +146,38 @@ export const PlanetDetail = ({
           <span>Tipo pianeta: {planet.kind}</span>
         </div>
 
+        {districtMessage ? <p className="panel-message">{districtMessage}</p> : null}
+
+        <div className="planet-districts">
+          <h4>Distretti</h4>
+          <ul>
+            {districtDefinitions.map((definition) => {
+              const owned = planet.districts[definition.id] ?? 0;
+              return (
+                <li key={definition.id}>
+                  <div>
+                    <strong>{definition.label}</strong>
+                    <span className="text-muted">{definition.description}</span>
+                  </div>
+                  <div className="planet-district__meta">
+                    <span>Costruiti: {owned}</span>
+                    <span>Costo: {formatCost(definition.cost)}</span>
+                    <span>Produzione: {formatCost(definition.production)}</span>
+                    <button
+                      className="panel__action panel__action--compact"
+                      onClick={() => onQueueDistrict(definition.id)}
+                    >
+                      Costruisci
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+
+      <aside className="planet-detail__roles">
         <div className="planet-population">
           <h4>Ruoli popolazione</h4>
           {automationConfig?.enabled ? (
@@ -167,63 +224,7 @@ export const PlanetDetail = ({
             })}
           </ul>
         </div>
-
-        {districtMessage ? <p className="panel-message">{districtMessage}</p> : null}
-
-        <div className="planet-districts">
-          <h4>Distretti</h4>
-          <ul>
-            {districtDefinitions.map((definition) => {
-              const owned = planet.districts[definition.id] ?? 0;
-              return (
-                <li key={definition.id}>
-                  <div>
-                    <strong>{definition.label}</strong>
-                    <span className="text-muted">{definition.description}</span>
-                  </div>
-                  <div className="planet-district__meta">
-                    <span>Costruiti: {owned}</span>
-                    <span>Costo: {formatCost(definition.cost)}</span>
-                    <span>Produzione: {formatCost(definition.production)}</span>
-                    <button
-                      className="panel__action panel__action--compact"
-                      onClick={() => onQueueDistrict(definition.id)}
-                    >
-                      Costruisci
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        <div className="planet-districts">
-          <h4>Coda costruzione</h4>
-          {planetDistrictQueue.length === 0 ? (
-            <p className="text-muted">Nessun distretto in costruzione.</p>
-          ) : (
-            <ul>
-              {planetDistrictQueue.map((task) => (
-                <li key={task.id}>
-                  <div className="district-queue__header">
-                    <strong>{task.label}</strong>
-                    <span className="text-muted">
-                      Tick rimanenti: {task.ticksRemaining}/{task.totalTicks}
-                    </span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-bar__fill"
-                      style={{ width: `${Math.round(task.progress * 100)}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      </aside>
     </div>
   );
 };
