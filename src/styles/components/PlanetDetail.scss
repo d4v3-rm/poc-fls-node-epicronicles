@@ -180,6 +180,18 @@
   border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.planet-detail__roles .planet-population {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.planet-detail__roles .planet-population ul {
+  flex: 1 1 auto;
+  max-height: none;
+  overflow-y: auto;
+}
+
 .planet-detail__body {
   display: flex;
   flex-direction: column;
