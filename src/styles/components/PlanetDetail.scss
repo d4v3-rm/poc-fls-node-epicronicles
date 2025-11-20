@@ -67,14 +67,14 @@
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 0.6rem;
 }
 
 .district-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  padding: 0.55rem 0.6rem;
+  padding: 0.7rem 0.75rem;
   background: rgba(255, 255, 255, 0.02);
   display: flex;
   flex-direction: column;
@@ -83,8 +83,23 @@
 
 .district-card__header {
   display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.district-card__title {
+  display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.2rem;
+}
+
+.district-card__title strong {
+  font-size: 1rem;
+}
+
+.district-card__title .text-muted {
+  line-height: 1.3;
 }
 
 .district-card__count {
@@ -107,17 +122,27 @@
   border-radius: 999px;
 }
 
-.district-card__meta {
-  display: flex;
-  flex-direction: column;
+.district-card__progress {
+  margin-top: 0.1rem;
+}
+
+.district-card__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.4rem;
   align-items: flex-start;
 }
 
-.district-card__actions {
+.district-card__stat {
   display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.district-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.4rem;
-  flex-wrap: wrap;
 }
 
 .panel__action--danger {
@@ -135,6 +160,19 @@
   font-size: 0.82rem;
 }
 
+.district-card__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(127, 227, 143, 0.1);
+  border: 1px solid rgba(127, 227, 143, 0.35);
+  color: #7fe38f;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .planet-district__meta {
   display: flex;
   flex-wrap: wrap;
@@ -145,6 +183,9 @@
 
 .planet-population {
   margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 
   ul {
     list-style: none;
@@ -152,46 +193,30 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   li {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
   }
 }
 
 .population-job__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-  font-size: 0.8rem;
-  justify-content: space-between;
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    flex: 1 1 180px;
-  }
+  display: none;
 }
 
 .population-job__actions {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  display: none;
 }
 
 .planet-production {
   margin-top: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
 
   &__grid {
     display: grid;
@@ -201,28 +226,87 @@
 
   &__card {
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 6px;
-    padding: 0.5rem;
+    border-radius: 8px;
+    padding: 0.4rem 0.45rem;
     background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__card--positive {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+
+  &__card--negative {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
   }
 
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 0.4rem;
     font-weight: 600;
     font-size: 0.85rem;
   }
 
-  &__breakdown {
-    list-style: none;
-    margin: 0.35rem 0 0;
-    padding: 0;
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  &__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  &__pill.is-positive {
+    color: #7fe38f;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: transparent;
+  }
+
+  &__pill.is-negative {
+    color: #ff9b8a;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: transparent;
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  &__stat {
     display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.75);
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.35rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    font-size: 0.8rem;
+
+    .is-positive {
+      color: #7fe38f;
+    }
+
+    .is-negative {
+      color: #ff9b8a;
+    }
   }
 }
 
@@ -344,6 +428,111 @@
 .planet-population ul {
   max-height: 260px;
   overflow-y: auto;
+}
+
+.population-role-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.population-role {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+.population-role__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.population-role__headline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.population-role__description {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.population-role__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(127, 227, 143, 0.15);
+  border: 1px solid rgba(127, 227, 143, 0.4);
+  color: #6edb7e;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.population-role__stat-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.population-role__stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.population-role__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.82rem;
+  font-weight: 600;
+  width: auto;
+  max-width: 100%;
+}
+
+.population-role__chip--accent {
+  border-color: rgba(127, 227, 143, 0.35);
+  color: #7fe38f;
+}
+
+.population-role__chip--muted {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.population-role__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.population-role__label {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
 }
 
 .planet-districts ul {

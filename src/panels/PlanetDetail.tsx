@@ -13,6 +13,7 @@ interface PlanetDetailProps {
   automationConfig?: EconomyConfig['populationAutomation'];
   populationJobs: EconomyConfig['populationJobs'];
   districtDefinitions: EconomyConfig['districts'];
+  canAffordDistricts: Record<string, boolean>;
   planetDistrictQueue: Array<{
     id: string;
     label: string;
@@ -20,7 +21,6 @@ interface PlanetDetailProps {
     totalTicks: number;
     progress: number;
   }>;
-  districtMessage: string | null;
   populationMessage: string | null;
   onQueueDistrict: (districtId: string) => void;
   onRemoveDistrict: (districtId: string) => void;
@@ -34,8 +34,8 @@ export const PlanetDetail = ({
   automationConfig,
   populationJobs,
   districtDefinitions,
+  canAffordDistricts,
   planetDistrictQueue,
-  districtMessage,
   populationMessage,
   onQueueDistrict,
   onRemoveDistrict,
@@ -67,24 +67,42 @@ export const PlanetDetail = ({
                   return null;
                 }
                 const label = resourceLabels[type as keyof typeof resourceLabels];
+                const netClass = summary.net >= 0 ? 'is-positive' : 'is-negative';
+                const cardClass = `planet-production__card planet-production__card--${summary.net >= 0 ? 'positive' : 'negative'}`;
                 return (
-                  <div key={type} className="planet-production__card">
+                  <div key={type} className={cardClass}>
                     <div className="planet-production__header">
-                      <span>{label}</span>
-                      <span
-                        className={
-                          summary.net >= 0 ? 'is-positive' : 'is-negative'
-                        }
-                      >
+                      <span className="planet-production__label">{label}</span>
+                      <span className={`planet-production__pill ${netClass}`}>
                         {formatSigned(summary.net)}
                       </span>
                     </div>
-                    <ul className="planet-production__breakdown">
-                      <li>Base {formatSigned(summary.base)}</li>
-                      <li>Distretti {formatSigned(summary.districts)}</li>
-                      <li>Popolazione {formatSigned(summary.population)}</li>
-                      <li>Upkeep {formatSigned(-summary.upkeep)}</li>
-                    </ul>
+                    <div className="planet-production__stats">
+                      <div className="planet-production__stat">
+                        <span className="text-muted">Base</span>
+                        <span className={summary.base >= 0 ? 'is-positive' : 'is-negative'}>
+                          {formatSigned(summary.base)}
+                        </span>
+                      </div>
+                      <div className="planet-production__stat">
+                        <span className="text-muted">Distretti</span>
+                        <span className={summary.districts >= 0 ? 'is-positive' : 'is-negative'}>
+                          {formatSigned(summary.districts)}
+                        </span>
+                      </div>
+                      <div className="planet-production__stat">
+                        <span className="text-muted">Popolazione</span>
+                        <span className={summary.population >= 0 ? 'is-positive' : 'is-negative'}>
+                          {formatSigned(summary.population)}
+                        </span>
+                      </div>
+                      <div className="planet-production__stat">
+                        <span className="text-muted">Upkeep</span>
+                        <span className={summary.upkeep <= 0 ? 'is-positive' : 'is-negative'}>
+                          {formatSigned(-summary.upkeep)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -148,8 +166,6 @@ export const PlanetDetail = ({
           <span>Tipo pianeta: {planet.kind}</span>
         </div>
 
-        {districtMessage ? <p className="panel-message">{districtMessage}</p> : null}
-
         <div className="planet-districts">
           <h4>Distretti</h4>
           <ul className="district-card-list">
@@ -157,44 +173,50 @@ export const PlanetDetail = ({
               const owned = planet.districts[definition.id] ?? 0;
               const capacityHint = Math.min(owned, 12);
               const fillWidth = `${(capacityHint / 12) * 100}%`;
+              const buildDisabled = !canAffordDistricts[definition.id];
+              const buildTooltip = buildDisabled
+                ? 'Risorse insufficienti per costruire questo distretto.'
+                : undefined;
               return (
                 <li key={definition.id} className="district-card">
                   <div className="district-card__header">
-                    <div>
+                    <div className="district-card__title">
                       <strong>{definition.label}</strong>
                       <span className="text-muted">{definition.description}</span>
                     </div>
-                    <div className="district-card__count">
-                      <span className="pill">{owned} costruiti</span>
-                      <div className="district-bar">
-                        <div className="district-bar__fill" style={{ width: fillWidth }} />
-                      </div>
+                    <span className="district-card__pill">{owned} costruiti</span>
+                  </div>
+                  <div className="district-card__progress">
+                    <div className="district-bar">
+                      <div className="district-bar__fill" style={{ width: fillWidth }} />
                     </div>
                   </div>
-                  <div className="district-card__meta">
-                    <div>
+                  <div className="district-card__stats">
+                    <div className="district-card__stat">
                       <span className="text-muted">Costo</span>
                       <div className="district-card__chip">{formatCost(definition.cost)}</div>
                     </div>
-                    <div>
+                    <div className="district-card__stat">
                       <span className="text-muted">Produzione</span>
                       <div className="district-card__chip">{formatCost(definition.production)}</div>
                     </div>
-                   <div className="district-card__actions">
-                      <button
-                        className="panel__action panel__action--compact"
-                        onClick={() => onQueueDistrict(definition.id)}
-                      >
-                        Costruisci
-                      </button>
-                      <button
-                        className="panel__action panel__action--compact panel__action--danger"
-                        disabled={owned <= 0}
-                        onClick={() => onRemoveDistrict(definition.id)}
-                      >
-                        Rimuovi
-                      </button>
-                   </div>
+                  </div>
+                  <div className="district-card__actions">
+                    <button
+                      className="panel__action panel__action--compact"
+                      disabled={buildDisabled}
+                      title={buildTooltip}
+                      onClick={() => onQueueDistrict(definition.id)}
+                    >
+                      Costruisci
+                    </button>
+                    <button
+                      className="panel__action panel__action--compact panel__action--danger"
+                      disabled={owned <= 0}
+                      onClick={() => onRemoveDistrict(definition.id)}
+                    >
+                      Rimuovi
+                    </button>
                   </div>
                 </li>
               );
@@ -214,22 +236,34 @@ export const PlanetDetail = ({
           {populationMessage ? (
             <p className="panel-message">{populationMessage}</p>
           ) : null}
-          <ul>
+          <ul className="population-role-list">
             {populationJobs.map((job) => {
               const assigned =
                 planet.population[job.id as keyof typeof planet.population] ?? 0;
               return (
-                <li key={job.id}>
-                  <div className="population-job__meta">
-                    <div>
+                <li key={job.id} className="population-role">
+                  <div className="population-role__top">
+                    <div className="population-role__headline">
                       <strong>{job.label}</strong>
                       <span className="text-muted">{job.description}</span>
                     </div>
-                    <span>Pop assegnati: {assigned}</span>
-                    <span>Produzione: {formatCost(job.production)}</span>
-                    <span>Upkeep: {formatCost(job.upkeep)}</span>
+                    <span className="population-role__badge">{assigned}</span>
                   </div>
-                  <div className="population-job__actions">
+                  <div className="population-role__stat-grid">
+                    <div className="population-role__stat-block">
+                      <span className="population-role__label">Produzione</span>
+                      <span className="population-role__chip population-role__chip--accent">
+                        {formatCost(job.production)}
+                      </span>
+                    </div>
+                    <div className="population-role__stat-block">
+                      <span className="population-role__label">Upkeep</span>
+                      <span className="population-role__chip population-role__chip--muted">
+                        {formatCost(job.upkeep)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="population-role__actions">
                     <button
                       className="panel__action panel__action--compact"
                       onClick={() => onPromote(job.id)}

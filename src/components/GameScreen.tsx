@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useRef, useState } from 'react';
 import type { PopulationJobId, StarSystem } from '@domain/types';
+import { canAffordCost } from '@domain/economy/economy';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { useGameLoop } from '@shared/useGameLoop';
@@ -65,7 +66,7 @@ export const GameScreen = () => {
   const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
   const [focusPlanetId, setFocusPlanetId] = useState<string | null>(null);
-  const [districtMessage, setDistrictMessage] = useState<string | null>(null);
+  const [, setDistrictMessage] = useState<string | null>(null);
   const [populationMessage, setPopulationMessage] = useState<string | null>(null);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [missionsOpen, setMissionsOpen] = useState(false);
@@ -216,6 +217,13 @@ export const GameScreen = () => {
           };
         })
     : [];
+  const canAffordDistricts = districtDefinitions.reduce<Record<string, boolean>>(
+    (acc, definition) => {
+      acc[definition.id] = session ? canAffordCost(session.economy, definition.cost) : false;
+      return acc;
+    },
+    {},
+  );
   const districtErrorMessages: Record<string, string> = {
     NO_SESSION: 'Nessuna sessione attiva.',
     PLANET_NOT_FOUND: 'Pianeta non trovato.',
@@ -569,8 +577,8 @@ export const GameScreen = () => {
             automationConfig={automationConfig}
             populationJobs={populationJobs}
             districtDefinitions={districtDefinitions}
+            canAffordDistricts={canAffordDistricts}
             planetDistrictQueue={planetDistrictQueue}
-            districtMessage={districtMessage}
               populationMessage={populationMessage}
               onQueueDistrict={handleQueueDistrict}
             />
