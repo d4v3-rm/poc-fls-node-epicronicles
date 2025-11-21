@@ -161,56 +161,115 @@ export const GalaxyMap = ({
       const group = new THREE.Group();
       group.name = 'blackHole';
 
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const gradient = ctx.createRadialGradient(128, 128, 8, 128, 128, 128);
-        gradient.addColorStop(0, 'rgba(0,0,0,1)');
-        gradient.addColorStop(0.35, 'rgba(20, 24, 38, 0.95)');
-        gradient.addColorStop(0.65, 'rgba(60, 85, 140, 0.45)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 256, 256);
-      }
-      const coreTexture = new THREE.CanvasTexture(canvas);
-      const coreMaterial = new THREE.SpriteMaterial({
-        map: coreTexture,
+      const shaderMaterials: THREE.ShaderMaterial[] = [];
+
+      const diskTilt = 0.08;
+
+      // Event horizon (dark sphere)
+      const horizon = new THREE.Mesh(
+        new THREE.SphereGeometry(6, 48, 48),
+        new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          depthWrite: true,
+        }),
+      );
+      group.add(horizon);
+
+      const accretionMaterial = new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
-        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          uTime: { value: 0 },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          void main() {
+            vec2 uv = vUv - 0.5;
+            float r = length(uv);
+            float angle = atan(uv.y, uv.x);
+
+            // disc mask
+            float inner = smoothstep(0.14, 0.18, r);
+            float outer = 1.0 - smoothstep(0.48, 0.52, r);
+            float disc = inner * outer;
+
+            // relativistic brightening
+            float beaming = 0.6 + 0.4 * cos(angle - uTime * 0.8);
+            float swirl = sin(r * 28.0 - uTime * 2.0) * 0.2;
+            float band = exp(-pow((r - 0.28 + swirl * 0.01) * 10.0, 2.0));
+
+            vec3 warm = vec3(1.2, 1.0, 0.85);
+            vec3 cool = vec3(0.4, 0.6, 1.0);
+            vec3 color = mix(cool, warm, 0.65 + 0.35 * beaming);
+            color *= band * disc * 2.2;
+
+            // subtle lensing glow
+            float glow = 1.0 - smoothstep(0.5, 0.9, r);
+            color += vec3(0.1, 0.15, 0.25) * glow * 0.4;
+
+            float alpha = clamp(disc * 2.0, 0.0, 1.0) * (0.4 + 0.6 * band);
+            gl_FragColor = vec4(color, alpha);
+          }
+        `,
       });
-      const core = new THREE.Sprite(coreMaterial);
-      core.scale.set(58, 58, 1);
-      group.add(core);
+      shaderMaterials.push(accretionMaterial);
 
-      const accretion = new THREE.Mesh(
-        new THREE.RingGeometry(22, 32, 80),
-        new THREE.MeshBasicMaterial({
-          color: 0x7aa8ff,
-          transparent: true,
-          opacity: 0.45,
-          side: THREE.DoubleSide,
-        }),
+      const accretionDisk = new THREE.Mesh(
+        new THREE.PlaneGeometry(120, 120, 1, 1),
+        accretionMaterial,
       );
-      accretion.rotation.set(0, 0, 0);
-      accretion.position.set(0, 0, -0.4);
-      group.add(accretion);
+      accretionDisk.name = 'accretionOuter';
+      accretionDisk.rotation.set(diskTilt, 0, 0);
+      group.add(accretionDisk);
 
-      const innerRing = new THREE.Mesh(
-        new THREE.RingGeometry(12, 20, 80),
-        new THREE.MeshBasicMaterial({
-          color: 0x1b1e2f,
-          transparent: true,
-          opacity: 0.65,
-          side: THREE.DoubleSide,
-        }),
+      const lensMaterial = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          uTime: { value: 0 },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          void main() {
+            vec2 uv = vUv - 0.5;
+            float r = length(uv);
+            float ring = smoothstep(0.34, 0.36, r) * (1.0 - smoothstep(0.38, 0.4, r));
+            float pulse = 0.8 + 0.2 * sin(uTime * 1.5 + r * 10.0);
+            vec3 color = vec3(1.0, 0.92, 0.85) * ring * pulse;
+            gl_FragColor = vec4(color, ring * 0.8);
+          }
+        `,
+      });
+      shaderMaterials.push(lensMaterial);
+
+      const lensRing = new THREE.Mesh(
+        new THREE.PlaneGeometry(130, 130, 1, 1),
+        lensMaterial,
       );
-      innerRing.rotation.set(0, 0, 0);
-      innerRing.position.set(0, 0, -0.2);
-      group.add(innerRing);
+      lensRing.name = 'glow';
+      lensRing.rotation.set(diskTilt, 0, 0);
+      lensRing.position.set(0, 0, 0.2);
+      group.add(lensRing);
 
+      group.userData.shaderMaterials = shaderMaterials;
       return group;
     };
 
@@ -329,6 +388,7 @@ export const GalaxyMap = ({
       systemGroup.rotation.x = 0;
       systemGroup.position.lerp(offsetTargetRef.current, 0.08);
       camera.position.z += (zoomTargetRef.current - camera.position.z) * 0.08;
+      const time = clockRef.current?.getElapsedTime() ?? 0;
 
       const showOrbits = camera.position.z < 105;
       const showLabels = camera.position.z < 240;
@@ -397,6 +457,24 @@ export const GalaxyMap = ({
           }
         }
       });
+
+      if (blackHoleRef.current) {
+        const outer = blackHoleRef.current.getObjectByName('accretionOuter') as THREE.Mesh | null;
+        const glow = blackHoleRef.current.getObjectByName('glow') as THREE.Mesh | null;
+        const shaderMats =
+          (blackHoleRef.current.userData.shaderMaterials as THREE.ShaderMaterial[]) ?? [];
+        shaderMats.forEach((mat) => {
+          if (mat.uniforms.uTime) {
+            mat.uniforms.uTime.value = time;
+          }
+        });
+        if (outer) {
+          outer.rotation.z += delta * 0.35;
+        }
+        if (glow) {
+          glow.rotation.z -= delta * 0.25;
+        }
+      }
 
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(renderLoop);
