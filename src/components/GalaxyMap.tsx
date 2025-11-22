@@ -8,6 +8,7 @@ import {
   fleetMaterials,
 } from '@three/materials';
 import { createScene } from '@three/scene';
+import { createNoise2D } from 'fast-simplex-noise';
 import '../styles/components/GalaxyMap.scss';
 import { createSystemNode } from '@three/mapUtils';
 import type { Group } from 'three';
@@ -104,6 +105,7 @@ export const GalaxyMap = ({
   const systemsSignatureRef = useRef<string>('');
   const blackHoleRef = useRef<Group | null>(null);
   const fogRef = useRef<THREE.Mesh | null>(null);
+  const fogNoiseRef = useRef<THREE.DataTexture | null>(null);
 
   const getVector = () => {
     const pool = vectorPoolRef.current;
@@ -156,6 +158,24 @@ export const GalaxyMap = ({
   );
   const createSpiralFog = useMemo(() => {
     return () => {
+      const noise2D = createNoise2D();
+      const size = 256;
+      const data = new Uint8Array(size * size);
+      for (let y = 0; y < size; y += 1) {
+        for (let x = 0; x < size; x += 1) {
+          const nx = x / size;
+          const ny = y / size;
+          const n = noise2D(nx * 6, ny * 6);
+          const value = Math.floor(((n + 1) / 2) * 255);
+          data[y * size + x] = value;
+        }
+      }
+      const noiseTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat);
+      noiseTexture.wrapS = THREE.RepeatWrapping;
+      noiseTexture.wrapT = THREE.RepeatWrapping;
+      noiseTexture.needsUpdate = true;
+      fogNoiseRef.current = noiseTexture;
+
       const fogMaterial = new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
@@ -164,6 +184,7 @@ export const GalaxyMap = ({
         uniforms: {
           uTime: { value: 0 },
           uShape: { value: galaxyShape === 'spiral' ? 1.0 : 0.0 },
+          uNoise: { value: noiseTexture },
         },
         vertexShader: `
           varying vec2 vUv;
@@ -176,16 +197,7 @@ export const GalaxyMap = ({
           varying vec2 vUv;
           uniform float uTime;
           uniform float uShape;
-          float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}
-          float noise(vec2 p){
-            vec2 i=floor(p);vec2 f=fract(p);
-            float a=hash(i);
-            float b=hash(i+vec2(1.0,0.0));
-            float c=hash(i+vec2(0.0,1.0));
-            float d=hash(i+vec2(1.0,1.0));
-            vec2 u=f*f*(3.0-2.0*f);
-            return mix(a,b,u.x)+ (c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-          }
+          uniform sampler2D uNoise;
           void main(){
             vec2 uv = (vUv - 0.5) * 2.0;
             float r = length(uv);
@@ -194,7 +206,8 @@ export const GalaxyMap = ({
             float armWave = sin(angle * arms - r * 7.0);
             float armMask = mix(1.0, smoothstep(-0.25, 0.35, armWave), uShape);
             float falloff = smoothstep(0.95, 0.32, r);
-            float n = noise(uv * 7.0 + uTime * 0.04);
+            vec2 noiseUv = uv * 3.5 + vec2(uTime * 0.01, uTime * 0.008);
+            float n = texture2D(uNoise, noiseUv).r;
             float density = armMask * falloff * (0.35 + 0.65 * n);
 
             vec3 warm = vec3(0.95, 0.75, 0.55);
