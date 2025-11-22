@@ -160,12 +160,9 @@ const createMapPosition = (
 const createStarSystem = (
   random: () => number,
   index: number,
-  maxRadius: number,
-  shape: GalaxyShape,
-  total: number,
   basePositions: Array<{ radius: number; angle: number }>,
 ): StarSystem => {
-  const pos = basePositions[index] ?? { radius: maxRadius * 0.5, angle: 0 };
+  const pos = basePositions[index] ?? { radius: 0, angle: 0 };
   const radius = pos.radius;
   const angle = pos.angle;
 
@@ -205,14 +202,7 @@ export const createTestGalaxy = ({
     galaxyRadius,
   );
   const systems = Array.from({ length: systemCount }, (_, index) =>
-    createStarSystem(
-      random,
-      index,
-      galaxyRadius,
-      galaxyShape,
-      systemCount,
-      basePositions,
-    ),
+    createStarSystem(random, index, basePositions),
   );
   return {
     seed,

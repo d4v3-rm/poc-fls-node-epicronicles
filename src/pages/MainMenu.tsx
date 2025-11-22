@@ -35,10 +35,14 @@ export const MainMenu = () => {
   const [stage, setStage] = useState<MenuStage>('landing');
   const [message, setMessage] = useState<string | null>(null);
 
-  const background = useMemo(
-    () => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)],
-    [],
-  );
+  const background = useMemo(() => {
+    const seedValue = seed || 'default';
+    const index = seedValue
+      .split('')
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+      BACKGROUNDS.length;
+    return BACKGROUNDS[index];
+  }, [seed]);
 
   const handleLoad = () => {
     const result = loadSession();

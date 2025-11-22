@@ -8,11 +8,9 @@ import {
   fleetMaterials,
 } from '@three/materials';
 import { createScene } from '@three/scene';
-import { createNoise2D } from 'fast-simplex-noise';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import '../styles/components/GalaxyMap.scss';
 import { createSystemNode } from '@three/mapUtils';
-import type { Group } from 'three';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -105,11 +103,7 @@ export const GalaxyMap = ({
   const vectorPoolRef = useRef<THREE.Vector3[]>([]);
   const matrixPoolRef = useRef<THREE.Matrix4[]>([]);
   const systemsSignatureRef = useRef<string>('');
-  const blackHoleRef = useRef<Group | null>(null);
-  const fogRef = useRef<THREE.Mesh | null>(null);
-  const fogNoiseRef = useRef<THREE.DataTexture | null>(null);
-  const starfieldRef = useRef<THREE.InstancedMesh | null>(null);
-  const nebulaRef = useRef<THREE.InstancedMesh | null>(null);
+  const blackHoleRef = useRef<THREE.Group | null>(null);
 
   const getVector = () => {
     const pool = vectorPoolRef.current;
@@ -141,7 +135,6 @@ export const GalaxyMap = ({
         .join('|'),
     [systems],
   );
-  const galaxyShape = useGameStore((state) => state.session?.galaxy.galaxyShape ?? 'circle');
   const maxSystemRadius = useMemo(() => {
     if (!systems.length) {
       return 400;
@@ -160,86 +153,6 @@ export const GalaxyMap = ({
     () => Math.max(220, maxSystemRadius * 1.5),
     [maxSystemRadius],
   );
-  const starfieldRadius = useMemo(
-    () => Math.max(1000, maxSystemRadius * 3),
-    [maxSystemRadius],
-  );
-  const nebulaCount = useMemo(() => Math.min(800, Math.max(120, systems.length * 2)), [systems.length]);
-  const createSpiralFog = useMemo(() => {
-    return () => {
-      const noise2D = createNoise2D();
-      const size = 256;
-      const data = new Uint8Array(size * size);
-      for (let y = 0; y < size; y += 1) {
-        for (let x = 0; x < size; x += 1) {
-          const nx = x / size;
-          const ny = y / size;
-          const n = noise2D(nx * 6, ny * 6);
-          const value = Math.floor(((n + 1) / 2) * 255);
-          data[y * size + x] = value;
-        }
-      }
-      const noiseTexture = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat);
-      noiseTexture.wrapS = THREE.RepeatWrapping;
-      noiseTexture.wrapT = THREE.RepeatWrapping;
-      noiseTexture.needsUpdate = true;
-      fogNoiseRef.current = noiseTexture;
-
-      const fogMaterial = new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide,
-        uniforms: {
-          uTime: { value: 0 },
-          uShape: { value: galaxyShape === 'spiral' ? 1.0 : 0.0 },
-          uNoise: { value: noiseTexture },
-        },
-        vertexShader: `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          varying vec2 vUv;
-          uniform float uTime;
-          uniform float uShape;
-          uniform sampler2D uNoise;
-          void main(){
-            vec2 uv = (vUv - 0.5) * 2.0;
-            float r = length(uv);
-            float angle = atan(uv.y, uv.x);
-            float arms = 2.0;
-            float armWave = sin(angle * arms - r * 7.0);
-            float armMask = mix(1.0, smoothstep(-0.25, 0.35, armWave), uShape);
-            float falloff = smoothstep(0.95, 0.32, r);
-            vec2 noiseUv = uv * 3.5 + vec2(uTime * 0.01, uTime * 0.008);
-            float n = texture2D(uNoise, noiseUv).r;
-            float density = armMask * falloff * (0.35 + 0.65 * n);
-
-            vec3 warm = vec3(0.95, 0.75, 0.55);
-            vec3 cool = vec3(0.55, 0.7, 0.95);
-            float mixCol = smoothstep(0.15, 0.85, r) * 0.6 + 0.4 * noise(uv * 3.0);
-            vec3 col = mix(cool, warm, mixCol) * density * 0.6;
-
-            gl_FragColor = vec4(col, density * 0.55);
-          }
-        `,
-      });
-      const fogSize = Math.max(1200, maxSystemRadius * 2.6);
-      const fogMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(fogSize, fogSize, 1, 1),
-        fogMaterial,
-      );
-      fogMesh.name = 'galaxyFog';
-      fogMesh.rotation.set(0, 0, 0);
-      fogMesh.position.set(0, 0, -1);
-      fogRef.current = fogMesh;
-      return fogMesh;
-    };
-  }, [galaxyShape, maxSystemRadius]);
 
   const colonizedLookup = useMemo(() => {
     const map = new Map<string, { id: string; name: string }>();
@@ -271,72 +184,6 @@ export const GalaxyMap = ({
 
     const systemGroup = new THREE.Group();
     systemGroupRef.current = systemGroup;
-    const createStarfield = () => {
-      const count = 1400;
-      const geometry = new THREE.SphereGeometry(0.65, 6, 6);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xaac8ff,
-        transparent: true,
-        opacity: 0.85,
-        depthWrite: false,
-      });
-      const mesh = new THREE.InstancedMesh(geometry, material, count);
-      const dummy = new THREE.Object3D();
-      for (let i = 0; i < count; i += 1) {
-        const r = starfieldRadius * (0.4 + Math.random() * 0.6);
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        dummy.position.set(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.sin(phi) * Math.sin(theta),
-          r * Math.cos(phi) * 0.25, // flatten a bit on Z
-        );
-        dummy.updateMatrix();
-        mesh.setMatrixAt(i, dummy.matrix);
-      }
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.name = 'starfield';
-      starfieldRef.current = mesh;
-      scene.add(mesh);
-    };
-
-    const createNebulaParticles = () => {
-      const geometry = new THREE.PlaneGeometry(3, 3);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x7fc7ff,
-        transparent: true,
-        opacity: 0.35,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      });
-      const mesh = new THREE.InstancedMesh(geometry, material, nebulaCount);
-      const dummy = new THREE.Object3D();
-
-      const basePositions = systems.map((system) => {
-        const pos = system.mapPosition ?? system.position;
-        return new THREE.Vector3(pos.x, pos.y, pos.z ?? 0);
-      });
-
-      for (let i = 0; i < nebulaCount; i += 1) {
-        const base = basePositions[i % basePositions.length] ?? new THREE.Vector3();
-        const jitter = new THREE.Vector3(
-          (Math.random() - 0.5) * 25,
-          (Math.random() - 0.5) * 25,
-          (Math.random() - 0.5) * 8,
-        );
-        dummy.position.copy(base).add(jitter);
-        const s = 1 + Math.random() * 2.5;
-        dummy.scale.set(s, s, s);
-        dummy.lookAt(camera.position);
-        dummy.updateMatrix();
-        mesh.setMatrixAt(i, dummy.matrix);
-      }
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.name = 'nebula';
-      nebulaRef.current = mesh;
-      scene.add(mesh);
-    };
     const createBlackHole = () => {
       const group = new THREE.Group();
       group.name = 'blackHole';
@@ -457,12 +304,7 @@ export const GalaxyMap = ({
     blackHoleRef.current = blackHole;
     systemGroup.add(blackHole);
 
-    const initialFog = createSpiralFog();
-    systemGroup.add(initialFog);
-
     scene.add(systemGroup);
-    createStarfield();
-    createNebulaParticles();
 
     let isPanning = false;
     let lastPointer = { x: 0, y: 0 };
@@ -551,7 +393,7 @@ export const GalaxyMap = ({
       targetNode.getWorldPosition(worldPos);
       const currentOffset = systemGroup.position.clone();
       offsetTargetRef.current = currentOffset.sub(worldPos);
-      zoomTargetRef.current = 90;
+      zoomTargetRef.current = clamp(60, minZoom, maxZoom);
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
@@ -572,7 +414,6 @@ export const GalaxyMap = ({
       controls.minDistance = minZoom;
       controls.maxDistance = maxZoom;
       controls.update();
-      const time = clockRef.current?.getElapsedTime() ?? 0;
 
       const showOrbits = camera.position.z < 105;
       const showLabels = camera.position.z < 240;
@@ -642,40 +483,20 @@ export const GalaxyMap = ({
         }
       });
 
-      if (blackHoleRef.current) {
-        const outer = blackHoleRef.current.getObjectByName('accretionOuter') as THREE.Mesh | null;
-        const glow = blackHoleRef.current.getObjectByName('glow') as THREE.Mesh | null;
-        const shaderMats =
-          (blackHoleRef.current.userData.shaderMaterials as THREE.ShaderMaterial[]) ?? [];
-        shaderMats.forEach((mat) => {
-          if (mat.uniforms.uTime) {
-            mat.uniforms.uTime.value = time;
-          }
-        });
-        if (outer) {
-          outer.rotation.z += delta * 0.35;
+      const outer = blackHoleRef.current?.getObjectByName('accretionOuter') as THREE.Mesh | null;
+      const glow = blackHoleRef.current?.getObjectByName('glow') as THREE.Mesh | null;
+      const shaderMats =
+        (blackHoleRef.current?.userData.shaderMaterials as THREE.ShaderMaterial[]) ?? [];
+      shaderMats.forEach((mat) => {
+        if (mat.uniforms.uTime) {
+          mat.uniforms.uTime.value = (clockRef.current?.elapsedTime ?? 0);
         }
-        if (glow) {
-          glow.rotation.z -= delta * 0.25;
-        }
+      });
+      if (outer) {
+        outer.rotation.z += delta * 0.35;
       }
-      if (fogRef.current) {
-        const fogMat = fogRef.current.material as THREE.ShaderMaterial;
-        if (fogMat.uniforms.uTime) {
-          fogMat.uniforms.uTime.value = time;
-        }
-        fogRef.current.rotation.z += delta * 0.02;
-      }
-      if (nebulaRef.current) {
-        const dummy = new THREE.Object3D();
-        for (let i = 0; i < nebulaCount; i += 1) {
-          nebulaRef.current.getMatrixAt(i, dummy.matrix);
-          const s = 0.98 + Math.sin(time * 0.6 + i * 0.15) * 0.04;
-          dummy.scale.setScalar(s);
-          dummy.updateMatrix();
-          nebulaRef.current.setMatrixAt(i, dummy.matrix);
-        }
-        nebulaRef.current.instanceMatrix.needsUpdate = true;
+      if (glow) {
+        glow.rotation.z -= delta * 0.25;
       }
 
       renderer.render(scene, camera);
@@ -696,18 +517,9 @@ export const GalaxyMap = ({
       window.removeEventListener('mouseup', handleMouseUp);
       renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
       controls.dispose();
-      if (starfieldRef.current) {
-        starfieldRef.current.geometry.dispose();
-        (starfieldRef.current.material as THREE.Material).dispose();
-        scene.remove(starfieldRef.current);
-        starfieldRef.current = null;
-      }
-      if (fogNoiseRef.current) {
-        fogNoiseRef.current.dispose();
-        fogNoiseRef.current = null;
-      }
       dispose();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -744,7 +556,7 @@ export const GalaxyMap = ({
     }
     lastFocusSystemRef.current = focusSystemId;
     lastFocusAppliedRef.current = { id: focusSystemId, trigger: focusTrigger };
-  }, [focusSystemId, focusPlanetId, systems, onClearRef, focusTrigger]);
+  }, [focusSystemId, focusPlanetId, systems, onClearRef, focusTrigger, minZoom, maxZoom]);
 
   useEffect(() => {
     if (!focusPlanetId) {
@@ -790,7 +602,7 @@ export const GalaxyMap = ({
       cameraRef.current.position.z = zoomTargetRef.current;
     }
     lastFocusPlanetRef.current = focusPlanetId;
-  }, [focusPlanetId, systems]);
+  }, [focusPlanetId, systems, focusSystemId, minZoom, maxZoom]);
 
   useEffect(() => {
     const group = systemGroupRef.current;
@@ -821,18 +633,6 @@ export const GalaxyMap = ({
     });
     group.clear();
     planetLookupRef.current.clear();
-
-    if (blackHoleRef.current) {
-      blackHoleRef.current.position.set(0, 0, 0);
-      group.add(blackHoleRef.current);
-    }
-    if (fogRef.current) {
-      fogRef.current.userData = fogRef.current.userData ?? {};
-      group.add(fogRef.current);
-    } else {
-      const fog = createSpiralFog();
-      group.add(fog);
-    }
 
     const positions = new Map<string, THREE.Vector3>();
 
@@ -963,6 +763,7 @@ export const GalaxyMap = ({
     recentCombatSystems,
     activeBattles,
     systemsSignature,
+    colonizedLookup,
   ]);
 
   return <div className="galaxy-map" ref={containerRef} />;

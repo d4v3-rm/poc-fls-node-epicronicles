@@ -38,6 +38,7 @@ import {
   beginResearch,
   unlockTraditionPerk,
   resolveActiveEvent,
+  stopScienceShip,
 } from '../store/thunks';
 export * from '../store/selectors';
 import type {
@@ -103,7 +104,6 @@ interface HookState {
     jobId: PopulationJobId,
   ) => PopulationAdjustResult;
   removeDistrict: (planetId: string, districtId: string) => RemoveDistrictResult;
-  removeDistrict: (planetId: string, districtId: string) => RemoveDistrictResult;
   cancelDistrictTask: (
     taskId: string,
   ) => DistrictQueueManageResult;
@@ -125,6 +125,7 @@ interface HookState {
   beginResearch: (branch: ResearchBranch, techId: string) => StartResearchResult;
   unlockTraditionPerk: (perkId: string) => UnlockTraditionResult;
   resolveActiveEvent: (optionId: string) => ResolveEventResult;
+  stopScienceShip: (shipId: string) => void;
 }
 
 export const useGameStore = <T>(selector: (state: HookState) => T): T => {
@@ -160,6 +161,7 @@ export const useGameStore = <T>(selector: (state: HookState) => T): T => {
         dispatch(orderScienceShip(shipId, systemId)),
       setScienceAutoExplore: (shipId: string, auto: boolean) =>
         dispatch(setScienceAutoExplore(shipId, auto)),
+      stopScienceShip: (shipId: string) => dispatch(stopScienceShip(shipId)),
       queueDistrictConstruction: (planetId: string, districtId: string) =>
         dispatch(queueDistrictConstruction(planetId, districtId)),
       promotePopulation: (planetId: string, jobId: PopulationJobId) =>
