@@ -14,6 +14,7 @@ import {
   AdditiveBlending,
   LinearFilter,
   ClampToEdgeWrapping,
+  TextureLoader,
 } from 'three';
 import type { OrbitingPlanet, StarSystem } from '@domain/types';
 import {
@@ -27,6 +28,7 @@ import {
 const orbitPalette = ['#72fcd5', '#f9d976', '#f58ef6', '#8ec5ff', '#c7ddff'];
 const planetGeometryCache = new Map<number, SphereGeometry>();
 const ringGeometryCache = new Map<string, RingGeometry>();
+const textureLoader = new TextureLoader();
 const starGlowTexture = (() => {
   let cache: CanvasTexture | null = null;
   return () => {
@@ -86,6 +88,22 @@ const starClassVisuals: Record<
     glowScale: 4.2,
   },
 };
+
+const getStarCoreTexture = (() => {
+  let cache: THREE.Texture | null = null;
+  return () => {
+    if (cache) {
+      return cache;
+    }
+    cache = textureLoader.load('/galaxy-map/star-basic-texture.jpg');
+    cache.minFilter = LinearFilter;
+    cache.magFilter = LinearFilter;
+    cache.wrapS = ClampToEdgeWrapping;
+    cache.wrapT = ClampToEdgeWrapping;
+    cache.needsUpdate = true;
+    return cache;
+  };
+})();
 
 export const createLabelSprite = (text: string) => {
   const canvas = document.createElement('canvas');
@@ -269,6 +287,8 @@ const createStarVisual = (
           emissiveIntensity: 1.8,
           roughness: 0.2,
           metalness: 0.1,
+          map: getStarCoreTexture(),
+          transparent: true,
         });
 
   const core = new Mesh(
