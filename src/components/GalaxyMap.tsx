@@ -9,6 +9,7 @@ import {
 } from '@three/materials';
 import { createScene } from '@three/scene';
 import { createNoise2D } from 'fast-simplex-noise';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import '../styles/components/GalaxyMap.scss';
 import { createSystemNode } from '@three/mapUtils';
 import type { Group } from 'three';
@@ -91,6 +92,7 @@ export const GalaxyMap = ({
   const animationRef = useRef<number | null>(null);
   const offsetTargetRef = useRef(new THREE.Vector3(0, 0, 0));
   const zoomTargetRef = useRef(170);
+  const controlsRef = useRef<OrbitControls | null>(null);
   const lastFocusSystemRef = useRef<string | null>(null);
   const lastFocusPlanetRef = useRef<string | null>(null);
   const lastFocusAppliedRef = useRef<{ id: string | null; trigger: number }>({
@@ -252,6 +254,14 @@ export const GalaxyMap = ({
     cameraRef.current = camera;
     clockRef.current = new THREE.Clock();
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = true;
+    controls.enableRotate = false;
+    controls.minDistance = minZoom;
+    controls.maxDistance = maxZoom;
+    controlsRef.current = controls;
+
     const systemGroup = new THREE.Group();
     systemGroupRef.current = systemGroup;
     const createBlackHole = () => {
@@ -391,11 +401,7 @@ export const GalaxyMap = ({
     const handleContextMenu = (event: MouseEvent) => event.preventDefault();
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      zoomTargetRef.current = clamp(
-        zoomTargetRef.current + event.deltaY * 0.1,
-        minZoom,
-        maxZoom,
-      );
+      controls.enableZoom = true;
     };
 
     const handleMouseDown = (event: MouseEvent) => {
@@ -488,7 +494,9 @@ export const GalaxyMap = ({
       systemGroup.rotation.y = 0;
       systemGroup.rotation.x = 0;
       systemGroup.position.lerp(offsetTargetRef.current, 0.08);
-      camera.position.z += (zoomTargetRef.current - camera.position.z) * 0.08;
+      controls.minDistance = minZoom;
+      controls.maxDistance = maxZoom;
+      controls.update();
       const time = clockRef.current?.getElapsedTime() ?? 0;
 
       const showOrbits = camera.position.z < 105;
@@ -601,6 +609,7 @@ export const GalaxyMap = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
+      controls.dispose();
       dispose();
     };
   }, []);
