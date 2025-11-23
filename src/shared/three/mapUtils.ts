@@ -131,14 +131,17 @@ const getStarCoreTexture = (() => {
     if (cache) {
       return cache;
     }
-    const tex = textureLoader.load('/galaxy-map/star-basic-texture.jpg');
+    // fallback flat texture
+    const size = 8;
+    const data = new Uint8Array(size * size * 3).fill(255);
+    const tex = new THREE.DataTexture(data, size, size, THREE.RGBFormat);
+    tex.needsUpdate = true;
     tex.minFilter = LinearFilter;
     tex.magFilter = LinearFilter;
     tex.wrapS = ClampToEdgeWrapping;
     tex.wrapT = ClampToEdgeWrapping;
-    tex.needsUpdate = true;
     cache = tex;
-    return cache;
+    return tex;
   };
 })();
 
