@@ -6,7 +6,6 @@ import {
   SphereGeometry,
   Mesh,
   RingGeometry,
-  MeshBasicMaterial,
   Group,
   DoubleSide,
   Object3D,
