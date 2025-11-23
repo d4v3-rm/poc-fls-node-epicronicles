@@ -630,7 +630,7 @@ export const GalaxyMap = ({
     }, 0);
   }, [systems]);
   const minZoom = useMemo(
-    () => Math.max(18, Math.min(70, maxSystemRadius * 0.18)),
+    () => Math.max(0, Math.min(10, maxSystemRadius * 0.18)),
     [maxSystemRadius],
   );
   const maxZoom = useMemo(

@@ -15,7 +15,9 @@ import {
   LinearFilter,
   ClampToEdgeWrapping,
   TextureLoader,
+  MeshBasicMaterial,
 } from 'three';
+import type { Texture } from 'three';
 import type { OrbitingPlanet, StarSystem } from '@domain/types';
 import {
   materialCache,
@@ -90,7 +92,7 @@ const starClassVisuals: Record<
 };
 
 const getStarCoreTexture = (() => {
-  let cache: THREE.Texture | null = null;
+  let cache: Texture | null = null;
   return () => {
     if (cache) {
       return cache;
@@ -281,14 +283,13 @@ const createStarVisual = (
   const coreMaterial =
     visibility === 'unknown'
       ? materialCache.fogged
-      : new MeshStandardMaterial({
+      : new MeshBasicMaterial({
           color: preset.coreColor,
-          emissive: preset.coreColor,
-          emissiveIntensity: 1.8,
-          roughness: 0.2,
-          metalness: 0.1,
           map: getStarCoreTexture(),
           transparent: true,
+          depthWrite: false,
+          blending: AdditiveBlending,
+          name: 'starCoreMaterial',
         });
 
   const core = new Mesh(
@@ -310,6 +311,7 @@ const createStarVisual = (
           depthWrite: false,
           blending: AdditiveBlending,
           opacity: 0.7,
+          name: 'starGlowMaterial',
         }),
       );
       glow.name = 'starGlow';
@@ -325,6 +327,7 @@ const createStarVisual = (
           depthWrite: false,
           blending: AdditiveBlending,
           opacity: 0.28,
+          name: 'starGlowOuterMaterial',
         }),
       );
       outerGlow.name = 'starGlowOuter';
