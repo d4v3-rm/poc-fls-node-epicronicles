@@ -15,7 +15,6 @@ import {
   ClampToEdgeWrapping,
   TextureLoader,
   MeshBasicMaterial,
-  CanvasTexture as ThreeCanvasTexture,
   ShaderMaterial,
   Vector3,
   Color,
@@ -73,7 +72,7 @@ const starGlowTexture = (() => {
   };
 })();
 const starStreakTexture = (() => {
-  let cache: ThreeCanvasTexture | null = null;
+  let cache: CanvasTexture | null = null;
   return () => {
     if (cache) {
       return cache;
@@ -94,7 +93,7 @@ const starStreakTexture = (() => {
     gradient.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, size / 2 - size * 0.08, size, size * 0.16);
-    cache = new ThreeCanvasTexture(canvas);
+    cache = new CanvasTexture(canvas);
     cache.needsUpdate = true;
     cache.minFilter = LinearFilter;
     cache.magFilter = LinearFilter;
@@ -133,9 +132,43 @@ const getStarCoreTexture = (() => {
     if (cache) {
       return cache;
     }
-    const size = 8;
-    const data = new Uint8Array(size * size * 3).fill(255);
-    const tex = new DataTexture(data, size, size, RGBFormat);
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      // fallback flat
+      const data = new Uint8Array(size * size * 3).fill(255);
+      const tex = new DataTexture(data, size, size, RGBFormat);
+      tex.needsUpdate = true;
+      cache = tex;
+      return tex;
+    }
+    const imgData = ctx.createImageData(size, size);
+    let seed = 1337;
+    const rand = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+    for (let y = 0; y < size; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        const dx = x - size / 2;
+        const dy = y - size / 2;
+        const r = Math.sqrt(dx * dx + dy * dy) / (size * 0.5);
+        const falloff = Math.max(0, 1 - r);
+        const noise = (rand() * 0.5 + rand() * 0.35) * falloff;
+        const value = Math.min(1, 0.5 * falloff + noise);
+        const idx = (y * size + x) * 4;
+        const channel = Math.floor(value * 255);
+        imgData.data[idx] = channel;
+        imgData.data[idx + 1] = channel;
+        imgData.data[idx + 2] = channel;
+        imgData.data[idx + 3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    const tex = new CanvasTexture(canvas);
     tex.needsUpdate = true;
     tex.minFilter = LinearFilter;
     tex.magFilter = LinearFilter;
@@ -147,7 +180,7 @@ const getStarCoreTexture = (() => {
 })();
 
 const createStarBurstTexture = (() => {
-  let cache: ThreeCanvasTexture | null = null;
+  let cache: CanvasTexture | null = null;
   return () => {
     if (cache) {
       return cache;
@@ -185,7 +218,7 @@ const createStarBurstTexture = (() => {
     drawSpike(size * 0.08, 0.6, 0);
     drawSpike(size * 0.05, 0.4, Math.PI / 4);
 
-    cache = new ThreeCanvasTexture(canvas);
+    cache = new CanvasTexture(canvas);
     cache.needsUpdate = true;
     cache.minFilter = LinearFilter;
     cache.magFilter = LinearFilter;
@@ -316,8 +349,6 @@ export const createLabelSprite = (text: string) => {
   canvas.height = fontSize * 1.8;
 
   ctx.font = `600 ${fontSize}px Inter`;
-  ctx.fillStyle = 'rgba(7, 10, 18, 0.75)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#e5ecff';
   ctx.fillText(text, 20, fontSize);
 
@@ -553,7 +584,7 @@ const createStarVisual = (
         streakCross.userData.systemId = null;
         streakCross.scale.set(preset.glowScale * 1.6, preset.glowScale * 0.55, 1);
         streakCross.material.rotation = Math.PI / 2;
-        group.add(streakCross);
+          group.add(streakCross);
       }
 
       const sparkle = new Sprite(
@@ -570,6 +601,21 @@ const createStarVisual = (
       sparkle.userData.systemId = null;
       sparkle.scale.set(preset.glowScale * 0.8, preset.glowScale * 0.8, 1);
       group.add(sparkle);
+
+      const corona = new Sprite(
+        new SpriteMaterial({
+          map: glowTexture,
+          color: preset.glowColor,
+          transparent: true,
+          depthWrite: false,
+          blending: AdditiveBlending,
+          opacity: 0.18,
+        }),
+      );
+      corona.name = 'starCorona';
+      corona.userData.systemId = null;
+      corona.scale.set(preset.glowScale * 1.2, preset.glowScale * 1.2, 1);
+      group.add(corona);
 
       const burstTex = createStarBurstTexture();
       if (burstTex) {
@@ -639,6 +685,7 @@ export const createSystemNode = (
     );
     ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
+    ring.userData.kind = 'owner';
     node.add(ring);
   }
 
@@ -653,6 +700,7 @@ export const createSystemNode = (
     );
     ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
+    ring.userData.kind = 'hostile';
     node.add(ring);
   }
 
@@ -667,6 +715,7 @@ export const createSystemNode = (
     );
     ring.material.side = DoubleSide;
     ring.userData.systemId = system.id;
+    ring.userData.kind = 'combat';
     node.add(ring);
   }
 
