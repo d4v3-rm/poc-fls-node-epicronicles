@@ -145,9 +145,11 @@ const getStarCoreTexture = (() => {
 const createStarCoreMaterial = ({
   preset,
   visibility,
+  seed,
 }: {
   preset: (typeof starClassVisuals)[string];
   visibility: StarSystem['visibility'];
+  seed: number;
 }) => {
   if (visibility === 'unknown') {
     return materialCache.fogged;
@@ -165,6 +167,9 @@ const createStarCoreMaterial = ({
       uGlow: { value: 1.2 },
       uFresnelPower: { value: 2.8 },
       uTime: { value: 0 },
+      uSeed: { value: seed },
+      uSpeed: { value: preset.plasmaSpeed },
+      uJetIntensity: { value: preset.jetIntensity },
     },
     vertexShader: `
       precision mediump float;
@@ -191,6 +196,9 @@ const createStarCoreMaterial = ({
       uniform float uGlow;
       uniform float uFresnelPower;
       uniform float uTime;
+      uniform float uSeed;
+      uniform float uSpeed;
+      uniform float uJetIntensity;
 
       float hash(vec2 p) {
         return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -220,16 +228,20 @@ const createStarCoreMaterial = ({
       }
 
       void main() {
-        vec3 tex = texture2D(uTexture, vUv).rrr;
         vec2 uvCentered = vUv - 0.5;
-        float plasma = fbm(uvCentered * 8.0 + uTime * 0.22) * 0.9 + fbm((uvCentered + vec2(0.28, -0.18)) * 4.6 - uTime * 0.16) * 0.7;
+        float time = uTime * uSpeed;
+        vec2 warped = uvCentered + fbm(uvCentered * 5.2 + time * 0.28 + uSeed) * 0.06;
+        vec3 tex = texture2D(uTexture, warped + 0.5).rrr;
+        float plasma = fbm(warped * 9.0 + time * 0.26) * 0.95 + fbm((warped + vec2(0.28, -0.18)) * 5.4 - time * 0.18) * 0.8;
         float angle = atan(uvCentered.y, uvCentered.x);
-        float jets = max(0.0, sin(angle * 5.5 + uTime * 0.8)) * smoothstep(0.2, 0.65, length(uvCentered));
-        plasma += jets * 0.35;
+        float jetBurst = sin(time * 0.65 + uSeed * 3.7) * 0.5 + 0.5;
+        float jets = pow(max(0.0, sin(angle * 6.2 + uSeed * 12.0 + time * 0.92)), 3.0) * jetBurst;
+        jets *= smoothstep(0.2, 0.75, length(uvCentered)) * uJetIntensity;
+        plasma += jets * 0.5;
         float fresnel = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewDir)), 0.0), uFresnelPower);
         float plasmaMask = clamp(plasma, 0.0, 1.0);
-        vec3 color = (tex * 0.9 + plasmaMask * 0.55 + jets * 0.25) * uTint * (0.85 + uGlow * 0.6) + fresnel * vec3(1.0, 1.0, 1.0);
-        float alpha = clamp(max(max(tex.r, plasmaMask), fresnel) + jets * 0.25, 0.0, 1.0);
+        vec3 color = (tex * 0.9 + plasmaMask * 0.6 + jets * 0.35) * uTint * (0.88 + uGlow * 0.6) + fresnel * vec3(1.0, 1.0, 1.0);
+        float alpha = clamp(max(max(tex.r, plasmaMask), fresnel) + jets * 0.3, 0.0, 1.0);
         gl_FragColor = vec4(color, alpha);
       }
     `,
@@ -408,9 +420,10 @@ const createStarVisual = (
     ...group.userData,
     pulseSeed,
     baseGlow: preset.glowScale,
+    timeSpeed: preset.plasmaSpeed,
   };
 
-  const coreMaterial = createStarCoreMaterial({ preset, visibility });
+  const coreMaterial = createStarCoreMaterial({ preset, visibility, seed: pulseSeed });
 
   const core = new Mesh(
     new SphereGeometry(preset.coreRadius, 32, 32),
@@ -465,13 +478,29 @@ const createStarVisual = (
             transparent: true,
             depthWrite: false,
             blending: AdditiveBlending,
-            opacity: 0.25,
+            opacity: preset.streakOpacity,
           }),
         );
         streak.name = 'starStreak';
         streak.userData.systemId = null;
         streak.scale.set(preset.glowScale * 1.8, preset.glowScale * 0.65, 1);
         group.add(streak);
+
+        const streakCross = new Sprite(
+          new SpriteMaterial({
+            map: streakTex,
+            color: preset.glowColor,
+            transparent: true,
+            depthWrite: false,
+            blending: AdditiveBlending,
+            opacity: preset.streakOpacity * 0.75,
+          }),
+        );
+        streakCross.name = 'starStreakCross';
+        streakCross.userData.systemId = null;
+        streakCross.scale.set(preset.glowScale * 1.6, preset.glowScale * 0.55, 1);
+        streakCross.material.rotation = Math.PI / 2;
+        group.add(streakCross);
       }
 
       const sparkle = new Sprite(

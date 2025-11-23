@@ -1124,15 +1124,19 @@ export const GalaxyMap = ({
         const starGlow = node.getObjectByName('starGlow') as THREE.Sprite | null;
         const starGlowOuter = node.getObjectByName('starGlowOuter') as THREE.Sprite | null;
         const starStreak = node.getObjectByName('starStreak') as THREE.Sprite | null;
+        const starStreakCross = node.getObjectByName('starStreakCross') as THREE.Sprite | null;
         const starSparkle = node.getObjectByName('starSparkle') as THREE.Sprite | null;
         const starCore = node.getObjectByName('starCore') as THREE.Mesh | null;
         const pulseSeed = (node.getObjectByName('starVisual')?.userData?.pulseSeed as number) ?? 0;
         const baseGlow =
           (node.getObjectByName('starVisual')?.userData?.baseGlow as number) ?? 1;
+        const timeSpeed =
+          (node.getObjectByName('starVisual')?.userData?.timeSpeed as number) ?? 1;
         if (starCore) {
           const mat = starCore.material as THREE.ShaderMaterial;
           if (mat.uniforms?.uTime) {
-            mat.uniforms.uTime.value = (clockRef.current?.elapsedTime ?? 0) + pulseSeed * 0.5;
+            mat.uniforms.uTime.value =
+              ((clockRef.current?.elapsedTime ?? 0) + pulseSeed * 0.5) * timeSpeed;
           }
         }
         if (starGlow) {
@@ -1162,6 +1166,21 @@ export const GalaxyMap = ({
           if (mat.opacity !== undefined) {
             mat.opacity = 0.2 + Math.sin(t * 1.1) * 0.05;
           }
+        }
+        if (starStreakCross) {
+          const t = (clockRef.current?.elapsedTime ?? 0) + pulseSeed * 0.1;
+          const pulse = 1 + Math.sin(t * 0.5) * 0.04;
+          starStreakCross.scale.set(
+            (baseGlow * 1.6) * pulse,
+            (baseGlow * 0.55) * (1 + Math.sin(t * 0.7) * 0.05),
+            1,
+          );
+          const mat = starStreakCross.material as THREE.Material & { opacity?: number; rotation?: number };
+          if (mat.opacity !== undefined) {
+            mat.opacity = 0.16 + Math.sin(t * 0.9) * 0.05;
+          }
+          const spriteMat = starStreakCross.material as THREE.SpriteMaterial;
+          spriteMat.rotation = Math.PI / 2 + Math.sin(t * 0.2) * 0.1;
         }
         if (starSparkle) {
           const t = (clockRef.current?.elapsedTime ?? 0) + pulseSeed * 0.14;
