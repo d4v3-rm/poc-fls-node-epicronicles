@@ -28,8 +28,8 @@ export const MapPanels = ({
   shipyardSystem,
   closeShipyard,
 }: MapPanelsProps) => {
-  const modalWidth = Math.min(840, viewportWidth - 40);
-  const modalHeight = Math.min(620, viewportHeight - 80);
+  const modalWidth = Math.min(1280, viewportWidth - 60);
+  const modalHeight = Math.min(780, viewportHeight - 80);
   const modalX = Math.max(20, (viewportWidth - modalWidth) / 2);
   const modalY = Math.max(20, (viewportHeight - modalHeight) / 2);
   return (

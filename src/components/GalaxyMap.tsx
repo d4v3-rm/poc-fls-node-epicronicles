@@ -1272,8 +1272,10 @@ export const GalaxyMap = ({
         }
       });
 
-      const outer = blackHoleRef.current?.getObjectByName('accretionOuter') as THREE.Mesh | null;
+      const blackHole = blackHoleRef.current;
+      const outer = blackHole?.getObjectByName('accretionOuter') as THREE.Mesh | null;
       const glow = blackHoleRef.current?.getObjectByName('glow') as THREE.Mesh | null;
+      const innerDisk = blackHoleRef.current?.getObjectByName('accretionInner') as THREE.Mesh | null;
       const shaderMats =
         (blackHoleRef.current?.userData.shaderMaterials as THREE.ShaderMaterial[]) ?? [];
       shaderMats.forEach((mat) => {
@@ -1281,8 +1283,14 @@ export const GalaxyMap = ({
           mat.uniforms.uTime.value = (clockRef.current?.elapsedTime ?? 0);
         }
       });
+      if (blackHole) {
+        blackHole.rotation.z += delta * 0.12;
+      }
       if (outer) {
         outer.rotation.z += delta * 0.35;
+      }
+      if (innerDisk) {
+        innerDisk.rotation.z -= delta * 0.28;
       }
       if (glow) {
         glow.rotation.z -= delta * 0.25;

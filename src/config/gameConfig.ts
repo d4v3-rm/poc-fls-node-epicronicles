@@ -597,6 +597,7 @@ export const gameConfig: GameConfig = {
       {
         id: 'corvette',
         name: 'Classe Aurora',
+        description: 'Corvetta versatile per pattugliamenti rapidi e schermaglia.',
         buildCost: {
           minerals: 120,
           energy: 40,
@@ -610,6 +611,7 @@ export const gameConfig: GameConfig = {
       {
         id: 'frigate',
         name: 'Classe Asteria',
+        description: 'Fregata di linea, buon bilanciamento tra attacco e difesa.',
         buildCost: {
           minerals: 170,
           energy: 70,
@@ -623,6 +625,7 @@ export const gameConfig: GameConfig = {
       {
         id: 'colony',
         name: 'Classe Horizon',
+        description: 'Nave colonia con moduli di supporto e stiva ampliata.',
         buildCost: {
           minerals: 150,
           energy: 60,

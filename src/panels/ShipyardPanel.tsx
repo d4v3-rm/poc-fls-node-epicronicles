@@ -107,52 +107,54 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
   );
 
   return (
-    <section className="shipyard-panel">
-      <header>
-        <h3>Cantieri</h3>
-        <span className="text-muted">Coda: {queueUsage}</span>
-      </header>
-      {system ? (
-        <div className="shipyard-panel__summary">
-          <strong>{system.name}</strong>
-          <span>Classe: {system.starClass}</span>
-          <span>Pianeti orbitanti: {system.orbitingPlanets.length}</span>
+    <section className="shipyard-panel shipyard-panel--columns">
+      <header className="shipyard-panel__header">
+        <div>
+          <h3>{system ? `Sistema ${system.name}` : 'Cantiere orbitale'}</h3>
         </div>
-      ) : null}
-      {message ? <p className="panel-message">{message}</p> : null}
-      <div className="shipyard-panel__designs">
-        {designs.map((design) => {
-          const templates = shipTemplates.filter(
-            (template) => template.base === design.id,
-          );
-          const templateId = selectedTemplate[design.id] ?? '';
-          const customState = customConfig[design.id] ?? {
-            offense: 0,
-            defense: 0,
-            hull: 0,
-            name: '',
-          };
-          return (
-            <ShipDesignCard
-              key={design.id}
-              design={design}
-              templates={templates}
-              queueLength={queue.length}
-              queueLimit={queueLimit}
-              canAfford={canAfford}
-              selectedTemplateId={templateId}
-              onSelectTemplate={(id) =>
-                setSelectedTemplate((prev) => ({ ...prev, [design.id]: id }))
-              }
-              customState={customState}
-              setCustomState={setCustomConfig}
-              onBuild={handleBuild}
-              onBuildCustom={handleBuildCustom}
-            />
-          );
-        })}
+        <div className="shipyard-panel__header-meta">
+        </div>
+      </header>
+      {message ? null : null}
+      <div className="shipyard-panel__columns">
+        <div className="shipyard-panel__col shipyard-panel__col--designs">
+          <div className="shipyard-panel__grid">
+            {designs.map((design) => {
+              const templates = shipTemplates.filter(
+                (template) => template.base === design.id,
+              );
+              const templateId = selectedTemplate[design.id] ?? '';
+              const customState = customConfig[design.id] ?? {
+                offense: 0,
+                defense: 0,
+                hull: 0,
+                name: '',
+              };
+              return (
+                <ShipDesignCard
+                  key={design.id}
+                  design={design}
+                  templates={templates}
+                  queueLength={queue.length}
+                  queueLimit={queueLimit}
+                  canAfford={canAfford}
+                  selectedTemplateId={templateId}
+                  onSelectTemplate={(id) =>
+                    setSelectedTemplate((prev) => ({ ...prev, [design.id]: id }))
+                  }
+                  customState={customState}
+                  setCustomState={setCustomConfig}
+                  onBuild={handleBuild}
+                  onBuildCustom={handleBuildCustom}
+                />
+              );
+            })}
+          </div>
+        </div>
+        <aside className="shipyard-panel__col shipyard-panel__col--queue-right shipyard-queue__section">
+          <BuildQueue queue={queueWithProgress} />
+        </aside>
       </div>
-      <BuildQueue queue={queueWithProgress} />
     </section>
   );
 };

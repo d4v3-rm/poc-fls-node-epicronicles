@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { ShipDesign } from '@domain/types';
 import { applyShipTemplate, applyCustomization } from '@domain/fleet/ships';
 import { formatCost } from '../shared/formatters';
@@ -46,6 +46,7 @@ export const ShipDesignCard = ({
   onBuild,
   onBuildCustom,
 }: ShipDesignCardProps) => {
+  const [showEditor, setShowEditor] = useState(false);
   const effectiveDesign =
     selectedTemplateId && templates.length > 0
       ? applyShipTemplate(
@@ -63,138 +64,166 @@ export const ShipDesignCard = ({
     costMultiplier,
     name: customState.name || undefined,
   });
+  const displayDesign = showEditor ? customizedDesign : effectiveDesign;
   const affordable = canAfford(design.buildCost);
   const disabled = queueLength >= queueLimit || !affordable;
   const customAffordable = canAfford(customizedDesign.buildCost);
   const customDisabled =
-    queueLength >= queueLimit || !customAffordable || points <= 0;
+    queueLength >= queueLimit || !customAffordable;
+  const variantName =
+    selectedTemplateId &&
+    templates.find((tpl) => tpl.id === selectedTemplateId)?.name;
 
   return (
     <div className="shipyard-panel__card">
-      <strong>{effectiveDesign.name}</strong>
-      <span className="text-muted">Tempo: {design.buildTime} tick</span>
-      {templates.length > 0 ? (
-        <label className="fleet-panel__order">
-          <span className="text-muted">Template</span>
-          <select
-            value={selectedTemplateId}
-            onChange={(event) => onSelectTemplate(event.target.value)}
-          >
-            <option value="">Base</option>
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
-      <p>Costi: {formatCost(effectiveDesign.buildCost) || 'N/A'}</p>
-      <div className="fleet-panel__order">
-        <span className="text-muted">
-          Att:{effectiveDesign.attack} Dif:{effectiveDesign.defense} Hull:
-          {effectiveDesign.hullPoints}
-        </span>
+      <div className="shipyard-card__header">
+        <div className="shipyard-card__header-left">
+          <strong className="shipyard-card__title">{design.name}</strong>
+          {variantName ? (
+            <p className="shipyard-card__subtitle">{variantName}</p>
+          ) : null}
+          {design.description ? (
+            <p className="shipyard-card__description">{design.description}</p>
+          ) : null}
+        </div>
+        <div className="shipyard-card__badges">
+          <span className="pill pill--glass" title="Tempo di costruzione">
+            ⏱ {design.buildTime} tick
+          </span>
+        </div>
       </div>
-      <button
-        className="panel__action panel__action--compact"
-        disabled={disabled}
-        onClick={() => onBuild(design.id, design.name)}
-      >
-        Costruisci
-      </button>
-      <div className="fleet-panel__order">
-        <span className="text-muted">Designer rapido (distribuisci punti)</span>
-        <label className="panel__field">
-          Offesa (+2 atk per punto)
-          <input
-            type="range"
-            min={0}
-            max={4}
-            value={customState.offense}
-            onChange={(e) =>
-              setCustomState((prev) => ({
-                ...prev,
-                [design.id]: {
-                  ...customState,
-                  offense: Number(e.target.value),
-                },
-              }))
-            }
-          />
-        </label>
-        <label className="panel__field">
-          Difesa (+1.5 def per punto)
-          <input
-            type="range"
-            min={0}
-            max={4}
-            value={customState.defense}
-            onChange={(e) =>
-              setCustomState((prev) => ({
-                ...prev,
-                [design.id]: {
-                  ...customState,
-                  defense: Number(e.target.value),
-                },
-              }))
-            }
-          />
-        </label>
-        <label className="panel__field">
-          Hull (+3 hp per punto)
-          <input
-            type="range"
-            min={0}
-            max={4}
-            value={customState.hull}
-            onChange={(e) =>
-              setCustomState((prev) => ({
-                ...prev,
-                [design.id]: {
-                  ...customState,
-                  hull: Number(e.target.value),
-                },
-              }))
-            }
-          />
-        </label>
-        <label className="panel__field">
-          Nome variante
-          <input
-            type="text"
-            value={customState.name}
-            onChange={(e) =>
-              setCustomState((prev) => ({
-                ...prev,
-                [design.id]: {
-                  ...customState,
-                  name: e.target.value,
-                },
-              }))
-            }
-          />
-        </label>
-        <p className="text-muted">
-          Punti: {points} · Moltiplicatore costo: {costMultiplier.toFixed(2)}
-        </p>
-        <p className="text-muted">
-          Statistiche: Atk {customizedDesign.attack} · Dif {customizedDesign.defense} · Hull{' '}
-          {customizedDesign.hullPoints}
-        </p>
-        <p>Costi: {formatCost(customizedDesign.buildCost) || 'N/A'}</p>
+
+      <div className="shipyard-card__section">
+        <p className="text-muted">Costi</p>
+        <div className="shipyard-card__meta">
+          {Object.entries(displayDesign.buildCost ?? {}).map(([key, value]) =>
+            value ? (
+              <span key={key} className="pill pill--cost">
+                {key}: {value}
+              </span>
+            ) : null,
+          )}
+          {!displayDesign.buildCost || Object.values(displayDesign.buildCost).every((v) => !v)
+            ? <span className="pill pill--cost">N/A</span>
+            : null}
+        </div>
+      </div>
+      <div className="shipyard-card__section">
+        <p className="text-muted">Statistiche</p>
+        <div className="shipyard-card__meta">
+          <span className="pill pill--stat pill--stat-attack">Atk {displayDesign.attack}</span>
+          <span className="pill pill--stat pill--stat-defense">Def {displayDesign.defense}</span>
+          <span className="pill pill--stat pill--stat-hull">Hull {displayDesign.hullPoints}</span>
+        </div>
+      </div>
+      {showEditor && (
+        <div className="shipyard-card__editor">
+          {templates.length > 0 ? (
+            <label className="fleet-panel__order">
+              <span className="text-muted">Template</span>
+              <select
+                value={selectedTemplateId}
+                onChange={(event) => onSelectTemplate(event.target.value)}
+              >
+                <option value="">Base</option>
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="panel__field">
+            Offesa (+2 atk per punto)
+            <input
+              type="range"
+              min={0}
+              max={4}
+              value={customState.offense}
+              onChange={(e) =>
+                setCustomState((prev) => ({
+                  ...prev,
+                  [design.id]: {
+                    ...customState,
+                    offense: Number(e.target.value),
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="panel__field">
+            Difesa (+1.5 def per punto)
+            <input
+              type="range"
+              min={0}
+              max={4}
+              value={customState.defense}
+              onChange={(e) =>
+                setCustomState((prev) => ({
+                  ...prev,
+                  [design.id]: {
+                    ...customState,
+                    defense: Number(e.target.value),
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="panel__field">
+            Hull (+3 hp per punto)
+            <input
+              type="range"
+              min={0}
+              max={4}
+              value={customState.hull}
+              onChange={(e) =>
+                setCustomState((prev) => ({
+                  ...prev,
+                  [design.id]: {
+                    ...customState,
+                    hull: Number(e.target.value),
+                  },
+                }))
+              }
+            />
+          </label>
+          <label className="panel__field">
+            Nome variante
+            <input
+              type="text"
+              value={customState.name}
+              onChange={(e) =>
+                setCustomState((prev) => ({
+                  ...prev,
+                  [design.id]: {
+                    ...customState,
+                    name: e.target.value,
+                  },
+                }))
+              }
+            />
+          </label>
+        </div>
+      )}
+      <div className="shipyard-card__actions">
         <button
           className="panel__action panel__action--compact"
-          disabled={customDisabled}
+          disabled={showEditor ? customDisabled : disabled}
           onClick={() =>
-            onBuildCustom(design.id, design.name, customState, selectedTemplateId)
+            showEditor
+              ? onBuildCustom(design.id, design.name, customState, selectedTemplateId)
+              : onBuild(design.id, design.name)
           }
         >
-          Costruisci variante
+          Costruisci
         </button>
-        {!customAffordable ? (
-          <p className="text-muted">Risorse insufficienti per la variante.</p>
-        ) : null}
+        <button
+          className="panel__action panel__action--ghost"
+          onClick={() => setShowEditor((prev) => !prev)}
+        >
+          Modifica
+        </button>
       </div>
     </div>
   );

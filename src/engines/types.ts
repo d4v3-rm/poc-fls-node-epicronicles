@@ -179,11 +179,13 @@ export interface GameNotification {
 
 export type PlanetKind = 'terrestrial' | 'desert' | 'tundra';
 
-export type ShipClassId = 'corvette' | 'frigate' | 'colony';
+// Config-driven ship ids; keep it open to allow new classes from config
+export type ShipClassId = string;
 
 export interface ShipDesign {
   id: ShipClassId;
   name: string;
+  description?: string;
   buildCost: ResourceCost;
   buildTime: number;
   attack: number;

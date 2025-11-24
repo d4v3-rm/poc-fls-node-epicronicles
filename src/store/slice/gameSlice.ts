@@ -204,5 +204,6 @@ export type PopulationJobId =
   | 'specialists'
   | 'researchers';
 
-export type ShipClassId = 'corvette' | 'frigate' | 'colony';
+// Config-driven ship ids; keep open to allow new classes from config
+export type ShipClassId = string;
 
