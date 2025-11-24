@@ -32,6 +32,7 @@ import {
   requestBorderAccess,
   mergeFleets,
   splitFleet,
+  stopFleet,
   setFleetPosition,
   saveSessionToStorage,
   loadSessionFromStorage,

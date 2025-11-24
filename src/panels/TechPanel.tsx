@@ -5,6 +5,12 @@ import { listTraditionChoices } from '@domain/traditions/traditions';
 import { selectResearch, selectTraditions } from '@store/selectors';
 import '../styles/components/TechPanel.scss';
 
+const kindLabels: Record<string, string> = {
+  foundation: 'Fondamenta',
+  feature: 'Feature',
+  rare: 'Rara',
+};
+
 export const TechPanel = () => {
   const research = useAppSelector(selectResearch);
   const traditions = useAppSelector(selectTraditions);
@@ -15,10 +21,7 @@ export const TechPanel = () => {
 
   const branches = config.research.branches;
   const availablePerks = useMemo(
-    () =>
-      traditions
-        ? listTraditionChoices(traditions, config.traditions)
-        : [],
+    () => (traditions ? listTraditionChoices(traditions, config.traditions) : []),
     [traditions, config.traditions],
   );
 
@@ -44,11 +47,33 @@ export const TechPanel = () => {
     );
   };
 
+  const renderBadges = (era?: number, kind?: string, origin?: string) => (
+    <span className="tech-card__badges">
+      <span className="tech-card__badge tech-card__badge--muted">Era {era ?? 1}</span>
+      {kind ? (
+        <span className="tech-card__badge tech-card__badge--muted">
+          {kindLabels[kind] ?? kind}
+        </span>
+      ) : null}
+      {origin && origin !== 'standard' ? (
+        <span className="tech-card__badge tech-card__badge--muted">{origin}</span>
+      ) : null}
+    </span>
+  );
+
   return (
     <div className="panel tech-panel">
-      <header className="panel-section__header">
-        <h4>Ricerca & Tradizioni</h4>
-        {message ? <span className="panel-message">{message}</span> : null}
+      <header className="panel-section__header tech-panel__header">
+        <div>
+          <h4>Ricerca & Tradizioni</h4>
+          {message ? <span className="panel-message">{message}</span> : null}
+        </div>
+        <div className="tech-panel__eras">
+          <span className="pill pill--glass">Era corrente: {research.currentEra}</span>
+          <span className="text-muted">
+            Ere sbloccate: {research.unlockedEras.join(', ') || '1'}
+          </span>
+        </div>
       </header>
       <div className="panel-section">
         <strong>Ricerca</strong>
@@ -88,6 +113,7 @@ export const TechPanel = () => {
                           {completed ? (
                             <span className="tech-card__badge">Completata</span>
                           ) : null}
+                          {renderBadges(tech.era, tech.kind, tech.origin)}
                         </div>
                         <p className="text-muted">{tech.description}</p>
                         <div className="tech-card__meta">
@@ -138,6 +164,7 @@ export const TechPanel = () => {
                   {unlocked ? (
                     <span className="tech-card__badge">Sbloccata</span>
                   ) : null}
+                  {renderBadges(perk.era, undefined, undefined)}
                 </div>
                 <p className="text-muted">{perk.description}</p>
                 <div className="tech-card__meta">

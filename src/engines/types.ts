@@ -43,6 +43,9 @@ export interface ResearchBranchState {
 export interface ResearchState {
   branches: Record<ResearchBranch, ResearchBranchState>;
   backlog: ResearchTech[];
+  currentEra: number;
+  unlockedEras: number[];
+  exclusivePicks?: Record<string, string>;
 }
 
 export type TraditionTreeId = 'exploration' | 'economy' | 'military';
@@ -64,6 +67,9 @@ export interface TraditionState {
   availablePoints: number;
   unlocked: string[];
   backlog: TraditionPerk[];
+  currentEra: number;
+  unlockedEras: number[];
+  exclusivePicks?: Record<string, string>;
 }
 
 export type EmpireKind = 'player' | 'ai';

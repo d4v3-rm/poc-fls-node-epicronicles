@@ -34,6 +34,9 @@ export const createInitialResearch = (config: ResearchConfig): ResearchState => 
   return {
     branches,
     backlog: config.techs,
+    currentEra: config.eras?.[0]?.id ?? 1,
+    unlockedEras: config.eras?.length ? [config.eras[0].id] : [1],
+    exclusivePicks: {},
   };
 };
 
@@ -53,6 +56,10 @@ export const startResearch = (
   if (tech.branch !== branch) {
     return { success: false, reason: 'BRANCH_MISMATCH' };
   }
+  const eraAllowed = tech.era ?? 1;
+  if (eraAllowed > state.currentEra) {
+    return { success: false, reason: 'PREREQ_NOT_MET' };
+  }
   const branchState = state.branches[branch];
   if (branchState.completed.includes(techId)) {
     return { success: false, reason: 'ALREADY_COMPLETED' };
@@ -62,6 +69,14 @@ export const startResearch = (
     branchState.completed.includes(id),
   );
   if (!prerequisitesMet) {
+    return { success: false, reason: 'PREREQ_NOT_MET' };
+  }
+  if (
+    tech.mutuallyExclusiveGroup &&
+    state.exclusivePicks &&
+    state.exclusivePicks[tech.mutuallyExclusiveGroup] &&
+    state.exclusivePicks[tech.mutuallyExclusiveGroup] !== tech.id
+  ) {
     return { success: false, reason: 'PREREQ_NOT_MET' };
   }
   const updatedBranch: ResearchBranchState = {
@@ -93,23 +108,27 @@ export const advanceResearch = ({
   const perBranch = researchIncome * config.pointsPerResearchIncome / 3;
   const completed: ResearchTech[] = [];
   const branches = { ...state.branches };
+  const exclusivePicks = { ...(state.exclusivePicks ?? {}) };
 
   (Object.entries(branches) as Array<[ResearchBranch, ResearchBranchState]>).forEach(
     ([branch, branchState]) => {
       if (!branchState.currentTechId) {
         return;
       }
-      const tech = getTech(config, branchState.currentTechId);
-      if (!tech) {
-        return;
-      }
-      const progress = branchState.progress + perBranch;
-      if (progress >= tech.cost) {
-        branches[branch] = {
-          ...branchState,
-          currentTechId: null,
-          progress: 0,
-          completed: [...branchState.completed, tech.id],
+        const tech = getTech(config, branchState.currentTechId);
+        if (!tech) {
+          return;
+        }
+        const progress = branchState.progress + perBranch;
+        if (progress >= tech.cost) {
+          if (tech.mutuallyExclusiveGroup && !exclusivePicks[tech.mutuallyExclusiveGroup]) {
+            exclusivePicks[tech.mutuallyExclusiveGroup] = tech.id;
+          }
+          branches[branch] = {
+            ...branchState,
+            currentTechId: null,
+            progress: 0,
+            completed: [...branchState.completed, tech.id],
         };
         completed.push(tech);
       } else {
@@ -121,8 +140,14 @@ export const advanceResearch = ({
     },
   );
 
+  const nextState: ResearchState = {
+    ...state,
+    branches,
+    exclusivePicks,
+  };
+  const eraState = computeEraUnlocks(nextState, config);
   return {
-    research: { ...state, branches },
+    research: { ...nextState, ...eraState },
     completed,
   };
 };
@@ -137,7 +162,18 @@ export const listAvailableTechs = (
     if (tech.branch !== branch) {
       return false;
     }
+    if ((tech.era ?? 1) > state.currentEra) {
+      return false;
+    }
     if (branchState.completed.includes(tech.id)) {
+      return false;
+    }
+    if (
+      tech.mutuallyExclusiveGroup &&
+      state.exclusivePicks &&
+      state.exclusivePicks[tech.mutuallyExclusiveGroup] &&
+      state.exclusivePicks[tech.mutuallyExclusiveGroup] !== tech.id
+    ) {
       return false;
     }
     if (tech.prerequisites && tech.prerequisites.length > 0) {
@@ -145,4 +181,24 @@ export const listAvailableTechs = (
     }
     return true;
   });
+};
+
+const computeEraUnlocks = (state: ResearchState, config: ResearchConfig) => {
+  const completedAll = Object.values(state.branches).flatMap((b) => b.completed);
+  const unlocked = new Set(state.unlockedEras);
+  const eras = [...(config.eras ?? [])].sort((a, b) => a.id - b.id);
+  eras.forEach((era) => {
+    if (unlocked.has(era.id)) {
+      return;
+    }
+    const gateways = era.gatewayTechs ?? [];
+    if (gateways.length === 0 || gateways.every((id) => completedAll.includes(id))) {
+      unlocked.add(era.id);
+    }
+  });
+  const currentEra = Math.max(...Array.from(unlocked));
+  return {
+    unlockedEras: Array.from(unlocked).sort((a, b) => a - b),
+    currentEra,
+  };
 };

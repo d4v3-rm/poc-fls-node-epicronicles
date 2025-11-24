@@ -568,6 +568,8 @@ export const gameConfig: GameConfig = {
         description: '+5% produzione ricerca.',
         cost: 2,
         effects: ['researchIncome:+0.05'],
+        era: 1,
+        clusterId: 'explore-1',
       },
       {
         id: 'logistics',
@@ -576,6 +578,8 @@ export const gameConfig: GameConfig = {
         description: '+5% produzione energia.',
         cost: 3,
         effects: ['energyIncome:+0.05'],
+        era: 1,
+        clusterId: 'military-1',
       },
       {
         id: 'bureaucrats',
@@ -584,6 +588,8 @@ export const gameConfig: GameConfig = {
         description: '+0.5 influenza/tick.',
         cost: 2,
         effects: ['influenceFlat:+0.5'],
+        era: 1,
+        clusterId: 'economy-1',
       },
       {
         id: 'planetary-planning',
@@ -593,6 +599,8 @@ export const gameConfig: GameConfig = {
         cost: 3,
         effects: ['mineralsIncome:+0.05'],
         prerequisites: ['bureaucrats'],
+        era: 1,
+        clusterId: 'economy-1',
       },
     ],
     pointsPerInfluenceIncome: 0.05,
