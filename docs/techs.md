@@ -74,6 +74,8 @@ Esempi di rami:
 - **Beacon quantici** (`quantum-beacons`) — Era 3, cluster `relic-6`, `rare`, origin anomaly. Bonus energia e ricerca, ottenibile da anomalia.
 - **Reattore nucleo oscuro** (`dark-core-reactor`) — Era 3, cluster `relic-7`, `rare`, origin relic. Bonus energia e minerali, ottenibile da anomalia.
 - **Baluardo stellare** (`stellar-ward`) — Era 3, cluster `faction-1`, `rare`, origin faction. Bonus ricerca e influenza, ottenibile da evento fazione.
+- **Lente gravitica** (`gravitic-lens`) — Era 3, cluster `relic-8`, `rare`, origin anomaly. Bonus ricerca, ottenibile da anomalia.
+- **Fonderia droni reliquia** (`drone-foundry`) — Era 3, cluster `relic-9`, `rare`, origin relic. Bonus minerali e costo navi leggere, ottenibile da anomalia.
 - **IA aperta** (`ai-open`) — Era 2, cluster `ai-1`, `feature`, origin standard, gruppo esclusivo `ai-governance`.
 - **IA regolata** (`ai-regulated`) — Era 2, cluster `ai-1`, `feature`, origin standard, gruppo esclusivo `ai-governance`.
 - **Adattamento biologico** (`bio-adaptation`) — Era 2, cluster `bio-cyber-1`, `feature`, origin standard, gruppo esclusivo `bio-cyber`.

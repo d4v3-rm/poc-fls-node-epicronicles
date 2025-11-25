@@ -36,7 +36,7 @@
 - UI Ricerca/Tradizioni con colonne, badge era/tipo e cluster.
 - Tutte le tech/perk correnti sono etichettate con era, cluster, kind/origin.
 - Config include coppie esclusive base (AI governance, Bio vs Cyber, Dottrine flotta) con lock in UI.
-- Prime tech rare collegate a eventi/anomalie (relic-sensors, ancient-drives, psi-echoes, chrono-scanners, void-harmonics, quantum-beacons, dark-core-reactor, stellar-ward) via insight/backlog.
+- Prime tech rare collegate a eventi/anomalie/fazione (relic-sensors, ancient-drives, psi-echoes, chrono-scanners, void-harmonics, quantum-beacons, dark-core-reactor, stellar-ward, gravitic-lens, drone-foundry) via insight/backlog.
 
 ### Prossimi micro-step
 - Ampliare pool rare e collegarle ad altri eventi/anomalie (e.g. reliquie multiple, catene evento).

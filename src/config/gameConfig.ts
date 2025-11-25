@@ -401,6 +401,54 @@ export const gameConfig: GameConfig = {
           },
         ],
       },
+      {
+        id: 'gravitic-anomaly',
+        kind: 'anomaly',
+        title: 'Lente gravitica',
+        description: 'Un anello di materia oscura piega i sensori.',
+        options: [
+          {
+            id: 'studia-lente',
+            label: 'Studia la distorsione',
+            description: 'Guadagna ricerca e uno schema raro, rischio instabilita.',
+            effects: [
+              { kind: 'resource', target: 'research', amount: 16 },
+              { kind: 'stability', amount: -2 },
+              { kind: 'insight', techId: 'gravitic-lens' },
+            ],
+          },
+          {
+            id: 'aggira',
+            label: 'Aggira il fenomeno',
+            description: 'Eviti rischi, piccolo bonus energia.',
+            effects: [{ kind: 'resource', target: 'energy', amount: 8 }],
+          },
+        ],
+      },
+      {
+        id: 'drone-cache',
+        kind: 'anomaly',
+        title: 'Archivio droni',
+        description: 'Un hangar derelitto ospita droni automatici inattivi.',
+        options: [
+          {
+            id: 'riattiva-droni',
+            label: 'Riattiva i droni',
+            description: 'Minerali bonus e schema raro, ma instabilita.',
+            effects: [
+              { kind: 'resource', target: 'minerals', amount: 18 },
+              { kind: 'stability', amount: -3 },
+              { kind: 'insight', techId: 'drone-foundry' },
+            ],
+          },
+          {
+            id: 'smantella',
+            label: 'Smantella i droni',
+            description: 'Recuperi minerali senza rischi.',
+            effects: [{ kind: 'resource', target: 'minerals', amount: 8 }],
+          },
+        ],
+      },
     ],
     crisis: [
       {
@@ -785,6 +833,30 @@ export const gameConfig: GameConfig = {
         clusterId: 'faction-1',
         kind: 'rare',
         origin: 'faction',
+      },
+      {
+        id: 'gravitic-lens',
+        branch: 'physics',
+        name: 'Lente gravitica',
+        description: 'Tecnologia rara: +10% ricerca, +10% velocita sondaggio.',
+        cost: 70,
+        effects: ['researchIncome:+0.1'],
+        era: 3,
+        clusterId: 'relic-8',
+        kind: 'rare',
+        origin: 'anomaly',
+      },
+      {
+        id: 'drone-foundry',
+        branch: 'engineering',
+        name: 'Fonderia droni reliquia',
+        description: 'Tecnologia rara: +12% minerali, -5% costo navi leggere.',
+        cost: 75,
+        effects: ['mineralsIncome:+0.12'],
+        era: 3,
+        clusterId: 'relic-9',
+        kind: 'rare',
+        origin: 'relic',
       },
       {
         id: 'ai-open',
