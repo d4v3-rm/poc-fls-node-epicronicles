@@ -27,3 +27,12 @@
 - [ ] Test di ritmo (gateway tech per era).
 - [ ] Equilibrio foundation vs feature; rischio eventi per scelte estreme (IA forte, armi bio, ecc.).
 - [ ] Feedback visivo e notifiche (completamento, scelte esclusive, era sbloccata).
+
+### Stato attuale
+- Offerte Ricerca filtrate/bilanciate per era e tipo (Fondamenta/Feature/Rare).
+- UI Ricerca/Tradizioni con colonne, badge era/tipo e cluster.
+
+### Prossimi micro-step
+- Annotare tutto il catalogo tech/perk con era/cluster/kind/esclusivi.
+- Aggiungere blocchi UI per scelte esclusive e filtri completate/rare/era (con barre progresso per ramo).
+- Gestire rare da eventi/reliquie nel pescaggio (hook da eventi/anomalie).
