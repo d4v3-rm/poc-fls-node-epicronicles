@@ -3,17 +3,18 @@
 ### Fase 1 – Modellazione e dati
 - [x] Estendere tipi `ResearchTech`/`TraditionPerk` con `era`, `clusterId`, `kind`, `origin`, `mutuallyExclusiveGroup`.
 - [x] Aggiungere `research.eras` in config con gateway iniziali.
-- [ ] Annotare tutte le tech/tradizioni esistenti con era/cluster/kind.
-- [ ] Definire i gruppi esclusivi (IA, Biotech/Cyber, Dottrine flotta).
+- [ ] Annotare tutte le tech/tradizioni esistenti con era/cluster/kind ed eventuale origine/rarità.
+- [ ] Definire e applicare i gruppi esclusivi (IA libera/regolata, Biotech/Cyber, Dottrine flotta).
 
 ### Fase 2 – Logica di gioco
 - [ ] Stato ricerca: `currentEra`, `unlockedEras`, conteggio gateway.
-- [ ] Selezione offerte tech per ramo con filtri era/cluster/kind e mix foundation/feature.
+- [x] Selezione offerte tech per ramo con filtri era/cluster/kind e mix foundation/feature.
 - [ ] Gestione scelte esclusive: blocco rami alternativi e memorizzazione scelta.
 - [ ] Tradizioni: gating per era e perk esclusivi; punti tradizione da influenze/bonus.
 
 ### Fase 3 – UI/UX
-- [ ] Pannello Ricerca/Tradizioni ristrutturato: header era + progresso, card cluster, badge foundation/feature/rare, origine, blocchi esclusivi.
+- [x] Pannello Ricerca/Tradizioni ristrutturato: header era, badge era/tipo, grouping per cluster, colonne Ricerca/Tradizioni.
+- [ ] Aggiungere blocchi di scelte esclusive e filtri (completate, rare, era) + barre di avanzamento per ramo.
 - [ ] Filtri (completate, rare, era) e highlight completate.
 - [ ] Stato attivo/progresso per ramo con barre e countdown.
 

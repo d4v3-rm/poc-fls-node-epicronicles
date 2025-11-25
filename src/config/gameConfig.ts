@@ -482,6 +482,7 @@ export const gameConfig: GameConfig = {
         era: 1,
         clusterId: 'energy-1',
         kind: 'foundation',
+        origin: 'standard',
       },
       {
         id: 'advanced-sensors',
@@ -493,6 +494,7 @@ export const gameConfig: GameConfig = {
         era: 2,
         clusterId: 'sensors-1',
         kind: 'feature',
+        origin: 'standard',
       },
       {
         id: 'bio-domes',
@@ -504,6 +506,7 @@ export const gameConfig: GameConfig = {
         era: 1,
         clusterId: 'bio-1',
         kind: 'foundation',
+        origin: 'standard',
       },
       {
         id: 'bureaucracy',
@@ -515,6 +518,7 @@ export const gameConfig: GameConfig = {
         era: 2,
         clusterId: 'admin-1',
         kind: 'feature',
+        origin: 'standard',
       },
       {
         id: 'reinforced-alloys',
@@ -526,6 +530,7 @@ export const gameConfig: GameConfig = {
         era: 1,
         clusterId: 'materials-1',
         kind: 'foundation',
+        origin: 'standard',
       },
       {
         id: 'modular-yards',
@@ -538,6 +543,7 @@ export const gameConfig: GameConfig = {
         era: 2,
         clusterId: 'yards-1',
         kind: 'feature',
+        origin: 'standard',
       },
     ],
     pointsPerResearchIncome: 1,
@@ -570,6 +576,7 @@ export const gameConfig: GameConfig = {
         effects: ['researchIncome:+0.05'],
         era: 1,
         clusterId: 'explore-1',
+        origin: 'standard',
       },
       {
         id: 'logistics',
@@ -580,6 +587,7 @@ export const gameConfig: GameConfig = {
         effects: ['energyIncome:+0.05'],
         era: 1,
         clusterId: 'military-1',
+        origin: 'standard',
       },
       {
         id: 'bureaucrats',
@@ -590,6 +598,7 @@ export const gameConfig: GameConfig = {
         effects: ['influenceFlat:+0.5'],
         era: 1,
         clusterId: 'economy-1',
+        origin: 'standard',
       },
       {
         id: 'planetary-planning',
@@ -601,6 +610,7 @@ export const gameConfig: GameConfig = {
         prerequisites: ['bureaucrats'],
         era: 1,
         clusterId: 'economy-1',
+        origin: 'standard',
       },
     ],
     pointsPerInfluenceIncome: 0.05,
