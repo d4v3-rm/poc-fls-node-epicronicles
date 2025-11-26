@@ -84,11 +84,16 @@ export const startResearch = (
     currentTechId: techId,
     progress: 0,
   };
+  const exclusivePicks = { ...(state.exclusivePicks ?? {}) };
+  if (tech.mutuallyExclusiveGroup && !exclusivePicks[tech.mutuallyExclusiveGroup]) {
+    exclusivePicks[tech.mutuallyExclusiveGroup] = tech.id;
+  }
   return {
     success: true,
     state: {
       ...state,
       branches: { ...state.branches, [branch]: updatedBranch },
+      exclusivePicks,
     },
   };
 };
