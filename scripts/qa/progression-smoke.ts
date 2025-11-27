@@ -36,6 +36,7 @@ const finishTech = (techId: string, researchState: ReturnType<typeof createIniti
 
 const smokeResearch = () => {
   let research = createInitialResearch(gameConfig.research);
+  const maxEra = Math.max(...(gameConfig.research.eras ?? []).map((e) => e.id));
 
   // Disponibilità iniziale per ogni ramo
   (['physics', 'society', 'engineering'] as const).forEach((branch) => {
@@ -49,6 +50,22 @@ const smokeResearch = () => {
   assert(
     research.currentEra === 2 && research.unlockedEras.includes(2),
     'Era 2 not unlocked after gateway techs',
+  );
+
+  // Completa gateway Era 3
+  research = finishTech('bureaucracy', research);
+  research = finishTech('modular-yards', research);
+  assert(
+    research.currentEra === 3 && research.unlockedEras.includes(3),
+    'Era 3 not unlocked after gateway techs',
+  );
+
+  // Completa gateway Era 4
+  research = finishTech('deep-space-navigation', research);
+  research = finishTech('stellar-logistics', research);
+  assert(
+    research.currentEra === maxEra && research.unlockedEras.includes(maxEra),
+    `Era ${maxEra} not unlocked after gateway techs`,
   );
 };
 

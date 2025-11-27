@@ -66,6 +66,10 @@ Esempi di rami:
 - **Leghe rinforzate** (`reinforced-alloys`) - Era 1, cluster `materials-1`, `foundation`, origin standard. Bonus minerali.
 - **Burosfera** (`bureaucracy`) - Era 2, cluster `admin-1`, `feature`, origin standard.
 - **Cantieri modulari** (`modular-yards`) - Era 2, cluster `yards-1`, `feature`, origin standard, prereq `reinforced-alloys`.
+- **Navigazione spazio profondo** (`deep-space-navigation`) - Era 3, cluster `nav-3`, `feature`, origin standard.
+- **Logistica stellare** (`stellar-logistics`) - Era 3, cluster `logistics-3`, `feature`, origin standard.
+- **Propulsione quantica** (`quantum-drives`) - Era 4, cluster `drive-4`, `feature`, origin standard.
+- **Amministrazione centrale** (`core-administration`) - Era 4, cluster `core-admin-4`, `feature`, origin standard.
 
 ### Tradizioni (set base)
 - **Scansioni fulminee** (`survey-speed`) - Era 1, cluster `explore-1`, origin standard.

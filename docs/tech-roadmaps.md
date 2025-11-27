@@ -31,7 +31,7 @@
 - [ ] Feedback visivo e notifiche (completamento, scelte esclusive, era sbloccata).
 
 ### Stato attuale
-- Pool tech ridotto al set minimo (6 tech base in Era 1-2) e 4 perk base; rimosse rare/evento/fazione.
+- Pool tech ridotto al set minimo (10 tech base in 4 ere) e 4 perk base; rimosse rare/evento/fazione.
 - Eventi/anomalie ridotti a quelli essenziali e senza insight verso tech rare.
 - UI Ricerca/Tradizioni ristrutturata con badge era/tipo e cluster; offerte garantiscono gateway disponibili.
 - Config ancora etichettata per origine/kind, ma i percorsi esclusivi non sono ancora bloccati logicamente.
@@ -42,7 +42,7 @@
 
 ### Checklist QA base (loop minimo)
 - Verificare che le offerte di ricerca non vadano mai a 0 con set minimale (per ramo).
-- Controllare sblocco Era 2 quando le gateway sono completate (sensori avanzati + leghe).
+- Controllare sblocco Ere con gateway: Era 2 (sensori avanzati + leghe), Era 3 (burosfera + cantieri modulari), Era 4 (navigazione profonda + logistica stellare).
 - Tradizioni: confermare che il progresso di era scatti dopo il 60% delle perk dell'era attuale.
 - Assicurarsi che le scelte esclusive restino bloccate dopo l'avvio/completamento di una tech esclusiva (quando reintrodotte).
 - Smoke script: `npm run qa:progress` (ricerca gateway + era tradizioni).
