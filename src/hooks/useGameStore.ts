@@ -33,6 +33,7 @@ import {
   mergeFleets,
   splitFleet,
   stopFleet,
+  buildShipyard,
   setFleetPosition,
   saveSessionToStorage,
   loadSessionFromStorage,
@@ -62,6 +63,7 @@ import type {
   StartResearchResult,
   UnlockTraditionResult,
   ResolveEventResult,
+  BuildShipyardResult,
 } from '../store/thunks';
 
 export const useAppDispatch: () => AppDispatch = () => useDispatch<AppDispatch>();
@@ -123,6 +125,7 @@ interface HookState {
   mergeFleets: (sourceId: string, targetId: string) => FleetMergeResult;
   splitFleet: (fleetId: string) => FleetSplitResult;
   stopFleet: (fleetId: string) => void;
+  buildShipyard: (systemId: string, anchorPlanetId?: string | null) => BuildShipyardResult;
   saveSession: () => SaveGameResult;
   loadSession: () => LoadGameResult;
   hasSavedSession: () => boolean;
@@ -197,6 +200,8 @@ export const useGameStore = <T>(selector: (state: HookState) => T): T => {
         dispatch(mergeFleets(sourceId, targetId)),
       splitFleet: (fleetId: string) => dispatch(splitFleet(fleetId)),
       stopFleet: (fleetId: string) => dispatch(stopFleet(fleetId)),
+      buildShipyard: (systemId: string, anchorPlanetId?: string | null) =>
+        dispatch(buildShipyard(systemId, anchorPlanetId ?? null)),
       saveSession: () => dispatch(saveSessionToStorage()),
       loadSession: () => dispatch(loadSessionFromStorage()),
       hasSavedSession: () => hasSavedSession(),

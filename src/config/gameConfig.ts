@@ -89,6 +89,7 @@ export interface MilitaryConfig {
   shipyard: {
     queueSize: number;
     homeSystemDesignId: ShipClassId;
+    buildCost: ResourceCost;
   };
   fleet: {
     baseTravelTicks: number;
@@ -747,6 +748,10 @@ export const gameConfig: GameConfig = {
     shipyard: {
       queueSize: 4,
       homeSystemDesignId: 'corvette',
+      buildCost: {
+        minerals: 150,
+        energy: 80,
+      },
     },
     fleet: {
       baseTravelTicks: 3,

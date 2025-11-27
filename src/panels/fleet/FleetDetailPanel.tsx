@@ -8,6 +8,7 @@ import type {
   ShipDesign,
   StarSystem,
 } from '@domain/types';
+import type { BuildShipyardReason } from '@store/slice/gameSlice';
 import { Target, PauseCircle } from 'lucide-react';
 import '../../styles/components/FleetShared.scss';
 
@@ -64,6 +65,10 @@ interface FleetDetailPanelProps {
   onStop?: (fleetId: string) => void;
   onMerge: (sourceId: string, targetId: string) => FleetMergeResult;
   onSplit: (fleetId: string) => FleetSplitResult;
+  onBuildShipyard?: (
+    systemId: string,
+    anchorPlanetId: string | null,
+  ) => { success: boolean; reason?: BuildShipyardReason };
   onClose: () => void;
 }
 
@@ -79,6 +84,7 @@ export const FleetDetailPanel = ({
   onStop,
   onMerge,
   onSplit,
+  onBuildShipyard,
   onClose,
 }: FleetDetailPanelProps) => {
   const [message, setMessage] = useState<string | null>(null);
@@ -111,6 +117,30 @@ export const FleetDetailPanel = ({
       candidate.id !== fleet.id && candidate.systemId === fleet.systemId,
   );
   const currentSystem = systems.find((system) => system.id === fleet.systemId);
+  const hasConstructor = fleet.ships.some(
+    (ship) => designLookup.get(ship.designId)?.role === 'construction',
+  );
+  const shipyardBuilt = Boolean(currentSystem?.hasShipyard);
+  const handleBuildShipyard = () => {
+    if (!onBuildShipyard || !currentSystem) {
+      return;
+    }
+    const result = onBuildShipyard(currentSystem.id, fleet.anchorPlanetId ?? null);
+    if (result.success) {
+      setMessage('Cantiere orbitale costruito.');
+    } else if (result.reason) {
+      const reason = result.reason as BuildShipyardReason;
+      const labels: Record<BuildShipyardReason, string> = {
+        NO_SESSION: 'Nessuna sessione attiva.',
+        SYSTEM_NOT_FOUND: 'Sistema non valido.',
+        TECH_MISSING: 'Richiede la tecnologia Cantiere orbitale.',
+        ALREADY_BUILT: 'Cantiere giù presente nel sistema.',
+        NO_CONSTRUCTOR: 'Serve una nave costruttrice nel sistema.',
+        INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
+      };
+      setMessage(labels[reason] ?? 'Azione non disponibile.');
+    }
+  };
   const anchorOptions =
     currentSystem?.orbitingPlanets?.map((planet) => ({
       id: planet.id,
@@ -248,6 +278,14 @@ export const FleetDetailPanel = ({
           </div>
         </div>
         <div className="fleet-detail__actions">
+          {hasConstructor && !shipyardBuilt ? (
+            <button
+              className="panel__action panel__action--compact"
+              onClick={handleBuildShipyard}
+            >
+              Costruisci cantiere
+            </button>
+          ) : null}
           <button
             className="panel__action panel__action--compact"
             onClick={() => {

@@ -251,6 +251,8 @@ export interface StarSystem {
   hostilePower?: number;
   orbitingPlanets: OrbitingPlanet[];
   ownerId?: string | null;
+  hasShipyard?: boolean;
+  shipyardAnchorPlanetId?: string | null;
 }
 
 export interface ScienceShip {

@@ -48,6 +48,14 @@ export const GameScreen = () => {
   const districtQueue = useAppSelector(selectDistrictQueue);
   const scienceShips = useAppSelector(selectScienceShips);
   const researchState = useAppSelector(selectResearch);
+  const colonizationUnlocked = useMemo(() => {
+    if (!researchState) {
+      return false;
+    }
+    return Object.values(researchState.branches).some((branch) =>
+      branch.completed.includes('colony-foundations'),
+    );
+  }, [researchState]);
   const economyConfig = useGameStore((state) => state.config.economy);
   const districtDefinitions = economyConfig.districts;
   const populationJobs = economyConfig.populationJobs;
@@ -91,6 +99,7 @@ export const GameScreen = () => {
   const mergeFleets = useGameStore((state) => state.mergeFleets);
   const splitFleet = useGameStore((state) => state.splitFleet);
   const stopFleet = useGameStore((state) => state.stopFleet);
+  const buildShipyard = useGameStore((state) => state.buildShipyard);
   const shipDesigns = useGameStore((state) => state.config.military.shipDesigns);
   const orderScienceShip = useGameStore((state) => state.orderScienceShip);
   const setScienceShipPosition = useGameStore(
@@ -166,15 +175,6 @@ export const GameScreen = () => {
     typeof window !== 'undefined' ? window.innerWidth : 1200;
   const viewportHeight =
     typeof window !== 'undefined' ? window.innerHeight : 800;
-
-  const colonizationUnlocked = useMemo(() => {
-    if (!researchState) {
-      return false;
-    }
-    return Object.values(researchState.branches).some((branch) =>
-      branch.completed.includes('colony-foundations'),
-    );
-  }, [researchState]);
 
   const sizeFor = (w: number, h: number) => {
     const width = Math.min(w, viewportWidth - 40);
@@ -388,7 +388,7 @@ export const GameScreen = () => {
           const isAccessible =
             targetSystem.visibility === 'surveyed' ||
             colonizedSystems.has(targetSystem.id);
-          setShipyardSystemId(null);
+          setShipyardSystemId(isAccessible && targetSystem.hasShipyard ? systemId : null);
           setSelectedPlanetId(null);
           setFocusSystemId(systemId);
           setFocusPlanetId(null);
@@ -566,6 +566,13 @@ export const GameScreen = () => {
                 onStop={(fleetId) => stopFleet(fleetId)}
                 onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
                 onSplit={(fleetId) => splitFleet(fleetId)}
+                onBuildShipyard={(systemId, anchorPlanetId) => {
+                  const result = buildShipyard(systemId, anchorPlanetId);
+                  if (result.success) {
+                    setShipyardSystemId(systemId);
+                  }
+                  return result;
+                }}
                 onClose={() => setDockSelection(null)}
               />
             ) : (

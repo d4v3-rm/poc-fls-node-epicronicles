@@ -58,6 +58,14 @@ export type BuildShipReason =
   | 'QUEUE_FULL'
   | 'INSUFFICIENT_RESOURCES';
 
+export type BuildShipyardReason =
+  | 'NO_SESSION'
+  | 'SYSTEM_NOT_FOUND'
+  | 'TECH_MISSING'
+  | 'ALREADY_BUILT'
+  | 'NO_CONSTRUCTOR'
+  | 'INSUFFICIENT_RESOURCES';
+
 export type FleetOrderReason =
   | 'NO_SESSION'
   | 'FLEET_NOT_FOUND'
@@ -166,6 +174,10 @@ export type SaveGameResult =
 export type LoadGameResult =
   | { success: true }
   | { success: false; reason: LoadReason };
+
+export type BuildShipyardResult =
+  | { success: true }
+  | { success: false; reason: BuildShipyardReason };
 
 export type ResearchActionReason =
   | 'NO_SESSION'

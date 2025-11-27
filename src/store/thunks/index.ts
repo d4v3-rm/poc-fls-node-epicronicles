@@ -1,6 +1,8 @@
 export * from './sessionThunks';
 export * from './colonizationThunks';
 export * from './shipyardThunks';
+export * from './buildShipyardThunk';
+export type { BuildShipyardResult } from '../slice/gameSlice';
 export * from './districtThunks';
 export * from './diplomacyThunks';
 export * from './fleetThunks';

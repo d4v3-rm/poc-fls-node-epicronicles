@@ -790,6 +790,22 @@ export const createSystemNode = (
     node.add(cross);
   }
 
+  if (system.hasShipyard) {
+    const square = new Mesh(
+      new PlaneGeometry(baseRadius * 1.6, baseRadius * 1.6),
+      new MeshBasicMaterial({
+        color: '#7fc1ff',
+        opacity: 0.35,
+        transparent: true,
+        depthWrite: false,
+      }),
+    );
+    square.position.set(0, baseRadius + 2.5, 1);
+    square.userData.systemId = system.id;
+    square.userData.kind = 'shipyard';
+    node.add(square);
+  }
+
   if (isSurveyed && system.orbitingPlanets.length > 0) {
     const orbitGroup = createOrbitingPlanets(
       system.orbitingPlanets,
