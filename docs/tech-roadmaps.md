@@ -45,3 +45,4 @@
 - Controllare sblocco Era 2 quando le gateway sono completate (sensori avanzati + leghe).
 - Tradizioni: confermare che il progresso di era scatti dopo il 60% delle perk dell'era attuale.
 - Assicurarsi che le scelte esclusive restino bloccate dopo l'avvio/completamento di una tech esclusiva (quando reintrodotte).
+- Smoke script: `npm run qa:progress` (ricerca gateway + era tradizioni).
