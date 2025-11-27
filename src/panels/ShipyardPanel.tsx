@@ -3,7 +3,7 @@ import { useAppSelector, useGameStore } from '@store/gameStore';
 import type { ShipClassId, StarSystem } from '@domain/types';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
 import { BuildQueue } from './shipyard/BuildQueue';
-import { selectResources, selectShipyardQueue } from '@store/selectors';
+import { selectResources, selectShipyardQueue, selectResearch } from '@store/selectors';
 import '../styles/components/ShipyardPanel.scss';
 
 const buildMessages = {
@@ -40,6 +40,7 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
 
   const resources = useAppSelector(selectResources);
   const queue = useAppSelector(selectShipyardQueue);
+  const research = useAppSelector(selectResearch);
 
   const canAfford = (designCost: Record<string, number | undefined>) => {
     if (!resources) {
@@ -104,6 +105,20 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
     [queue],
   );
 
+  const completedTechs = new Set(
+    research
+      ? Object.values(research.branches).flatMap((b) => b.completed)
+      : [],
+  );
+  const allowedDesign = (designId: string) => {
+    if (designId === 'constructor') return true;
+    if (designId === 'colony') return completedTechs.has('colony-foundations');
+    if (designId === 'science') return completedTechs.has('science-outfitting');
+    if (designId === 'corvette' || designId === 'frigate')
+      return completedTechs.has('orbital-shipyard');
+    return true;
+  };
+
   return (
     <section className="shipyard-panel shipyard-panel--columns">
       <header className="shipyard-panel__header">
@@ -117,7 +132,7 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
       <div className="shipyard-panel__columns">
         <div className="shipyard-panel__col shipyard-panel__col--designs">
           <div className="shipyard-panel__grid">
-            {designs.map((design) => {
+            {designs.filter((d) => allowedDesign(d.id)).map((design) => {
               const templates = shipTemplates.filter(
                 (template) => template.base === design.id,
               );

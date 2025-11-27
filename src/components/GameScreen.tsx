@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PopulationJobId, StarSystem } from '@domain/types';
 import { canAffordCost } from '@domain/economy/economy';
 import { useAppSelector, useGameStore } from '@store/gameStore';
@@ -25,7 +25,7 @@ import { LogPanel } from '@panels/LogPanel';
 import { SideEntityDock } from './SideEntityDock';
 import { FleetDetailPanel } from '@panels/fleet/FleetDetailPanel';
 import { ScienceShipDetailPanel } from '@panels/fleet/ScienceShipDetailPanel';
-import { selectScienceShips } from '@store/selectors';
+import { selectScienceShips, selectResearch } from '@store/selectors';
 import {
   selectColonizedSystems,
   selectDistrictQueue,
@@ -47,6 +47,7 @@ export const GameScreen = () => {
   const colonizedSystems = useAppSelector(selectColonizedSystems);
   const districtQueue = useAppSelector(selectDistrictQueue);
   const scienceShips = useAppSelector(selectScienceShips);
+  const researchState = useAppSelector(selectResearch);
   const economyConfig = useGameStore((state) => state.config.economy);
   const districtDefinitions = economyConfig.districts;
   const populationJobs = economyConfig.populationJobs;
@@ -166,6 +167,15 @@ export const GameScreen = () => {
   const viewportHeight =
     typeof window !== 'undefined' ? window.innerHeight : 800;
 
+  const colonizationUnlocked = useMemo(() => {
+    if (!researchState) {
+      return false;
+    }
+    return Object.values(researchState.branches).some((branch) =>
+      branch.completed.includes('colony-foundations'),
+    );
+  }, [researchState]);
+
   const sizeFor = (w: number, h: number) => {
     const width = Math.min(w, viewportWidth - 40);
     const height = Math.min(h, viewportHeight - 80);
@@ -176,6 +186,7 @@ export const GameScreen = () => {
 
   const large = sizeFor(1000, 700);
   const wide = sizeFor(1260, 760);
+
   if (!session) {
     return (
       <div className="game-layout">
@@ -291,6 +302,7 @@ export const GameScreen = () => {
         onOpenColonization={() => setColonizationOpen(true)}
         onOpenBattles={() => setBattlesOpen(true)}
         onOpenLog={() => setLogOpen(true)}
+        showColonization={colonizationUnlocked}
       />
       <div className="side-entity-stack">
         <SideEntityDock
@@ -376,7 +388,7 @@ export const GameScreen = () => {
           const isAccessible =
             targetSystem.visibility === 'surveyed' ||
             colonizedSystems.has(targetSystem.id);
-          setShipyardSystemId(isAccessible ? systemId : null);
+          setShipyardSystemId(null);
           setSelectedPlanetId(null);
           setFocusSystemId(systemId);
           setFocusPlanetId(null);

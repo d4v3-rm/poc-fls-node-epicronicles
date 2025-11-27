@@ -117,6 +117,7 @@ export const TechPanel = () => {
           branch,
           offers: getResearchOffers(branch.id, research, config.research),
           state: research.branches[branch.id],
+          techs: config.research.techs.filter((t) => t.branch === branch.id),
         }))
       : [];
 
@@ -222,9 +223,26 @@ export const TechPanel = () => {
               const currentTech = state.currentTechId
                 ? config.research.techs.find((t) => t.id === state.currentTechId)
                 : null;
-              const filteredOffers = offers.filter((tech) => {
-                const completed = state.completed.includes(tech.id);
-                if (!showCompleted && completed) {
+              const completedIds = new Set(state.completed);
+              const baseList = showAllEras
+                ? offers.concat(
+                    config.research.techs.filter(
+                      (t) => t.branch === branch.id && !offers.find((o) => o.id === t.id),
+                    ),
+                  )
+                : offers;
+              const withCompleted =
+                showCompleted && !showAllEras
+                  ? baseList.concat(
+                      config.research.techs.filter(
+                        (t) => t.branch === branch.id && completedIds.has(t.id),
+                      ),
+                    )
+                  : baseList;
+              const unique = Array.from(
+                new Map(withCompleted.map((t) => [t.id, t])).values(),
+              ).filter((tech) => {
+                if (!showCompleted && completedIds.has(tech.id)) {
                   return false;
                 }
                 if (showRareOnly && tech.kind !== 'rare') {
@@ -235,6 +253,7 @@ export const TechPanel = () => {
                 }
                 return true;
               });
+              const filteredOffers = unique;
               const clusters = groupBy(filteredOffers, (tech) =>
                 tech.clusterId ? tech.clusterId : 'Generiche',
               );

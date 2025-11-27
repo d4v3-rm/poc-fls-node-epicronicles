@@ -21,6 +21,7 @@ interface SideDockProps {
   onOpenColonization: () => void;
   onOpenBattles: () => void;
   onOpenLog: () => void;
+  showColonization?: boolean;
 }
 
 export const SideDock = ({
@@ -33,6 +34,7 @@ export const SideDock = ({
   onOpenColonization,
   onOpenBattles,
   onOpenLog,
+  showColonization = true,
 }: SideDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
@@ -90,15 +92,17 @@ export const SideDock = ({
       >
         <FlaskConical size={18} />
       </button>
-      <button
-        type="button"
-        className="side-dock__btn"
-        onClick={onOpenColonization}
-        aria-label="Colonizzazione"
-        data-tooltip="Colonizzazione"
-      >
-        <Flag size={18} />
-      </button>
+      {showColonization ? (
+        <button
+          type="button"
+          className="side-dock__btn"
+          onClick={onOpenColonization}
+          aria-label="Colonizzazione"
+          data-tooltip="Colonizzazione"
+        >
+          <Flag size={18} />
+        </button>
+      ) : null}
       <button
         type="button"
         className="side-dock__btn"
