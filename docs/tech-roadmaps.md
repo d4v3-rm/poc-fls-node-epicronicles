@@ -39,3 +39,9 @@
 ### Prossimi micro-step
 - QA ritmo base: verificare progressione con set minimo di tech e offerte non vuote, controllo gateway garantiti.
 - Solo in seguito: reintrodurre pool rare + anomalie/eventi dedicati e bilanciarli.
+
+### Checklist QA base (loop minimo)
+- Verificare che le offerte di ricerca non vadano mai a 0 con set minimale (per ramo).
+- Controllare sblocco Era 2 quando le gateway sono completate (sensori avanzati + leghe).
+- Tradizioni: confermare che il progresso di era scatti dopo il 60% delle perk dell'era attuale.
+- Assicurarsi che le scelte esclusive restino bloccate dopo l'avvio/completamento di una tech esclusiva (quando reintrodotte).
