@@ -56,6 +56,7 @@ interface FleetDetailPanelProps {
   systems: StarSystem[];
   scienceShips: ScienceShip[];
   designs: ShipDesign[];
+  completedTechs: string[];
   onOrder: (fleetId: string, systemId: string) => {
     success: boolean;
     reason?: keyof typeof fleetOrderErrors;
@@ -78,6 +79,7 @@ export const FleetDetailPanel = ({
   systems,
   scienceShips,
   designs,
+  completedTechs,
   onOrder,
   onAnchorChange,
   onCenter,
@@ -97,10 +99,14 @@ export const FleetDetailPanel = ({
   const surveyedSystems = systems.filter(
     (system) => system.visibility === 'surveyed',
   );
-  const relatedScience = scienceShips.filter(
-    (ship) =>
-      ship.currentSystemId === fleet.systemId ||
-      ship.targetSystemId === fleet.systemId,
+  const relatedScience = useMemo(
+    () =>
+      scienceShips.filter(
+        (ship) =>
+          ship.currentSystemId === fleet.systemId ||
+          ship.targetSystemId === fleet.systemId,
+      ),
+    [scienceShips, fleet.systemId],
   );
 
   const handleOrder = (systemId: string) => {
@@ -120,6 +126,14 @@ export const FleetDetailPanel = ({
   const hasConstructor = fleet.ships.some(
     (ship) => designLookup.get(ship.designId)?.role === 'construction',
   );
+  const constructorActions = (() => {
+    if (!hasConstructor) return [];
+    const actions: Array<{ id: string; label: string }> = [];
+    if (completedTechs.includes('orbital-shipyard')) {
+      actions.push({ id: 'build-shipyard', label: 'Costruisci cantiere orbitale' });
+    }
+    return actions;
+  })();
   const shipyardBuilt = Boolean(currentSystem?.hasShipyard);
   const handleBuildShipyard = () => {
     if (!onBuildShipyard || !currentSystem) {
@@ -278,6 +292,15 @@ export const FleetDetailPanel = ({
           </div>
         </div>
         <div className="fleet-detail__actions">
+          {constructorActions.length > 0 ? (
+            <div className="fleet-detail__chips">
+              {constructorActions.map((action) => (
+                <span key={action.id} className="pill pill--glass">
+                  {action.label}
+                </span>
+              ))}
+            </div>
+          ) : null}
           {hasConstructor && !shipyardBuilt ? (
             <button
               className="panel__action panel__action--compact"

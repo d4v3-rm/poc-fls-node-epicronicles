@@ -48,6 +48,13 @@ export const GameScreen = () => {
   const districtQueue = useAppSelector(selectDistrictQueue);
   const scienceShips = useAppSelector(selectScienceShips);
   const researchState = useAppSelector(selectResearch);
+  const completedTechs = useMemo(
+    () =>
+      researchState
+        ? Object.values(researchState.branches).flatMap((b) => b.completed)
+        : [],
+    [researchState],
+  );
   const colonizationUnlocked = useMemo(() => {
     if (!researchState) {
       return false;
@@ -554,6 +561,7 @@ export const GameScreen = () => {
                 systems={systems}
                 scienceShips={scienceShips}
                 designs={shipDesigns}
+                completedTechs={completedTechs}
                 onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
                 onAnchorChange={(fleetId, planetId) =>
                   setFleetPosition(fleetId, planetId)
