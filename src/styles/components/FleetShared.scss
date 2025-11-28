@@ -6,6 +6,27 @@
   gap: 0.85rem;
 }
 
+.fleet-detail--split {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.fleet-detail__left {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fleet-detail__aside {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
 .fleet-detail__header {
   display: flex;
   justify-content: space-between;
@@ -92,6 +113,22 @@
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+}
+
+.fleet-construction-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.fleet-construction__title {
+  margin: 0;
+  font-weight: 600;
 }
 
 .fleet-row {

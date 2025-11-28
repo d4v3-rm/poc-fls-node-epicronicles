@@ -99,14 +99,16 @@ export const FleetDetailPanel = ({
   const surveyedSystems = systems.filter(
     (system) => system.visibility === 'surveyed',
   );
-  const relatedScience = useMemo(
-    () =>
-      scienceShips.filter(
-        (ship) =>
-          ship.currentSystemId === fleet.systemId ||
-          ship.targetSystemId === fleet.systemId,
-      ),
-    [scienceShips, fleet.systemId],
+  const currentSystem = systems.find((system) => system.id === fleet.systemId);
+  const anchorOptions =
+    currentSystem?.orbitingPlanets?.map((planet) => ({
+      id: planet.id,
+      name: planet.name ?? planet.id,
+    })) ?? [];
+  const relatedScience = scienceShips.filter(
+    (ship) =>
+      ship.currentSystemId === fleet.systemId ||
+      ship.targetSystemId === fleet.systemId,
   );
 
   const handleOrder = (systemId: string) => {
@@ -122,10 +124,15 @@ export const FleetDetailPanel = ({
     (candidate) =>
       candidate.id !== fleet.id && candidate.systemId === fleet.systemId,
   );
-  const currentSystem = systems.find((system) => system.id === fleet.systemId);
   const hasConstructor = fleet.ships.some(
     (ship) => designLookup.get(ship.designId)?.role === 'construction',
   );
+  const canBuildYard = hasConstructor && completedTechs.includes('orbital-shipyard');
+  const yardLockedReason = !hasConstructor
+    ? 'Serve una nave costruttrice.'
+    : !completedTechs.includes('orbital-shipyard')
+      ? 'Richiede tecnologia Cantiere orbitale.'
+      : null;
   const constructorActions = (() => {
     if (!hasConstructor) return [];
     const actions: Array<{ id: string; label: string }> = [];
@@ -148,184 +155,195 @@ export const FleetDetailPanel = ({
         NO_SESSION: 'Nessuna sessione attiva.',
         SYSTEM_NOT_FOUND: 'Sistema non valido.',
         TECH_MISSING: 'Richiede la tecnologia Cantiere orbitale.',
-        ALREADY_BUILT: 'Cantiere gia presente nel sistema.',
+        ALREADY_BUILT: 'Cantiere già presente nel sistema.',
         NO_CONSTRUCTOR: 'Serve una nave costruttrice nel sistema.',
         INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
       };
       setMessage(labels[reason] ?? 'Azione non disponibile.');
     }
   };
-  const anchorOptions =
-    currentSystem?.orbitingPlanets?.map((planet) => ({
-      id: planet.id,
-      name: planet.name ?? planet.id,
-    })) ?? [];
 
   return (
-    <div className="fleet-detail">
-      <header className="fleet-detail__header">
-        <div>
-          <p className="fleet-detail__eyebrow">Dettagli flotta</p>
-          <h3 className="fleet-detail__title">{fleet.name ?? fleet.id}</h3>
-          <div className="fleet-detail__meta">
-            <span>{resolveName(fleet.systemId)}</span>
-            <span>• Navi: {fleet.ships.length}</span>
-          </div>
-          <div className="fleet-detail__tags">
-            {fleet.targetSystemId ? (
-              <span className="pill pill--glass">
-                In rotta verso {resolveName(fleet.targetSystemId)}
-                {typeof fleet.ticksToArrival === 'number'
-                  ? ` (${fleet.ticksToArrival} tick)`
-                  : ''}
-              </span>
-            ) : (
-              <span className="pill pill--glass">In stazione</span>
-            )}
-            {fleet.anchorPlanetId ? (
-              <span className="pill pill--glass">Agganciata a pianeta</span>
-            ) : (
-              <span className="pill pill--glass">Agganciata a stella</span>
-            )}
-          </div>
-        </div>
-        <button className="dock-detail__close" onClick={onClose}>
-          ×
-        </button>
-      </header>
-
-      <section className="fleet-detail__section">
-        <h4>Composizione</h4>
-        <p className="fleet-detail__ships">
-          {fleet.ships.length > 0
-            ? describeFleetShips(fleet.ships, designLookup)
-            : 'Nessuna nave attiva'}
-        </p>
-        {relatedScience.length > 0 ? (
-          <div className="fleet-detail__science">
-            <span className="text-muted">Supporto scientifico:</span>
-            <div className="fleet-detail__chips">
-              {relatedScience.map((ship) => (
-                <span key={ship.id} className="fleet-chip">
-                  <span>{ship.name}</span>
-                  <small>{scienceStatusLabel[ship.status]}</small>
+    <div className="fleet-detail fleet-detail--split">
+      <div className="fleet-detail__left">
+        <header className="fleet-detail__header">
+          <div>
+            <p className="fleet-detail__eyebrow">Dettagli flotta</p>
+            <h3 className="fleet-detail__title">{fleet.name ?? fleet.id}</h3>
+            <div className="fleet-detail__meta">
+              <span>{resolveName(fleet.systemId)}</span>
+              <span>• Navi: {fleet.ships.length}</span>
+            </div>
+            <div className="fleet-detail__tags">
+              {fleet.targetSystemId ? (
+                <span className="pill pill--glass">
+                  In rotta verso {resolveName(fleet.targetSystemId)}
+                  {typeof fleet.ticksToArrival === 'number'
+                    ? ` (${fleet.ticksToArrival} tick)`
+                    : ''}
                 </span>
-              ))}
+              ) : (
+                <span className="pill pill--glass">In stazione</span>
+              )}
+              {fleet.anchorPlanetId ? (
+                <span className="pill pill--glass">Agganciata a pianeta</span>
+              ) : (
+                <span className="pill pill--glass">Agganciata a stella</span>
+              )}
             </div>
           </div>
-        ) : null}
-      </section>
+          <button className="dock-detail__close" onClick={onClose}>
+            ×
+          </button>
+        </header>
 
-      <section className="fleet-detail__section">
-        <div className="fleet-detail__actions">
-          <button
-            className="hud-icon-btn"
-            data-tooltip="Centra sulla flotta"
-            onClick={() => onCenter?.(fleet.systemId)}
-          >
-            <Target size={14} />
-          </button>
-          <button
-            className="hud-icon-btn"
-            data-tooltip="Ferma la flotta"
-            onClick={() => onStop?.(fleet.id)}
-          >
-            <PauseCircle size={14} />
-          </button>
-        </div>
-        <div className="fleet-detail__row">
-          <div className="fleet-detail__field">
-            <label className="text-muted">Destinazione</label>
-            <select
-              value={fleet.targetSystemId ?? fleet.systemId}
-              onChange={(event) => handleOrder(event.target.value)}
+        <section className="fleet-detail__section">
+          <h4>Composizione</h4>
+          <p className="fleet-detail__ships">
+            {fleet.ships.length > 0
+              ? describeFleetShips(fleet.ships, designLookup)
+              : 'Nessuna nave attiva'}
+          </p>
+          {relatedScience.length > 0 ? (
+            <div className="fleet-detail__science">
+              <span className="text-muted">Supporto scientifico:</span>
+              <div className="fleet-detail__chips">
+                {relatedScience.map((ship) => (
+                  <span key={ship.id} className="fleet-chip">
+                    <span>{ship.name}</span>
+                    <small>{scienceStatusLabel[ship.status]}</small>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="fleet-detail__section">
+          <div className="fleet-detail__actions">
+            <button
+              className="hud-icon-btn"
+              data-tooltip="Centra sulla flotta"
+              onClick={() => onCenter?.(fleet.systemId)}
             >
-              {surveyedSystems.map((system) => (
-                <option key={system.id} value={system.id}>
-                  {system.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="fleet-detail__field">
-            <label className="text-muted">Aggancio (sistema attuale)</label>
-            <select
-              value={fleet.anchorPlanetId ?? ''}
-              onChange={(event) => {
-                onAnchorChange(
-                  fleet.id,
-                  event.target.value ? event.target.value : null,
-                );
-              }}
+              <Target size={14} />
+            </button>
+            <button
+              className="hud-icon-btn"
+              data-tooltip="Ferma la flotta"
+              onClick={() => onStop?.(fleet.id)}
             >
-              <option value="">Stella</option>
-              {anchorOptions.map((planet) => (
-                <option key={planet.id} value={planet.id}>
-                  {planet.name}
-                </option>
-              ))}
-            </select>
+              <PauseCircle size={14} />
+            </button>
           </div>
-          <div className="fleet-detail__field">
-            <label className="text-muted">Unisci con</label>
-            <select
-              value=""
-              onChange={(event) => {
-                if (!event.target.value) {
-                  return;
-                }
-                const result = onMerge(fleet.id, event.target.value);
+          <div className="fleet-detail__row">
+            <div className="fleet-detail__field">
+              <label className="text-muted">Destinazione</label>
+              <select
+                value={fleet.targetSystemId ?? fleet.systemId}
+                onChange={(event) => handleOrder(event.target.value)}
+              >
+                {surveyedSystems.map((system) => (
+                  <option key={system.id} value={system.id}>
+                    {system.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="fleet-detail__field">
+              <label className="text-muted">Aggancio (sistema attuale)</label>
+              <select
+                value={fleet.anchorPlanetId ?? ''}
+                onChange={(event) => {
+                  onAnchorChange(
+                    fleet.id,
+                    event.target.value ? event.target.value : null,
+                  );
+                }}
+              >
+                <option value="">Stella</option>
+                {anchorOptions.map((planet) => (
+                  <option key={planet.id} value={planet.id}>
+                    {planet.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="fleet-detail__field">
+              <label className="text-muted">Unisci con</label>
+              <select
+                value=""
+                onChange={(event) => {
+                  if (!event.target.value) {
+                    return;
+                  }
+                  const result = onMerge(fleet.id, event.target.value);
+                  setMessage(
+                    result.success
+                      ? 'Flotte unite.'
+                      : fleetManageErrors[result.reason],
+                  );
+                }}
+              >
+                <option value="">Seleziona flotta...</option>
+                {mergeOptions.map((candidate) => (
+                  <option key={candidate.id} value={candidate.id}>
+                    {candidate.name ?? candidate.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="fleet-detail__actions">
+            <button
+              className="panel__action panel__action--compact"
+              onClick={() => {
+                const result = onSplit(fleet.id);
                 setMessage(
                   result.success
-                    ? 'Flotte unite.'
+                    ? 'Nuova flotta creata.'
                     : fleetManageErrors[result.reason],
                 );
               }}
+              disabled={fleet.ships.length <= 1}
             >
-              <option value="">Seleziona flotta...</option>
-              {mergeOptions.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>
-                  {candidate.name ?? candidate.id}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="fleet-detail__actions">
-          {constructorActions.length > 0 ? (
-            <div className="fleet-detail__chips">
-              {constructorActions.map((action) => (
-                <span key={action.id} className="pill pill--glass">
-                  {action.label}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {hasConstructor && !shipyardBuilt ? (
-            <button
-              className="panel__action panel__action--compact"
-              onClick={handleBuildShipyard}
-            >
-              Costruisci cantiere
+              Dividi 1 nave
             </button>
-          ) : null}
-          <button
-            className="panel__action panel__action--compact"
-            onClick={() => {
-              const result = onSplit(fleet.id);
-              setMessage(
-                result.success
-                  ? 'Nuova flotta creata.'
-                  : fleetManageErrors[result.reason],
-              );
-            }}
-            disabled={fleet.ships.length <= 1}
-          >
-            Dividi 1 nave
-          </button>
-        </div>
-        {message ? <p className="panel-message">{message}</p> : null}
-      </section>
+          </div>
+          {message ? <p className="panel-message">{message}</p> : null}
+        </section>
+      </div>
+
+      {hasConstructor ? (
+        <aside className="fleet-detail__aside">
+          <div className="fleet-detail__section">
+            <h4>Costruzione</h4>
+            {shipyardBuilt ? (
+              <p className="text-muted">Cantiere orbitale già presente nel sistema.</p>
+            ) : constructorActions.length > 0 ? (
+              constructorActions.map((action) => (
+                <div key={action.id} className="fleet-construction-card">
+                  <div>
+                    <p className="fleet-construction__title">{action.label}</p>
+                    <small className="text-muted">
+                      {yardLockedReason ?? 'Richiede costruttrice nel sistema e risorse.'}
+                    </small>
+                  </div>
+                  <button
+                    className="panel__action panel__action--compact"
+                    onClick={handleBuildShipyard}
+                    disabled={!canBuildYard || shipyardBuilt}
+                  >
+                    Costruisci
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted">{yardLockedReason ?? 'Nessuna azione disponibile.'}</p>
+            )}
+          </div>
+        </aside>
+      ) : null}
     </div>
   );
 };
