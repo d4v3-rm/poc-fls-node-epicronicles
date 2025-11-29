@@ -11,7 +11,7 @@ import '../styles/components/SideEntityDock.scss';
 
 type DockSelection =
   | { kind: 'colony'; planetId: string; systemId: string }
-  | { kind: 'fleet'; fleetId: string; systemId: string }
+  | { kind: 'fleet'; fleetId: string; systemId: string; source?: 'fleet' | 'colonization' | 'construction' }
   | { kind: 'science'; shipId: string; systemId: string };
 
 interface SideEntityDockProps {
@@ -39,8 +39,15 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
       [session],
     );
 
-  const getRole = (designId: string): 'military' | 'colony' | 'construction' =>
-    designLookup.get(designId)?.role ?? 'military';
+  const getRole = (
+    designId: string,
+  ): 'military' | 'colony' | 'construction' | 'science' =>
+    (designLookup.get(designId)?.role as
+      | 'military'
+      | 'colony'
+      | 'construction'
+      | 'science'
+      | undefined) ?? 'military';
 
   const colonyEntries =
     session?.economy.planets.map((planet) => ({
@@ -126,13 +133,14 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
                         className="hud-icon-btn"
                         data-tooltip="Dettagli"
                         onClick={() =>
-                          onSelect({
-                            kind: 'fleet',
-                            fleetId: fleet.id,
-                            systemId: fleet.systemId,
-                          })
-                        }
-                      >
+                        onSelect({
+                          kind: 'fleet',
+                          fleetId: fleet.id,
+                          systemId: fleet.systemId,
+                          source: 'fleet',
+                        })
+                      }
+                    >
                         <Info size={14} />
                       </button>
                     </div>
@@ -193,6 +201,7 @@ export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockPr
                             kind: 'fleet',
                             fleetId: entry.fleetId,
                             systemId: entry.systemId,
+                            source: variant === 'construction' ? 'construction' : 'colonization',
                           })
                         }
                       >

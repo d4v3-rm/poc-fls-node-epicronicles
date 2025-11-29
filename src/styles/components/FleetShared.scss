@@ -5,26 +5,26 @@
   flex-direction: column;
   gap: 0.85rem;
   width: 100%;
-  max-width: 760px;
+  max-width: 1080px;
 }
 
 .fleet-detail--split {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 0.8rem;
+  display: flex;
+  flex-direction: row;
   align-items: flex-start;
+  gap: 1rem;
 }
 
 .fleet-detail__left {
-  flex: 2;
+  flex: 1 1 0;
+  min-width: 420px;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
 }
 
 .fleet-detail__aside {
-  flex: 1;
-  min-width: 240px;
+  flex: 0 0 340px;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -140,6 +140,18 @@
 
 .fleet-construction-card .panel__action {
   width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .fleet-detail--split {
+    flex-direction: column;
+  }
+
+  .fleet-detail__left,
+  .fleet-detail__aside {
+    flex: 1 1 auto;
+    min-width: 100%;
+  }
 }
 
 .fleet-row {

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import type { ShipClassId, StarSystem } from '@domain/types';
+import type { BuildShipyardReason } from '@store/slice/gameSlice';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
 import { BuildQueue } from './shipyard/BuildQueue';
 import { selectResources, selectShipyardQueue, selectResearch } from '@store/selectors';
 import '../styles/components/ShipyardPanel.scss';
 
-const buildMessages = {
+  const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',
   INVALID_DESIGN: 'Progetto nave non valido.',
   QUEUE_FULL: 'Coda cantieri piena.',
@@ -119,15 +120,19 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
       ),
     [research],
   );
-  const canBuildShipyard = useMemo(() => {
+  type BuildCheck = { ok: true } | { ok: false; reason: BuildShipyardReason };
+  const canBuildShipyard: BuildCheck = useMemo(() => {
     if (!session || !system) {
-      return { ok: false, reason: 'NO_SESSION' as const };
+      return { ok: false, reason: 'NO_SESSION' };
+    }
+    if (system.visibility !== 'surveyed') {
+      return { ok: false, reason: 'SYSTEM_NOT_SURVEYED' };
     }
     if (system.hasShipyard) {
-      return { ok: false, reason: 'ALREADY_BUILT' as const };
+      return { ok: false, reason: 'ALREADY_BUILT' };
     }
     if (!completedTechs.has('orbital-shipyard')) {
-      return { ok: false, reason: 'TECH_MISSING' as const };
+      return { ok: false, reason: 'TECH_MISSING' };
     }
     const constructorPresent = session.fleets.some(
       (fleet) =>
@@ -137,37 +142,42 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
         ),
     );
     if (!constructorPresent) {
-      return { ok: false, reason: 'NO_CONSTRUCTOR' as const };
+      return { ok: false, reason: 'NO_CONSTRUCTOR' };
+    }
+    if (system.shipyardBuild) {
+      return { ok: false, reason: 'IN_PROGRESS' };
     }
     if (!canAfford(shipyardCost)) {
-      return { ok: false, reason: 'INSUFFICIENT_RESOURCES' as const };
+      return { ok: false, reason: 'INSUFFICIENT_RESOURCES' };
     }
-    return { ok: true as const };
+    return { ok: true };
   }, [session, system, completedTechs, designs, shipyardCost, canAfford]);
 
   const handleBuildShipyard = () => {
     if (!system) return;
     const result = buildShipyard(system.id, system.shipyardAnchorPlanetId ?? null);
     if (result.success) {
-      setMessage('Cantiere orbitale costruito.');
+      setMessage('Costruzione cantiere avviata (10 tick).');
     } else if (result.reason) {
-      const labels = {
+      const labels: Record<string, string> = {
         NO_SESSION: 'Nessuna sessione attiva.',
         SYSTEM_NOT_FOUND: 'Sistema non valido.',
+        SYSTEM_NOT_SURVEYED: 'Il sistema deve essere ispezionato.',
         TECH_MISSING: 'Richiede la tecnologia Cantiere orbitale.',
         ALREADY_BUILT: 'Cantiere già presente.',
         NO_CONSTRUCTOR: 'Serve una nave costruttrice nel sistema.',
         INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
+        IN_PROGRESS: 'Costruzione già in corso.',
       } as const;
       setMessage(labels[result.reason] ?? 'Azione non disponibile.');
     }
   };
   const allowedDesign = (designId: string) => {
     if (designId === 'constructor') return true;
-    if (designId === 'colony') return completedTechs.has('colony-foundations');
-    if (designId === 'science') return completedTechs.has('science-outfitting');
-    if (designId === 'corvette' || designId === 'frigate')
-      return completedTechs.has('orbital-shipyard');
+    const hasYard = completedTechs.has('orbital-shipyard');
+    if (designId === 'colony') return hasYard && completedTechs.has('colony-foundations');
+    if (designId === 'science') return hasYard && completedTechs.has('science-outfitting');
+    if (designId === 'corvette' || designId === 'frigate') return hasYard;
     return true;
   };
 
@@ -181,31 +191,52 @@ export const ShipyardPanel = ({ system }: ShipyardPanelProps) => {
         </div>
       </header>
       {message ? <p className="panel-message">{message}</p> : null}
-      {system && !system.hasShipyard ? (
+      {system && (!system.hasShipyard || system.shipyardBuild) ? (
         <div className="shipyard-panel__empty">
-          <p className="text-muted">
-            Nessun cantiere orbitale in questo sistema. Usa una nave costruttrice per costruirlo.
-          </p>
-          <p className="text-muted">
-            Costo: energia {shipyardCost.energy ?? 0} / minerali {shipyardCost.minerals ?? 0}
-          </p>
-          <button
-            className="panel__action"
-            onClick={handleBuildShipyard}
-            disabled={!canBuildShipyard.ok}
-          >
-            Costruisci cantiere
-          </button>
-          {canBuildShipyard.ok ? null : (
-            <small className="text-muted">
-              {canBuildShipyard.reason === 'TECH_MISSING'
-                ? 'Richiede tecnologia Cantiere orbitale.'
-                : canBuildShipyard.reason === 'NO_CONSTRUCTOR'
-                  ? 'Serve una nave costruttrice nel sistema.'
-                  : canBuildShipyard.reason === 'INSUFFICIENT_RESOURCES'
-                    ? 'Risorse insufficienti.'
-                    : null}
-            </small>
+          {system.shipyardBuild ? (
+            <>
+              <p className="text-muted">Costruzione cantiere in corso.</p>
+              <p className="text-muted">
+                Progresso: {Math.round(
+                  (1 -
+                    system.shipyardBuild.ticksRemaining /
+                      Math.max(1, system.shipyardBuild.totalTicks)) *
+                    100,
+                )}
+                %
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-muted">
+                Nessun cantiere orbitale in questo sistema. Usa una nave costruttrice per costruirlo.
+              </p>
+              <p className="text-muted">
+                Costo: energia {shipyardCost.energy ?? 0} / minerali {shipyardCost.minerals ?? 0}
+              </p>
+              <button
+                className="panel__action"
+                onClick={handleBuildShipyard}
+                disabled={!canBuildShipyard.ok}
+              >
+                Costruisci cantiere
+              </button>
+              {canBuildShipyard.ok ? null : (
+                <small className="text-muted">
+                  {canBuildShipyard.reason === 'TECH_MISSING'
+                    ? 'Richiede tecnologia Cantiere orbitale.'
+                    : canBuildShipyard.reason === 'NO_CONSTRUCTOR'
+                      ? 'Serve una nave costruttrice nel sistema.'
+                      : canBuildShipyard.reason === 'SYSTEM_NOT_SURVEYED'
+                        ? 'Il sistema deve essere ispezionato.'
+                      : canBuildShipyard.reason === 'INSUFFICIENT_RESOURCES'
+                        ? 'Risorse insufficienti.'
+                        : canBuildShipyard.reason === 'IN_PROGRESS'
+                          ? 'Costruzione già in corso.'
+                          : null}
+                </small>
+              )}
+            </>
           )}
         </div>
       ) : null}

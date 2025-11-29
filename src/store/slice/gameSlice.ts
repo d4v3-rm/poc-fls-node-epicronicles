@@ -61,7 +61,9 @@ export type BuildShipReason =
 export type BuildShipyardReason =
   | 'NO_SESSION'
   | 'SYSTEM_NOT_FOUND'
+  | 'SYSTEM_NOT_SURVEYED'
   | 'TECH_MISSING'
+  | 'IN_PROGRESS'
   | 'ALREADY_BUILT'
   | 'NO_CONSTRUCTOR'
   | 'INSUFFICIENT_RESOURCES';

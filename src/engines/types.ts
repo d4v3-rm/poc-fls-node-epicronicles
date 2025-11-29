@@ -253,6 +253,11 @@ export interface StarSystem {
   ownerId?: string | null;
   hasShipyard?: boolean;
   shipyardAnchorPlanetId?: string | null;
+  shipyardBuild?: {
+    ticksRemaining: number;
+    totalTicks: number;
+    anchorPlanetId: string | null;
+  };
 }
 
 export interface ScienceShip {
@@ -301,7 +306,7 @@ export interface FleetShip {
   attackBonus?: number;
 }
 
-export type ShipRole = 'military' | 'colony' | 'construction';
+export type ShipRole = 'military' | 'colony' | 'construction' | 'science';
 
 export interface Fleet {
   id: string;

@@ -20,6 +20,12 @@ export const buildShipyard =
     if (!system) {
       return { success: false, reason: 'SYSTEM_NOT_FOUND' };
     }
+    if (system.visibility !== 'surveyed') {
+      return { success: false, reason: 'SYSTEM_NOT_SURVEYED' };
+    }
+    if (system.shipyardBuild) {
+      return { success: false, reason: 'IN_PROGRESS' };
+    }
     if (system.hasShipyard) {
       return { success: false, reason: 'ALREADY_BUILT' };
     }
@@ -46,9 +52,29 @@ export const buildShipyard =
       return { success: false, reason: 'INSUFFICIENT_RESOURCES' };
     }
     const updatedEconomy = spendResources(session.economy, buildCost);
+    const constructorFleet = session.fleets.find(
+      (fleet) =>
+        fleet.systemId === systemId &&
+        fleet.ships.some((ship) => {
+          const design = getShipDesign(state.config.military, ship.designId);
+          return design?.role === constructionRole;
+        }),
+    );
+    const resolvedAnchor =
+      anchorPlanetId ??
+      constructorFleet?.anchorPlanetId ??
+      null;
     const updatedSystems = session.galaxy.systems.map((s) =>
       s.id === systemId
-        ? { ...s, hasShipyard: true, shipyardAnchorPlanetId: anchorPlanetId ?? null }
+        ? {
+            ...s,
+            ownerId: 'player',
+            shipyardBuild: {
+              ticksRemaining: 10,
+              totalTicks: 10,
+              anchorPlanetId: resolvedAnchor,
+            },
+          }
         : s,
     );
     dispatch(

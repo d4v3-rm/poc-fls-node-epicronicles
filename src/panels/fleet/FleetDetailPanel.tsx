@@ -61,6 +61,7 @@ interface FleetDetailPanelProps {
     success: boolean;
     reason?: keyof typeof fleetOrderErrors;
   };
+  showConstructionActions?: boolean;
   onAnchorChange: (fleetId: string, planetId: string | null) => void;
   onCenter?: (systemId: string) => void;
   onStop?: (fleetId: string) => void;
@@ -81,6 +82,7 @@ export const FleetDetailPanel = ({
   designs,
   completedTechs,
   onOrder,
+  showConstructionActions = false,
   onAnchorChange,
   onCenter,
   onStop,
@@ -105,6 +107,8 @@ export const FleetDetailPanel = ({
       id: planet.id,
       name: planet.name ?? planet.id,
     })) ?? [];
+  const shipyardBuild = currentSystem?.shipyardBuild;
+  const buildInProgress = Boolean(shipyardBuild);
   const relatedScience = scienceShips.filter(
     (ship) =>
       ship.currentSystemId === fleet.systemId ||
@@ -127,12 +131,23 @@ export const FleetDetailPanel = ({
   const hasConstructor = fleet.ships.some(
     (ship) => designLookup.get(ship.designId)?.role === 'construction',
   );
-  const canBuildYard = hasConstructor && completedTechs.includes('orbital-shipyard');
+  const canBuildYard =
+    hasConstructor &&
+    completedTechs.includes('orbital-shipyard') &&
+    currentSystem?.visibility === 'surveyed' &&
+    !buildInProgress &&
+    !currentSystem?.hasShipyard;
   const yardLockedReason = !hasConstructor
     ? 'Serve una nave costruttrice.'
-    : !completedTechs.includes('orbital-shipyard')
-      ? 'Richiede tecnologia Cantiere orbitale.'
-      : null;
+    : currentSystem?.visibility !== 'surveyed'
+      ? 'Il sistema deve essere ispezionato.'
+      : buildInProgress
+        ? 'Costruzione già in corso.'
+        : currentSystem?.hasShipyard
+          ? 'Cantiere già presente nel sistema.'
+          : !completedTechs.includes('orbital-shipyard')
+            ? 'Richiede tecnologia Cantiere orbitale.'
+            : null;
   const constructorActions = (() => {
     if (!hasConstructor) return [];
     const actions: Array<{ id: string; label: string }> = [];
@@ -148,18 +163,24 @@ export const FleetDetailPanel = ({
     }
     const result = onBuildShipyard(currentSystem.id, fleet.anchorPlanetId ?? null);
     if (result.success) {
-      setMessage('Cantiere orbitale costruito.');
+      setMessage('Costruzione cantiere avviata (10 tick).');
     } else if (result.reason) {
       const reason = result.reason as BuildShipyardReason;
       const labels: Record<BuildShipyardReason, string> = {
         NO_SESSION: 'Nessuna sessione attiva.',
         SYSTEM_NOT_FOUND: 'Sistema non valido.',
+        SYSTEM_NOT_SURVEYED: 'Il sistema deve essere ispezionato.',
         TECH_MISSING: 'Richiede la tecnologia Cantiere orbitale.',
+        IN_PROGRESS: 'Costruzione già in corso.',
         ALREADY_BUILT: 'Cantiere già presente nel sistema.',
         NO_CONSTRUCTOR: 'Serve una nave costruttrice nel sistema.',
         INSUFFICIENT_RESOURCES: 'Risorse insufficienti.',
       };
-      setMessage(labels[reason] ?? 'Azione non disponibile.');
+      if (reason === 'IN_PROGRESS') {
+        setMessage('Costruzione cantiere già in corso.');
+      } else {
+        setMessage(labels[reason] ?? 'Azione non disponibile.');
+      }
     }
   };
 
@@ -314,11 +335,30 @@ export const FleetDetailPanel = ({
         </section>
       </div>
 
-      {hasConstructor ? (
+      {hasConstructor && showConstructionActions ? (
         <aside className="fleet-detail__aside">
           <div className="fleet-detail__section">
             <h4>Costruzione</h4>
-            {shipyardBuilt ? (
+            {buildInProgress && shipyardBuild ? (
+              <div className="fleet-construction-card">
+                <div>
+                  <p className="fleet-construction__title">Cantiere in costruzione</p>
+                  <small className="text-muted">
+                    Progresso:{' '}
+                    {Math.round(
+                      (1 -
+                        shipyardBuild.ticksRemaining /
+                          Math.max(1, shipyardBuild.totalTicks)) *
+                        100,
+                    )}
+                    %
+                  </small>
+                </div>
+                <button className="panel__action panel__action--compact" disabled>
+                  In corso
+                </button>
+              </div>
+            ) : shipyardBuilt ? (
               <p className="text-muted">Cantiere orbitale già presente nel sistema.</p>
             ) : constructorActions.length > 0 ? (
               constructorActions.map((action) => (
@@ -332,7 +372,7 @@ export const FleetDetailPanel = ({
                   <button
                     className="panel__action panel__action--compact"
                     onClick={handleBuildShipyard}
-                    disabled={!canBuildYard || shipyardBuilt}
+                    disabled={!canBuildYard}
                   >
                     Costruisci
                   </button>

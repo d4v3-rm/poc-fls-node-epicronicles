@@ -55,6 +55,30 @@ const combatResultLabel: Record<CombatResultType, string> = {
   stalemate: 'Stallo',
 };
 
+const advanceShipyardConstruction = (galaxy: GalaxyState): GalaxyState => {
+  const systems = galaxy.systems.map((system) => {
+    if (!system.shipyardBuild) return system;
+    const remaining = Math.max(0, system.shipyardBuild.ticksRemaining - 1);
+    if (remaining <= 0) {
+      return {
+        ...system,
+        ownerId: system.ownerId ?? 'player',
+        hasShipyard: true,
+        shipyardAnchorPlanetId: system.shipyardBuild.anchorPlanetId ?? null,
+        shipyardBuild: undefined,
+      };
+    }
+    return {
+      ...system,
+      shipyardBuild: {
+        ...system.shipyardBuild,
+        ticksRemaining: remaining,
+      },
+    };
+  });
+  return { ...galaxy, systems };
+};
+
 export const advanceSimulation = (
   session: GameSession,
   ticks: number,
@@ -139,6 +163,7 @@ export const advanceSimulation = (
     const shipyard = advanceShipyard({
       tasks: updatedSession.shipyardQueue,
       fleets: updatedSession.fleets,
+      scienceShips: updatedSession.scienceShips,
       military: config.military,
       fallbackSystemId,
     });
@@ -229,11 +254,8 @@ export const advanceSimulation = (
       session: { ...updatedSession, fleets: fleetsAdvance.fleets, galaxy: warZoneGalaxy },
       military: config.military,
     });
-    const { galaxy, scienceShips } = advanceExploration(
-      warZoneGalaxy,
-      updatedSession.scienceShips,
-      config.exploration,
-    );
+    const galaxyWithShipyards = advanceShipyardConstruction(warZoneGalaxy);
+    const { galaxy, scienceShips } = advanceExploration(galaxyWithShipyards, shipyard.scienceShips, config.exploration);
     const balancedEconomy = autoBalancePopulation({
       economy: districtConstruction.economy,
       config: config.economy,

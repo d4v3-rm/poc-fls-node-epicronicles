@@ -83,11 +83,12 @@
   position: fixed;
   left: 90px;
   bottom: 90px;
-  width: 380px;
+  width: 840px;
+  max-width: 90vw;
   background: rgba(6, 10, 20, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  padding: 0.75rem;
+  padding: 0.9rem;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
   z-index: 5;

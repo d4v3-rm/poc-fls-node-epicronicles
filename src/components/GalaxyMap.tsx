@@ -666,7 +666,7 @@ export const GalaxyMap = ({
       systems
         .map(
           (system) =>
-            `${system.id}:${system.visibility}:${system.ownerId ?? ''}:${system.hostilePower ?? 0}:${system.orbitingPlanets.length}:${system.hasShipyard ? 1 : 0}:${system.shipyardAnchorPlanetId ?? ''}`,
+            `${system.id}:${system.visibility}:${system.ownerId ?? ''}:${system.hostilePower ?? 0}:${system.orbitingPlanets.length}:${system.hasShipyard ? 1 : 0}:${system.shipyardAnchorPlanetId ?? ''}:${system.shipyardBuild ? system.shipyardBuild.ticksRemaining : 0}`,
         )
         .join('|') +
       `|F:${fleetSignature}`,

@@ -97,7 +97,12 @@ export const GameScreen = () => {
   const [debugModalOpen, setDebugModalOpen] = useState(false);
   const [dockSelection, setDockSelection] = useState<
     | { kind: 'colony'; planetId: string; systemId: string }
-    | { kind: 'fleet'; fleetId: string; systemId: string }
+    | {
+        kind: 'fleet';
+        fleetId: string;
+        systemId: string;
+        source?: 'fleet' | 'colonization' | 'construction';
+      }
     | { kind: 'science'; shipId: string; systemId: string }
     | null
   >(null);
@@ -574,12 +579,9 @@ export const GameScreen = () => {
                 onStop={(fleetId) => stopFleet(fleetId)}
                 onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
                 onSplit={(fleetId) => splitFleet(fleetId)}
+                showConstructionActions={dockSelection?.source === 'construction'}
                 onBuildShipyard={(systemId, anchorPlanetId) => {
-                  const result = buildShipyard(systemId, anchorPlanetId);
-                  if (result.success) {
-                    setShipyardSystemId(systemId);
-                  }
-                  return result;
+                  return buildShipyard(systemId, anchorPlanetId);
                 }}
                 onClose={() => setDockSelection(null)}
               />

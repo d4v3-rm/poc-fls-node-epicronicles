@@ -826,6 +826,21 @@ export const gameConfig: GameConfig = {
         hullPoints: 18,
         speed: 0.85,
       },
+      {
+        id: 'science',
+        name: 'ISS Pathfinder',
+        role: 'science',
+        description: 'Nave scientifica per esplorazione e analisi dei sistemi.',
+        buildCost: {
+          minerals: 90,
+          energy: 55,
+        },
+        buildTime: 6,
+        attack: 0,
+        defense: 1,
+        hullPoints: 14,
+        speed: 1.1,
+      },
     ],
     templates: [
       {
