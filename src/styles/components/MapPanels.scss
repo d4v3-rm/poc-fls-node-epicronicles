@@ -9,7 +9,7 @@
 
 .system-mini-panel {
   position: fixed;
-  left: 12px;
+  left: 264px; // lascia spazio al dock verticale
   bottom: 64px;
   width: 320px;
   background: rgba(6, 10, 20, 0.95);
@@ -25,7 +25,7 @@
 
 .planet-mini-panel {
   position: fixed;
-  left: 12px;
+  left: 264px; // lascia spazio al dock verticale
   bottom: 12px;
   width: 320px;
   background: rgba(6, 10, 20, 0.95);
