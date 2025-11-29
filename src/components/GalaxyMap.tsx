@@ -511,6 +511,10 @@ interface GalaxyMapProps {
     systemId: string,
     anchor: { x: number; y: number },
   ) => void;
+  onShipyardSelect?: (
+    systemId: string,
+    anchor: { x: number; y: number },
+  ) => void;
   onClearFocus?: () => void;
 }
 
@@ -520,6 +524,7 @@ export const GalaxyMap = ({
   focusTrigger = 0,
   onSystemSelect,
   onPlanetSelect,
+  onShipyardSelect,
   onClearFocus,
 }: GalaxyMapProps) => {
   const onSelectRef = useRef(onSystemSelect);
@@ -1006,7 +1011,7 @@ export const GalaxyMap = ({
       const intersects = raycaster.intersectObjects(systemGroup.children, true);
       const hit = intersects.find((intersect) => {
         let obj: THREE.Object3D | null = intersect.object;
-        while (obj && !obj.userData.systemId && !obj.userData.planetId) {
+        while (obj && !obj.userData.systemId && !obj.userData.planetId && !obj.userData.kind) {
           obj = obj.parent;
         }
         return Boolean(obj?.userData.systemId);
@@ -1016,7 +1021,12 @@ export const GalaxyMap = ({
         return;
       }
       let targetNode: THREE.Object3D | null = hit.object;
-      while (targetNode && !targetNode.userData.systemId && !targetNode.userData.planetId) {
+      while (
+        targetNode &&
+        !targetNode.userData.systemId &&
+        !targetNode.userData.planetId &&
+        !targetNode.userData.kind
+      ) {
         targetNode = targetNode.parent;
       }
       if (!targetNode) {
@@ -1031,13 +1041,16 @@ export const GalaxyMap = ({
       targetNode.getWorldPosition(worldPos);
       const systemId = targetNode.userData.systemId as string;
       const planetId = targetNode.userData.planetId as string | undefined;
+      const kind = targetNode.userData.kind as string | undefined;
       const currentOffset = systemGroup.position.clone();
       offsetTargetRef.current = currentOffset.sub(worldPos);
       zoomTargetRef.current = clamp(60, minZoom, maxZoom);
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
-      if (planetId && onPlanetSelect) {
+      if (kind === 'shipyard' && onShipyardSelect) {
+        onShipyardSelect(systemId, { x: anchorX, y: anchorY });
+      } else if (planetId && onPlanetSelect) {
         onPlanetSelect(planetId, systemId, { x: anchorX, y: anchorY });
       } else {
         onSelectRef.current?.(systemId, {

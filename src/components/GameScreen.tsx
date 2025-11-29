@@ -314,9 +314,6 @@ export const GameScreen = () => {
           const isAccessible =
             targetSystem.visibility === 'surveyed' ||
             colonizedSystems.has(targetSystem.id);
-          const hasShipyardStructure =
-            targetSystem.hasShipyard || Boolean(targetSystem.shipyardBuild);
-          setShipyardSystemId(isAccessible && hasShipyardStructure ? systemId : null);
           setSelectedPlanetId(null);
           setFocusSystemId(systemId);
           setFocusPlanetId(null);
@@ -327,6 +324,18 @@ export const GameScreen = () => {
           );
         }}
         onClearFocus={clearFocusTargets}
+        onSelectShipyard={(systemId) => {
+          const targetSystem = systems.find((entry) => entry.id === systemId);
+          if (!targetSystem) return;
+          const isAccessible =
+            targetSystem.visibility === 'surveyed' ||
+            colonizedSystems.has(targetSystem.id);
+          const hasShipyardStructure =
+            targetSystem.hasShipyard || Boolean(targetSystem.shipyardBuild);
+          setShipyardSystemId(isAccessible && hasShipyardStructure ? systemId : null);
+          setFocusSystemId(systemId);
+          setFocusPlanetId(null);
+        }}
         onSelectPlanet={(planetId, systemId) => {
           setFocusSystemId(systemId);
           setFocusPlanetId(planetId);

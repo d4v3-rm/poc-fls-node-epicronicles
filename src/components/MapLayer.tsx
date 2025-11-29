@@ -16,6 +16,10 @@ interface MapLayerProps {
     systemId: string,
     anchor: { x: number; y: number },
   ) => void;
+  onSelectShipyard: (
+    systemId: string,
+    anchor: { x: number; y: number },
+  ) => void;
   onClearFocus: () => void;
 }
 
@@ -26,6 +30,7 @@ export const MapLayer = ({
   mapMessage,
   onSelectSystem,
   onSelectPlanet,
+  onSelectShipyard,
   onClearFocus,
 }: MapLayerProps) => (
   <div className="game-map-layer">
@@ -35,6 +40,7 @@ export const MapLayer = ({
       focusTrigger={focusTrigger}
       onSystemSelect={onSelectSystem}
       onPlanetSelect={onSelectPlanet}
+      onShipyardSelect={onSelectShipyard}
       onClearFocus={onClearFocus}
     />
     {mapMessage ? <div className="map-alert">{mapMessage}</div> : null}
