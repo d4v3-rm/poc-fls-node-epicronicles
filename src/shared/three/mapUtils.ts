@@ -456,7 +456,7 @@ export const createOrbitingPlanets = (
         return geom;
       })();
     const planetMesh = new Mesh(baseGeom, meshMaterial);
-    planetMesh.raycast = () => null;
+    // Abilita il raycast per poter selezionare i pianeti dalla mappa
     const orbitSpeed = base * planet.orbitSpeed;
     planetMesh.userData = {
       ...planetMesh.userData,

@@ -327,6 +327,12 @@ export const GameScreen = () => {
           );
         }}
         onClearFocus={clearFocusTargets}
+        onSelectPlanet={(planetId, systemId) => {
+          setFocusSystemId(systemId);
+          setFocusPlanetId(planetId);
+          setSelectedPlanetId(planetId);
+          setFocusTrigger((value) => value + 1);
+        }}
       />
       <HudBottomBar
         onToggleDebug={() => setDebugModalOpen(true)}

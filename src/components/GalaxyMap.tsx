@@ -506,6 +506,11 @@ interface GalaxyMapProps {
     systemId: string,
     anchor: { x: number; y: number },
   ) => void;
+  onPlanetSelect?: (
+    planetId: string,
+    systemId: string,
+    anchor: { x: number; y: number },
+  ) => void;
   onClearFocus?: () => void;
 }
 
@@ -514,6 +519,7 @@ export const GalaxyMap = ({
   focusPlanetId,
   focusTrigger = 0,
   onSystemSelect,
+  onPlanetSelect,
   onClearFocus,
 }: GalaxyMapProps) => {
   const onSelectRef = useRef(onSystemSelect);
@@ -1000,7 +1006,7 @@ export const GalaxyMap = ({
       const intersects = raycaster.intersectObjects(systemGroup.children, true);
       const hit = intersects.find((intersect) => {
         let obj: THREE.Object3D | null = intersect.object;
-        while (obj && !obj.userData.systemId) {
+        while (obj && !obj.userData.systemId && !obj.userData.planetId) {
           obj = obj.parent;
         }
         return Boolean(obj?.userData.systemId);
@@ -1010,7 +1016,7 @@ export const GalaxyMap = ({
         return;
       }
       let targetNode: THREE.Object3D | null = hit.object;
-      while (targetNode && !targetNode.userData.systemId) {
+      while (targetNode && !targetNode.userData.systemId && !targetNode.userData.planetId) {
         targetNode = targetNode.parent;
       }
       if (!targetNode) {
@@ -1024,16 +1030,21 @@ export const GalaxyMap = ({
       const worldPos = new THREE.Vector3();
       targetNode.getWorldPosition(worldPos);
       const systemId = targetNode.userData.systemId as string;
+      const planetId = targetNode.userData.planetId as string | undefined;
       const currentOffset = systemGroup.position.clone();
       offsetTargetRef.current = currentOffset.sub(worldPos);
       zoomTargetRef.current = clamp(60, minZoom, maxZoom);
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
-      onSelectRef.current?.(systemId, {
-        x: anchorX,
-        y: anchorY,
-      });
+      if (planetId && onPlanetSelect) {
+        onPlanetSelect(planetId, systemId, { x: anchorX, y: anchorY });
+      } else {
+        onSelectRef.current?.(systemId, {
+          x: anchorX,
+          y: anchorY,
+        });
+      }
     };
 
     renderer.domElement.addEventListener('click', handleClick);
