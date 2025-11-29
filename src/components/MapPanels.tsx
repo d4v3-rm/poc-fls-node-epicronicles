@@ -2,7 +2,7 @@ import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { Suspense, lazy } from 'react';
 import type { StarSystem, Planet } from '@domain/types';
 
-import '../styles/components/MapPanels.scss';
+import './MapPanels.scss';
 
 const ShipyardPanel = lazy(() =>
   import('@panels/ShipyardPanel').then((m) => ({
@@ -79,8 +79,8 @@ export const MapPanels = ({
               <span>
                 {focusedSystem.visibility === 'surveyed'
                   ? 'Sondato'
-                  : focusedSystem.visibility === 'scanned'
-                    ? 'Scansionato'
+                  : focusedSystem.visibility === 'revealed'
+                    ? 'Rivelato'
                     : 'Sconosciuto'}
               </span>
             </div>

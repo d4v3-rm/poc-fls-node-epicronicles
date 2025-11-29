@@ -1,4 +1,4 @@
-import '../../styles/components/ShipyardPanel.scss';
+import '../ShipyardPanel.scss';
 
 interface BuildQueueProps {
   queue: Array<{

@@ -3,7 +3,7 @@ import { useAppSelector, useGameStore } from '@store/gameStore';
 import { getResearchOffers } from '@domain/research/research';
 import { listTraditionChoices } from '@domain/traditions/traditions';
 import { selectResearch, selectTraditions } from '@store/selectors';
-import '../styles/components/TechPanel.scss';
+import './TechPanel.scss';
 
 const kindLabels: Record<string, string> = {
   foundation: 'Fondamenta',

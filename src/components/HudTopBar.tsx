@@ -1,5 +1,5 @@
 import { Pause, Play, Gauge, Clock3, Activity, PauseCircle } from 'lucide-react';
-import '../styles/components/HudTopBar.scss';
+import './HudTopBar.scss';
 import { ResourceBar } from './ResourceBar';
 import { useGameStore } from '@store/gameStore';
 

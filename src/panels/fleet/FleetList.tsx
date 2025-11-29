@@ -9,7 +9,7 @@ import type {
   StarSystem,
 } from '@domain/types';
 
-import '../../styles/components/FleetShared.scss';
+import './FleetShared.scss';
 
 const fleetOrderErrors = {
   NO_SESSION: 'Nessuna sessione.',

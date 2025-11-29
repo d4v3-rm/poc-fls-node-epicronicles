@@ -9,7 +9,7 @@ import {
   Swords,
   ScrollText,
 } from 'lucide-react';
-import '../styles/components/SideDock.scss';
+import './SideDock.scss';
 
 interface SideDockProps {
   onOpenMissions: () => void;

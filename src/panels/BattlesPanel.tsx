@@ -12,7 +12,7 @@ import {
   selectWarEvents,
 } from '@store/selectors';
 
-import '../styles/components/BattlesPanel.scss';
+import './BattlesPanel.scss';
 
 interface BattlesPanelProps {
   warEventsRef?: RefObject<HTMLUListElement | null>;

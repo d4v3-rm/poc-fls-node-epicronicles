@@ -3,8 +3,8 @@ import type { ShipDesign } from '@domain/types';
 import { applyShipTemplate, applyCustomization } from '@domain/fleet/ships';
 import type { MilitaryConfig } from '@config/gameConfig';
 
-import '../../styles/components/FleetShared.scss';
-import '../../styles/components/ShipyardPanel.scss';
+import '../fleet/FleetShared.scss';
+import '../ShipyardPanel.scss';
 
 type CustomState = {
   offense: number;

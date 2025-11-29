@@ -1,7 +1,7 @@
 ﻿import { memo } from "react";
 import { useAppSelector } from "@store/gameStore";
 import { selectPlanets } from "@store/selectors";
-import "../styles/components/PlanetPanels.scss";
+import "./PlanetPanels.scss";
 
 interface ColonyPanelProps {
   onSelectPlanet: (planetId: string, systemId: string) => void;

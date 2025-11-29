@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import type { Empire, WarStatus } from '@domain/types';
 import { selectEmpires } from '@store/selectors';
-import '../styles/components/DiplomacyPanel.scss';
+import './DiplomacyPanel.scss';
 
 const statusLabel: Record<WarStatus, string> = {
   peace: 'Pace',

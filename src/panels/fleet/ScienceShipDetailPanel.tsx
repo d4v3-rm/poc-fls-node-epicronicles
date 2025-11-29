@@ -1,7 +1,7 @@
 import type { ScienceShip, StarSystem } from '@domain/types';
 import { Activity, PauseCircle, MapPin, Radar, Target } from 'lucide-react';
 
-import '../../styles/components/FleetShared.scss';
+import './FleetShared.scss';
 
 interface ScienceShipDetailPanelProps {
   ship: ScienceShip;

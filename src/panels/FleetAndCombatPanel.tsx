@@ -6,7 +6,7 @@ import {
   selectScienceShips,
   selectSystems,
 } from '@store/selectors';
-import '../styles/components/FleetAndCombatPanel.scss';
+import './FleetAndCombatPanel.scss';
 
 const FleetAndCombatPanelComponent = () => {
   const fleets = useAppSelector(selectFleets);

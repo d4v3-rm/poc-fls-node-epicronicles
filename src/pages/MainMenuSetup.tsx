@@ -1,7 +1,7 @@
 import type { GameConfig } from '@config/gameConfig';
 import { MainMenuLayout } from './MainMenuLayout';
 
-import '../styles/pages/MainMenuSetup.scss';
+import './MainMenuSetup.scss';
 
 interface MainMenuSetupProps {
   background: string;

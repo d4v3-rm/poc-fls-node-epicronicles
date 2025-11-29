@@ -1,6 +1,6 @@
 import { MainMenuLayout } from './MainMenuLayout';
 
-import '../styles/pages/MainMenuLanding.scss';
+import './MainMenuLanding.scss';
 
 interface MainMenuLandingProps {
   background: string;

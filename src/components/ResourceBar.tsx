@@ -4,7 +4,7 @@ import { RESOURCE_TYPES } from "@domain/economy/economy";
 import { resourceLabels } from "@domain/shared/resourceMetadata";
 import { Zap, Pickaxe, Sandwich, FlaskConical, Star } from "lucide-react";
 
-import "../styles/components/ResourceBar.scss";
+import "./ResourceBar.scss";
 
 const resourceIcons: Record<string, ReactElement> = {
   energy: <Zap size={16} />,

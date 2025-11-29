@@ -5,7 +5,7 @@ import type { BuildShipyardReason } from '@store/slice/gameSlice';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
 import { BuildQueue } from './shipyard/BuildQueue';
 import { selectResources, selectShipyardQueue, selectResearch } from '@store/selectors';
-import '../styles/components/ShipyardPanel.scss';
+import './ShipyardPanel.scss';
 
   const buildMessages = {
   NO_SESSION: 'Nessuna sessione.',

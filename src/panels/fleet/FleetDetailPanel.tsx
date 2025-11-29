@@ -10,7 +10,7 @@ import type {
 } from '@domain/types';
 import type { BuildShipyardReason } from '@store/slice/gameSlice';
 import { Target, PauseCircle } from 'lucide-react';
-import '../../styles/components/FleetShared.scss';
+import './FleetShared.scss';
 
 const fleetOrderErrors = {
   NO_SESSION: 'Nessuna sessione.',

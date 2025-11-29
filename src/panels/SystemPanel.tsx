@@ -3,7 +3,7 @@ import { useAppSelector } from '@store/gameStore';
 import { selectPlanets } from '@store/selectors';
 import { selectSystemsMap } from '@store/selectors';
 
-import '../styles/components/SystemPanel.scss';
+import './SystemPanel.scss';
 
 const visibilityLabel = {
   unknown: 'Sconosciuto',

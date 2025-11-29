@@ -6,7 +6,7 @@ import {
   selectPlanets,
 } from '@store/selectors';
 
-import '../styles/components/DistrictQueuePanel.scss';
+import './DistrictQueuePanel.scss';
 
 const manageErrors = {
   NO_SESSION: 'Nessuna sessione.',

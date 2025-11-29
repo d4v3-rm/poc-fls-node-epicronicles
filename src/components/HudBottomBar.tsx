@@ -12,7 +12,7 @@ import {
   Bug,
   LogOut,
 } from 'lucide-react';
-import '../styles/components/HudBottomBar.scss';
+import './HudBottomBar.scss';
 import { gameConfig } from '@config/gameConfig';
 
 interface HudBottomBarProps {

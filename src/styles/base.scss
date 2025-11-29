@@ -1,9 +1,14 @@
 @use './tokens';
+@use './_shared' as *;
 
 .text-muted {
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.9rem;
   margin: 0;
+}
+
+* {
+  border-radius: 0 !important;
 }
 
 .text-danger {
@@ -13,12 +18,16 @@
 .panel-message {
   margin: 0.4rem 0;
   color: #b9d3ff;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .panel__subtitle {
   margin: 0.15rem 0 0.35rem;
   color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .panel__field {
@@ -29,25 +38,29 @@
 
   input,
   select {
-    background: rgba(6, 9, 20, 0.9);
-    border: 1px solid rgba(90, 115, 150, 0.5);
-    border-radius: 8px;
-    padding: 0.4rem 0.5rem;
+    background: rgba(6, 9, 20, 0.92);
+    border: 1px solid rgba(90, 200, 255, 0.35);
+    border-radius: 0;
+    padding: 0.55rem 0.65rem;
     color: #e9efff;
+    letter-spacing: 0.04em;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(90, 200, 255, 0.8);
+      box-shadow:
+        0 0 0 1px rgba(90, 200, 255, 0.35),
+        0 0 0 4px rgba(90, 200, 255, 0.08);
+    }
   }
 }
 
 .progress-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  overflow: hidden;
+  @include progress-bar();
 }
 
 .progress-bar__fill {
-  height: 100%;
-  background: linear-gradient(90deg, #9edcff, #7fe38f);
-  transition: width 0.2s ease;
+  @include progress-fill();
 }
 
 .pill {

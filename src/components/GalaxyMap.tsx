@@ -12,7 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import '../styles/components/GalaxyMap.scss';
+import './GalaxyMap.scss';
 import { createSystemNode } from '@three/mapUtils';
 
 const clamp = (value: number, min: number, max: number) =>

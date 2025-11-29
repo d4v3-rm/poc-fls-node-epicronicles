@@ -7,7 +7,7 @@ import {
   selectScienceShips,
 } from '@store/selectors';
 import { Crosshair, Info } from 'lucide-react';
-import '../styles/components/SideEntityDock.scss';
+import './SideEntityDock.scss';
 
 type DockSelection =
   | { kind: 'colony'; planetId: string; systemId: string }

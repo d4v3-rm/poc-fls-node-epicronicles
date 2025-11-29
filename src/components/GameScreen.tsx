@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { StarSystem } from '@domain/types';
+import type { Planet, StarSystem } from '@domain/types';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { useGameLoop } from '@shared/useGameLoop';
@@ -29,7 +29,7 @@ import {
   selectPlanets,
   selectSystems,
 } from '@store/selectors';
-import '../styles/components/GameScreen.scss';
+import './GameScreen.scss';
 
 export const GameScreen = () => {
   useGameLoop();
@@ -121,12 +121,6 @@ export const GameScreen = () => {
     setFocusPlanetId(null);
   };
 
-  const closePlanetPanel = () => {
-    setSelectedPlanetId(null);
-    setFocusSystemId(null);
-    setFocusPlanetId(null);
-  };
-
   useEffect(() => {
     if (!sessionId) {
       return;
@@ -177,7 +171,6 @@ export const GameScreen = () => {
   };
 
   const large = sizeFor(1000, 700);
-  const wide = sizeFor(1260, 760);
 
   if (!session) {
     return (
@@ -198,14 +191,14 @@ export const GameScreen = () => {
   const focusedSystem: StarSystem | null = focusSystemId
     ? systems.find((system) => system.id === focusSystemId) ?? null
     : null;
-  const focusedPlanet =
-    selectedPlanetId && planets.find((planet) => planet.id === selectedPlanetId)
-      ? planets.find((planet) => planet.id === selectedPlanetId)
-      : focusPlanetId
-        ? planets.find((planet) => planet.id === focusPlanetId) ?? null
-        : null;
-  const focusedPlanetSystem =
-    focusedPlanet && systems.find((system) => system.id === focusedPlanet.systemId);
+  const focusedPlanet: Planet | null = selectedPlanetId
+    ? planets.find((planet) => planet.id === selectedPlanetId) ?? null
+    : focusPlanetId
+      ? planets.find((planet) => planet.id === focusPlanetId) ?? null
+      : null;
+  const focusedPlanetSystem: StarSystem | null = focusedPlanet
+    ? systems.find((system) => system.id === focusedPlanet.systemId) ?? null
+    : null;
   const selectedFleet =
     dockSelection?.kind === 'fleet'
       ? session.fleets.find((fleet) => fleet.id === dockSelection.fleetId) ?? null

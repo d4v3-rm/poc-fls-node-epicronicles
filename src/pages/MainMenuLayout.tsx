@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import '../styles/pages/MainMenuLayout.scss';
+import './MainMenuLayout.scss';
 
 interface MainMenuLayoutProps {
   background: string;
