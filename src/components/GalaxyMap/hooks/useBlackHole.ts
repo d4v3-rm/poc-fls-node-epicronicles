@@ -5,11 +5,11 @@ import { useGalaxyMapContext } from './GalaxyMapContext';
 export const useBlackHole = () => {
   const {
     sceneContext,
-    refs: { systemGroupRef, blackHoleRef },
+    refs: { blackHoleRef },
   } = useGalaxyMapContext();
 
   useEffect(() => {
-    const group = systemGroupRef.current;
+    const group = sceneContext?.systemGroup ?? null;
     if (!sceneContext || !group) {
       return;
     }
@@ -23,5 +23,5 @@ export const useBlackHole = () => {
       }
       blackHoleRef.current = null;
     };
-  }, [sceneContext, systemGroupRef, blackHoleRef]);
+  }, [sceneContext, blackHoleRef]);
 };

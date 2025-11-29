@@ -38,11 +38,12 @@ export const useMapInteractions = ({
   } = useGalaxyMapContext();
 
   useEffect(() => {
-    if (!sceneContext || !systemGroupRef.current) {
+    const group = systemGroupRef.current ?? sceneContext?.systemGroup ?? null;
+    if (!sceneContext || !group) {
       return undefined;
     }
     const { renderer, camera, controls } = sceneContext;
-    const systemGroup = systemGroupRef.current;
+    const systemGroup = group;
 
     let isPanning = false;
     let lastPointer = { x: 0, y: 0 };

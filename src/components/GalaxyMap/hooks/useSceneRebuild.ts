@@ -59,7 +59,7 @@ export const useSceneRebuild = ({
     },
   } = useGalaxyMapContext();
   useEffect(() => {
-    const group = systemGroupRef.current;
+    const group = systemGroupRef.current ?? sceneContext?.systemGroup ?? null;
     if (!sceneContext || !group) {
       return;
     }
