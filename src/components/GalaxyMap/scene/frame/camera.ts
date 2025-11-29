@@ -11,6 +11,7 @@ export interface CameraUpdateParams {
   minZoom: number;
   maxZoom: number;
   offsetTargetRef: MutableRefObject<THREE.Vector3>;
+  zoomTargetRef: MutableRefObject<number>;
   tiltStateRef: MutableRefObject<{ current: number; target: number }>;
   tempSphericalRef: MutableRefObject<THREE.Spherical>;
   tempOffsetRef: MutableRefObject<THREE.Vector3>;
@@ -22,6 +23,7 @@ export const updateCameraAndTilt = ({
   minZoom,
   maxZoom,
   offsetTargetRef,
+  zoomTargetRef,
   tiltStateRef,
   tempSphericalRef,
   tempOffsetRef,
@@ -49,6 +51,11 @@ export const updateCameraAndTilt = ({
     tempOffset.copy(camera.position).sub(target);
     tempSpherical.setFromVector3(tempOffset);
     tempSpherical.phi = appliedTilt;
+    tempSpherical.radius = THREE.MathUtils.lerp(
+      tempSpherical.radius,
+      zoomTargetRef.current,
+      0.08,
+    );
     tempOffset.setFromSpherical(tempSpherical).add(target);
     camera.position.copy(tempOffset);
     camera.lookAt(target);
