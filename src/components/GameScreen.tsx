@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Planet, StarSystem } from '@domain/types';
+import type { OrbitingPlanet, Planet, StarSystem } from '@domain/types';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { useGameLoop } from '@shared/useGameLoop';
@@ -199,9 +199,18 @@ export const GameScreen = () => {
   const focusedPlanet: Planet | null = selectedPlanetId
     ? planets.find((planet) => planet.id === selectedPlanetId) ?? null
     : null;
-  const focusedPlanetSystem: StarSystem | null = focusedPlanet
-    ? systems.find((system) => system.id === focusedPlanet.systemId) ?? null
-    : null;
+  const focusedOrbitingPlanet: OrbitingPlanet | null =
+    selectedPlanetId && focusSystemId
+      ? systems
+          .find((system) => system.id === focusSystemId)
+          ?.orbitingPlanets.find((planet) => planet.id === selectedPlanetId) ?? null
+      : null;
+  const focusedPlanetSystem: StarSystem | null =
+    focusedPlanet
+      ? systems.find((system) => system.id === focusedPlanet.systemId) ?? null
+      : focusSystemId
+        ? systems.find((system) => system.id === focusSystemId) ?? null
+        : null;
   const selectedFleet =
     dockSelection?.kind === 'fleet'
       ? session.fleets.find((fleet) => fleet.id === dockSelection.fleetId) ?? null
@@ -368,6 +377,7 @@ export const GameScreen = () => {
         <MapPanels
           focusedSystem={focusedSystem}
           focusedPlanet={focusedPlanet}
+          focusedOrbitingPlanet={focusedOrbitingPlanet}
           focusedPlanetSystem={focusedPlanetSystem ?? null}
           viewportWidth={viewportWidth}
           viewportHeight={viewportHeight}
