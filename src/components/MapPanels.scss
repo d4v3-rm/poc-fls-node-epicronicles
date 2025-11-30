@@ -23,7 +23,7 @@
 .planet-mini-panel {
   position: fixed;
   left: 74px; // lascia spazio al dock verticale
-  bottom: 12px;
+  bottom: 64px;
   width: 320px;
   @include panel-card(0.75rem 0.85rem, 12px, rgba(6, 10, 20, 0.95));
   pointer-events: auto;
