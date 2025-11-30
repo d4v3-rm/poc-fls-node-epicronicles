@@ -45,7 +45,8 @@ export const useGalaxyScene = ({
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.enablePan = false;
+    controls.enablePan = true;
+    controls.screenSpacePanning = true;
     controls.enableRotate = false;
     controls.minDistance = minZoom;
     controls.maxDistance = maxZoom;

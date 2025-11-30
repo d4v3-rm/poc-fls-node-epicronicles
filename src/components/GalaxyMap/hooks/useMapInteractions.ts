@@ -75,6 +75,7 @@ export const useMapInteractions = ({
       if (event.button === 2) {
         isPanning = true;
         lastPointer = { x: event.clientX, y: event.clientY };
+        controls.enablePan = true;
       }
     };
 
@@ -85,14 +86,17 @@ export const useMapInteractions = ({
       const deltaX = event.clientX - lastPointer.x;
       const deltaY = event.clientY - lastPointer.y;
       lastPointer = { x: event.clientX, y: event.clientY };
-      const panScale = (camera.position.z / 400) * 0.8;
-      offsetTargetRef.current.x += deltaX * -panScale;
-      offsetTargetRef.current.y += deltaY * panScale;
+      controls.target.x -= (deltaX / renderer.domElement.clientWidth) * camera.position.z;
+      controls.target.y += (deltaY / renderer.domElement.clientHeight) * camera.position.z;
+      controls.update();
+      const target = controls.target;
+      offsetTargetRef.current.set(-target.x, -target.y, 0);
     };
 
     const handleMouseUp = (event: MouseEvent) => {
       if (event.button === 2) {
         isPanning = false;
+        controls.enablePan = false;
       }
     };
 
