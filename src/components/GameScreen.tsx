@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OrbitingPlanet, Planet, StarSystem } from '@domain/types';
+import { canAffordCost } from '@domain/economy/economy';
 import { useAppSelector, useGameStore } from '@store/gameStore';
 import { DraggablePanel } from '@panels/shared/DraggablePanel';
 import { useGameLoop } from '@shared/useGameLoop';
@@ -19,6 +20,7 @@ import { TechPanel } from '@panels/TechPanel';
 import { GalaxyOverview } from '@panels/GalaxyOverview';
 import { ColonizationPanel } from '@panels/ColonizationPanel';
 import { BattlesPanel } from '@panels/BattlesPanel';
+import { PlanetDetail } from '@panels/PlanetDetail';
 import { LogPanel } from '@panels/LogPanel';
 import { SideEntityDock } from './SideEntityDock';
 import { FleetDetailPanel } from '@panels/fleet/FleetDetailPanel';
@@ -64,6 +66,7 @@ export const GameScreen = () => {
   const [shipyardSystemId, setShipyardSystemId] = useState<string | null>(null);
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null);
   const [selectedPlanetId, setSelectedPlanetId] = useState<string | null>(null);
+  const [planetDetailId, setPlanetDetailId] = useState<string | null>(null);
   const [focusPlanetId, setFocusPlanetId] = useState<string | null>(null);
   const [mapMessage, setMapMessage] = useState<string | null>(null);
   const [missionsOpen, setMissionsOpen] = useState(false);
@@ -100,6 +103,13 @@ export const GameScreen = () => {
   );
   const setScienceAutoExplore = useGameStore((state) => state.setScienceAutoExplore);
   const stopScienceShip = useGameStore((state) => state.stopScienceShip);
+  const queueDistrictConstruction = useGameStore(
+    (state) => state.queueDistrictConstruction,
+  );
+  const removeDistrict = useGameStore((state) => state.removeDistrict);
+  const promotePopulation = useGameStore((state) => state.promotePopulation);
+  const demotePopulation = useGameStore((state) => state.demotePopulation);
+  const economyConfig = useGameStore((state) => state.config.economy);
   const focusedSessionRef = useRef<string | null>(null);
   const warEventsRef = useRef<HTMLUListElement | null>(null);
   const {
@@ -113,6 +123,7 @@ export const GameScreen = () => {
     setShipyardSystemId(null);
     setSelectedSystemId(null);
     setSelectedPlanetId(null);
+    setPlanetDetailId(null);
     setFocusPlanetId(null);
     setMapMessage(null);
   };
@@ -219,6 +230,10 @@ export const GameScreen = () => {
     dockSelection?.kind === 'science'
       ? session.scienceShips.find((ship) => ship.id === dockSelection.shipId) ?? null
       : null;
+  const planetDetail =
+    planetDetailId && session
+      ? session.economy.planets.find((planet) => planet.id === planetDetailId) ?? null
+      : null;
 
   return (
     <div className="game-layout">
@@ -248,7 +263,8 @@ export const GameScreen = () => {
           }}
           onSelect={(selection) => {
             if (selection.kind === 'colony') {
-              setSelectedPlanetId(selection.planetId);
+              setSelectedPlanetId(null);
+              setPlanetDetailId(selection.planetId);
               setDockSelection(null);
             }
           }}
@@ -357,7 +373,15 @@ export const GameScreen = () => {
         onSelectPlanet={(planetId, systemId) => {
           setFocusSystemId(systemId);
           setFocusPlanetId(planetId);
-          setSelectedPlanetId(planetId);
+          const isColonized =
+            session?.economy.planets.some((planet) => planet.id === planetId) ?? false;
+          if (isColonized) {
+            setPlanetDetailId(planetId);
+            setSelectedPlanetId(null);
+          } else {
+            setSelectedPlanetId(planetId);
+            setPlanetDetailId(null);
+          }
           setFocusTrigger((value) => value + 1);
         }}
       />
@@ -511,6 +535,52 @@ export const GameScreen = () => {
             onClose={() => setLogOpen(false)}
           >
             <LogPanel />
+          </DraggablePanel>
+        ) : null}
+        {planetDetail ? (
+          <DraggablePanel
+            title={`Gestione - ${planetDetail.name}`}
+            initialX={large.initialX}
+            initialY={large.initialY}
+            initialWidth={large.width}
+            initialHeight={large.height}
+            onClose={() => setPlanetDetailId(null)}
+          >
+            <PlanetDetail
+              planet={planetDetail}
+              systemName={
+                systems.find((system) => system.id === planetDetail.systemId)?.name ??
+                planetDetail.systemId
+              }
+              onPromote={(jobId) => promotePopulation(planetDetail.id, jobId)}
+              onDemote={(jobId) => demotePopulation(planetDetail.id, jobId)}
+              automationConfig={economyConfig.populationAutomation}
+              populationJobs={economyConfig.populationJobs}
+              districtDefinitions={economyConfig.districts}
+              canAffordDistricts={Object.fromEntries(
+                economyConfig.districts.map((definition) => [
+                  definition.id,
+                  canAffordCost(session.economy, definition.cost),
+                ]),
+              )}
+              planetDistrictQueue={session.districtConstructionQueue
+                .filter((task) => task.planetId === planetDetail.id)
+                .map((task) => {
+                  const definition = economyConfig.districts.find(
+                    (entry) => entry.id === task.districtId,
+                  );
+                  return {
+                    ...task,
+                    label: definition?.label ?? task.districtId,
+                    progress: 1 - task.ticksRemaining / Math.max(1, task.totalTicks),
+                  };
+                })}
+              populationMessage={null}
+              onQueueDistrict={(districtId) =>
+                queueDistrictConstruction(planetDetail.id, districtId)
+              }
+              onRemoveDistrict={(districtId) => removeDistrict(planetDetail.id, districtId)}
+            />
           </DraggablePanel>
         ) : null}
         {dockSelection && dockSelection.kind === 'fleet' ? (
