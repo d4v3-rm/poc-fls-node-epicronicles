@@ -34,7 +34,7 @@ export const updateCameraAndTilt = ({
   const deltaFactor = delta > 0 ? Math.min(4, delta * 60) : 1;
   systemGroup.rotation.y = 0;
   systemGroup.rotation.x = 0;
-  systemGroup.position.lerp(offsetTargetRef.current, 0.08);
+  systemGroup.position.lerp(offsetTargetRef.current, 0.25);
 
   if (controls) {
     controls.minDistance = minZoom;
