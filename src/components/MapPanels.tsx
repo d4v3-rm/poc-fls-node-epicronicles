@@ -114,9 +114,7 @@ export const MapPanels = ({
                 {focusedPlanet?.name ?? focusedOrbitingPlanet?.name ?? 'Pianeta'}
               </h4>
               <small className="text-muted">
-                {focusedPlanetSystem?.name ??
-                  focusedPlanet?.systemId ??
-                  focusedOrbitingPlanet?.systemId}
+                {focusedPlanetSystem?.name ?? 'Sistema sconosciuto'}
               </small>
             </div>
             <button

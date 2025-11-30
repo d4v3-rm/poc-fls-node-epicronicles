@@ -1,23 +1,13 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useGalaxyMapData } from '../hooks/useGalaxyMapData';
-import { GalaxyMapProvider, useGalaxyMapContext } from '../providers/GalaxyMapContext';
+import { GalaxyMapProvider } from '../providers/GalaxyMapContext';
 import { useGalaxyMapRefs } from '../hooks/useGalaxyMapRefs';
 import { useGalaxyScene, type GalaxySceneContext } from '../hooks/useGalaxyScene';
 import { updateFrame } from '../scene/frameUpdate';
-import { useMapInteractions } from '../hooks/useMapInteractions';
-import { useSceneRebuild } from '../hooks/useSceneRebuild';
-import { useBlackHole } from '../hooks/useBlackHole';
-import { useMapFocus } from '../hooks/useMapFocus';
 import { createAnchorResolver } from '../scene/anchors';
-import {
-  scienceMaterials,
-  scienceLineMaterials,
-  fleetMaterials,
-} from '@three/materials';
+import { GalaxyMapInner } from './GalaxyMapInner';
+import { useGalaxyMapContextValue } from '../hooks/useGalaxyMapContextValue';
 import './GalaxyMap.scss';
-
-const BASE_TILT = Math.PI / 2;
-const MAX_TILT_DOWN = BASE_TILT + Math.PI / 6;
 
 interface GalaxyMapProps {
   focusSystemId?: string | null;
@@ -48,6 +38,7 @@ export const GalaxyMap = ({
   onShipyardSelect,
   onClearFocus,
 }: GalaxyMapProps) => {
+  const refs = useGalaxyMapRefs();
   const onSelectRef = useRef(onSystemSelect);
   const onClearRef = useRef(onClearFocus);
   useEffect(() => {
@@ -59,7 +50,6 @@ export const GalaxyMap = ({
   const {
     containerRef,
     systemGroupRef,
-    cameraRef,
     offsetTargetRef,
     zoomTargetRef,
     zoomTargetDirtyRef,
@@ -71,12 +61,11 @@ export const GalaxyMap = ({
     fleetAnchorsRef,
     planetAngleRef,
     planetLookupRef,
-    systemsSignatureRef,
     blackHoleRef,
     nebulaRef,
     anchorResolverRef,
     syncSceneContext,
-  } = useGalaxyMapRefs();
+  } = refs;
 
   const handleFrame = useCallback(
     (ctx: GalaxySceneContext, delta: number, elapsed: number) => {
@@ -144,112 +133,11 @@ export const GalaxyMap = ({
     syncSceneContext(sceneContext);
   }, [sceneContext, syncSceneContext]);
 
-  const cameraState = useMemo(
-    () => ({
-      systemGroupRef,
-      cameraRef,
-      offsetTargetRef,
-      zoomTargetRef,
-      zoomTargetDirtyRef,
-      tiltStateRef,
-      tempSphericalRef,
-      tempOffsetRef,
-    }),
-    [
-      systemGroupRef,
-      cameraRef,
-      offsetTargetRef,
-      zoomTargetRef,
-      zoomTargetDirtyRef,
-      tiltStateRef,
-      tempSphericalRef,
-      tempOffsetRef,
-    ],
-  );
-
-  const anchorState = useMemo(
-    () => ({
-      systemPositionRef,
-      scienceAnchorsRef,
-      fleetAnchorsRef,
-      planetAngleRef,
-      planetLookupRef,
-      systemsSignatureRef,
-      blackHoleRef,
-      nebulaRef,
-      anchorResolverRef,
-    }),
-    [
-      systemPositionRef,
-      scienceAnchorsRef,
-      fleetAnchorsRef,
-      planetAngleRef,
-      planetLookupRef,
-      systemsSignatureRef,
-      blackHoleRef,
-      nebulaRef,
-      anchorResolverRef,
-    ],
-  );
-
-  const contextValue = useMemo(
-    () => ({
-      cameraState,
-      anchorState,
-      refs: {
-        containerRef,
-        systemGroupRef,
-        cameraRef,
-        offsetTargetRef,
-        zoomTargetRef,
-        tiltStateRef,
-        tempSphericalRef,
-        tempOffsetRef,
-        systemPositionRef,
-        scienceAnchorsRef,
-        fleetAnchorsRef,
-        planetAngleRef,
-        planetLookupRef,
-        systemsSignatureRef,
-        blackHoleRef,
-        nebulaRef,
-        anchorResolverRef,
-        zoomTargetDirtyRef,
-        syncSceneContext,
-      },
-      sceneContext,
-      minZoom: data.minZoom,
-      maxZoom: data.maxZoom,
-      baseTilt: BASE_TILT,
-      maxTiltDown: MAX_TILT_DOWN,
-    }),
-    [
-      cameraState,
-      anchorState,
-      containerRef,
-      systemGroupRef,
-      cameraRef,
-      offsetTargetRef,
-      zoomTargetRef,
-      tiltStateRef,
-      tempSphericalRef,
-      tempOffsetRef,
-      systemPositionRef,
-      scienceAnchorsRef,
-      fleetAnchorsRef,
-      planetAngleRef,
-      planetLookupRef,
-      systemsSignatureRef,
-      blackHoleRef,
-      nebulaRef,
-      anchorResolverRef,
-      zoomTargetDirtyRef,
-      sceneContext,
-      data.minZoom,
-      data.maxZoom,
-      syncSceneContext,
-    ],
-  );
+  const contextValue = useGalaxyMapContextValue({
+    data,
+    refs,
+    sceneContext,
+  });
 
   return (
     <GalaxyMapProvider value={contextValue}>
@@ -268,76 +156,3 @@ export const GalaxyMap = ({
   );
 };
 
-type GalaxyMapInnerProps = {
-  data: ReturnType<typeof useGalaxyMapData>;
-  focusSystemId: string | null;
-  focusPlanetId: string | null;
-  focusTrigger: number;
-  onPlanetSelect?: (
-    planetId: string,
-    systemId: string,
-    anchor: { x: number; y: number },
-  ) => void;
-  onShipyardSelect?: (
-    systemId: string,
-    anchor: { x: number; y: number },
-  ) => void;
-  onClearFocus?: () => void;
-  onSelectRef: React.MutableRefObject<
-    ((systemId: string, anchor: { x: number; y: number }) => void) | undefined
-  >;
-  onClearRef: React.MutableRefObject<(() => void) | undefined>;
-};
-
-const GalaxyMapInner = ({
-  data,
-  focusSystemId,
-  focusPlanetId,
-  focusTrigger,
-  onPlanetSelect,
-  onShipyardSelect,
-  onClearFocus,
-  onSelectRef,
-  onClearRef,
-}: GalaxyMapInnerProps) => {
-  const { refs } = useGalaxyMapContext();
-  const { containerRef } = refs;
-
-  useBlackHole();
-
-  useMapInteractions({
-    onSelectRef,
-    onClearRef,
-    onPlanetSelect,
-    onShipyardSelect,
-  });
-
-  useSceneRebuild({
-    systems: data.systems,
-    galaxyShape: data.galaxyShape,
-    galaxySeed: data.galaxySeed,
-    maxSystemRadius: data.maxSystemRadius,
-    orbitBaseSpeed: data.orbitBaseSpeed,
-    colonizedLookup: data.colonizedLookup,
-    recentCombatSystems: data.recentCombatSystems,
-    activeBattles: data.activeBattles,
-    starVisuals: data.starVisuals,
-    scienceShips: data.scienceShips,
-    fleets: data.fleets,
-    empireWar: data.empireWar,
-    systemsSignature: data.systemsSignature,
-    scienceMaterials,
-    scienceLineMaterials,
-    fleetMaterials,
-  });
-
-  useMapFocus({
-    focusSystemId,
-    focusPlanetId,
-    focusTrigger,
-    systems: data.systems,
-    onClearFocus,
-  });
-
-  return <div className="galaxy-map" ref={containerRef} />;
-};

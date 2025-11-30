@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeZoomBounds } from '../../src/components/GalaxyMap/hooks/mapDataUtils';
 import { buildFleetSignature, buildSystemsSignature } from '../../src/components/GalaxyMap/hooks/signatures';
+import type { Fleet, StarSystem } from '../../src/engines/types';
 
 describe('computeZoomBounds', () => {
   it('applies a minimum zoom floor of 10', () => {
@@ -17,9 +18,19 @@ describe('computeZoomBounds', () => {
 
 describe('signatures', () => {
   it('builds a fleet signature with key attributes', () => {
-    const sig = buildFleetSignature([
-      { id: 'F1', systemId: 'S1', targetSystemId: 'S2', anchorPlanetId: 'P1', ticksToArrival: 3, ships: [], name: 'n1', ownerId: 'player', anchorPlanetId: null } as any,
-    ]);
+    const fleet: Fleet = {
+      id: 'F1',
+      name: 'Fleet 1',
+      ownerId: 'player',
+      systemId: 'S1',
+      targetSystemId: 'S2',
+      anchorPlanetId: 'P1',
+      localOffset: null,
+      ticksToArrival: 3,
+      ships: [],
+      lastTargetSystemId: null,
+    };
+    const sig = buildFleetSignature([fleet]);
     expect(sig).toContain('F1:S1:S2');
   });
 
@@ -29,6 +40,7 @@ describe('signatures', () => {
       systems: [
         {
           id: 'S1',
+          name: 'Sys',
           visibility: 'surveyed',
           ownerId: 'player',
           hostilePower: 0,
@@ -37,8 +49,8 @@ describe('signatures', () => {
           position: { x: 0, y: 0 },
           mapPosition: { x: 0, y: 0, z: 0 },
           starClass: 'G',
-        },
-      ] as any,
+        } as StarSystem,
+      ],
       galaxyShape: 'circle',
       galaxySeed: 'seed',
       fleetSignature: fleetSig,

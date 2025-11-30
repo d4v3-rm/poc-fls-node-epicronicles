@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
+import * as THREE from 'three';
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { useGalaxySceneSetup } from './useGalaxySceneSetup';
 
 export interface GalaxySceneContext {

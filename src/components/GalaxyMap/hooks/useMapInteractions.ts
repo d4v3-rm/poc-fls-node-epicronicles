@@ -76,7 +76,7 @@ export const useMapInteractions = ({
         return;
       }
 
-      if ((hit as any).visibility === 'unknown') {
+      if (hit.visibility === 'unknown') {
         onClearRef.current?.();
         return;
       }

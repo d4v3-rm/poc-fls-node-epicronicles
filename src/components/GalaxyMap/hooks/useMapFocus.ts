@@ -113,5 +113,6 @@ export const useMapFocus = ({
     focusOnObject,
     focusOnPosition,
     clampZoom,
+    systemGroupRef,
   ]);
 };

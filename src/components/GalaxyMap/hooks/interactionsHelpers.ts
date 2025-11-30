@@ -1,11 +1,17 @@
 import * as THREE from 'three';
 
 type HitResult =
-  | { systemId: string; planetId?: string; kind?: string; worldPos: THREE.Vector3 }
+  | {
+      systemId: string;
+      planetId?: string;
+      kind?: string;
+      visibility?: string;
+      worldPos: THREE.Vector3;
+    }
   | null;
 
 export const resolveHitObject = (
-  intersects: THREE.Intersection<THREE.Object3D<THREE.Event>>[],
+  intersects: THREE.Intersection[],
 ): HitResult => {
   const hit = intersects.find((intersect) => {
     let obj: THREE.Object3D | null = intersect.object;
@@ -32,9 +38,10 @@ export const resolveHitObject = (
   const systemId = targetNode.userData.systemId as string;
   const planetId = targetNode.userData.planetId as string | undefined;
   const kind = targetNode.userData.kind as string | undefined;
+  const visibility = targetNode.userData.visibility as string | undefined;
   const worldPos = new THREE.Vector3();
   targetNode.getWorldPosition(worldPos);
-  return { systemId, planetId, kind, worldPos };
+  return { systemId, planetId, kind, visibility, worldPos };
 };
 
 export const computeAnchor = (
