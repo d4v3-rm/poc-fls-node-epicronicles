@@ -5,7 +5,7 @@ import { useGalaxyMapRefs } from '../hooks/useGalaxyMapRefs';
 import { useGalaxyScene, type GalaxySceneContext } from '../hooks/useGalaxyScene';
 import { updateFrame } from '../scene/frameUpdate';
 import { createAnchorResolver } from '../scene/anchors';
-import { GalaxyMapInner } from './GalaxyMapInner';
+import { GalaxyMapScene } from './GalaxyMapScene';
 import { useGalaxyMapContextValue } from '../hooks/useGalaxyMapContextValue';
 import './GalaxyMap.scss';
 
@@ -141,7 +141,7 @@ export const GalaxyMap = ({
 
   return (
     <GalaxyMapProvider value={contextValue}>
-      <GalaxyMapInner
+      <GalaxyMapScene
         data={data}
         focusSystemId={focusSystemId ?? null}
         focusPlanetId={focusPlanetId ?? null}
