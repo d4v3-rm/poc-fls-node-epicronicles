@@ -27,50 +27,41 @@ export interface FrameUpdateParams {
   updateAnchors: (group: THREE.Group, entries: AnchorEntry[]) => void;
 }
 
-export const updateFrame = ({
-  ctx,
-  delta,
-  elapsed,
-  minZoom,
-  maxZoom,
-  offsetTargetRef,
-  zoomTargetRef,
-  zoomTargetDirtyRef,
-  tiltStateRef,
-  tempSphericalRef,
-  tempOffsetRef,
-  planetAngleRef,
-  nebulaRef,
-  blackHoleRef,
-  scienceAnchors,
-  fleetAnchors,
-  updateAnchors,
-}: FrameUpdateParams) => {
-  const { zoomFactor, deltaFactor } = updateCameraAndTilt({
-    ctx,
-    delta,
-    minZoom,
-    maxZoom,
-    offsetTargetRef,
-    zoomTargetRef,
-    zoomTargetDirtyRef,
-    tiltStateRef,
-    tempSphericalRef,
-    tempOffsetRef,
-  });
+export const updateFrame = (params: FrameUpdateParams) => {
+  const cameraStep = () =>
+    updateCameraAndTilt({
+      ctx: params.ctx,
+      delta: params.delta,
+      minZoom: params.minZoom,
+      maxZoom: params.maxZoom,
+      offsetTargetRef: params.offsetTargetRef,
+      zoomTargetRef: params.zoomTargetRef,
+      zoomTargetDirtyRef: params.zoomTargetDirtyRef,
+      tiltStateRef: params.tiltStateRef,
+      tempSphericalRef: params.tempSphericalRef,
+      tempOffsetRef: params.tempOffsetRef,
+    });
 
-  updateNebulaOpacity(nebulaRef.current, zoomFactor);
-  updateSystemNodes({
-    systemGroup: ctx.systemGroup,
-    delta,
-    elapsed,
-    zoomFactor,
-    planetAngleRef,
-    camera: ctx.camera,
-    deltaFactor,
-  });
-  updateBlackHoleFrame(blackHoleRef, delta, elapsed);
+  const sceneEffectsStep = (zoomFactor: number, deltaFactor: number) => {
+    updateNebulaOpacity(params.nebulaRef.current, zoomFactor);
+    updateSystemNodes({
+      systemGroup: params.ctx.systemGroup,
+      delta: params.delta,
+      elapsed: params.elapsed,
+      zoomFactor,
+      planetAngleRef: params.planetAngleRef,
+      camera: params.ctx.camera,
+      deltaFactor,
+    });
+    updateBlackHoleFrame(params.blackHoleRef, params.delta, params.elapsed);
+  };
 
-  updateAnchors(ctx.systemGroup, scienceAnchors);
-  updateAnchors(ctx.systemGroup, fleetAnchors);
+  const anchorsStep = () => {
+    params.updateAnchors(params.ctx.systemGroup, params.scienceAnchors);
+    params.updateAnchors(params.ctx.systemGroup, params.fleetAnchors);
+  };
+
+  const { zoomFactor, deltaFactor } = cameraStep();
+  sceneEffectsStep(zoomFactor, deltaFactor);
+  anchorsStep();
 };

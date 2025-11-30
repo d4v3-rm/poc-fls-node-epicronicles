@@ -3,6 +3,7 @@ import type { MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { useGalaxyMapContext } from '../providers/GalaxyMapContext';
 import { useCameraController } from './useCameraController';
+import { computeAnchor, resolveHitObject } from './interactionsHelpers';
 
 interface UseMapInteractionsParams {
   onSelectRef: MutableRefObject<
@@ -69,52 +70,28 @@ export const useMapInteractions = ({
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(systemGroup.children, true);
-      const hit = intersects.find((intersect) => {
-        let obj: THREE.Object3D | null = intersect.object;
-        while (obj && !obj.userData.systemId && !obj.userData.planetId && !obj.userData.kind) {
-          obj = obj.parent;
-        }
-        return Boolean(obj?.userData.systemId);
-      });
+      const hit = resolveHitObject(intersects);
       if (!hit) {
         onClearRef.current?.();
         return;
       }
-      let targetNode: THREE.Object3D | null = hit.object;
-      while (
-        targetNode &&
-        !targetNode.userData.systemId &&
-        !targetNode.userData.planetId &&
-        !targetNode.userData.kind
-      ) {
-        targetNode = targetNode.parent;
-      }
-      if (!targetNode) {
-        return;
-      }
 
-      if (targetNode.userData.visibility === 'unknown') {
+      if ((hit as any).visibility === 'unknown') {
         onClearRef.current?.();
         return;
       }
-      const worldPos = new THREE.Vector3();
-      targetNode.getWorldPosition(worldPos);
-      const systemId = targetNode.userData.systemId as string;
-      const planetId = targetNode.userData.planetId as string | undefined;
-      const kind = targetNode.userData.kind as string | undefined;
+      const { systemId, planetId, kind, worldPos } = hit;
       focusOnPosition(worldPos, { zoom: 60 });
-      const projected = worldPos.clone().project(camera);
-      const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
-      const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
+      const anchor = computeAnchor(worldPos, camera, {
+        width: renderer.domElement.clientWidth,
+        height: renderer.domElement.clientHeight,
+      });
       if (kind === 'shipyard' && onShipyardSelect) {
-        onShipyardSelect(systemId, { x: anchorX, y: anchorY });
+        onShipyardSelect(systemId, anchor);
       } else if (planetId && onPlanetSelect) {
-        onPlanetSelect(planetId, systemId, { x: anchorX, y: anchorY });
+        onPlanetSelect(planetId, systemId, anchor);
       } else {
-        onSelectRef.current?.(systemId, {
-          x: anchorX,
-          y: anchorY,
-        });
+        onSelectRef.current?.(systemId, anchor);
       }
     };
 

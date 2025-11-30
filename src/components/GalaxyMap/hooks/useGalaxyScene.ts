@@ -1,11 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { createScene } from '@three/scene';
+import { useGalaxySceneSetup } from './useGalaxySceneSetup';
 
 export interface GalaxySceneContext {
   scene: THREE.Scene;
@@ -30,71 +25,27 @@ export const useGalaxyScene = ({
   maxZoom,
   onFrame,
 }: UseGalaxySceneOptions): GalaxySceneContext | null => {
-  const contextRef = useRef<GalaxySceneContext | null>(null);
+  const context = useGalaxySceneSetup({ containerRef, minZoom, maxZoom });
   const animationRef = useRef<number | null>(null);
-  const [context, setContext] = useState<GalaxySceneContext | null>(null);
+  const contextRef = useRef<GalaxySceneContext | null>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
+    contextRef.current = context ?? null;
+  }, [context]);
+
+  useEffect(() => {
+    if (!context) {
       return undefined;
     }
-
-    const { scene, camera, renderer, dispose } = createScene(container);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 2));
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.enabled = true;
-    controls.enablePan = true;
-    controls.screenSpacePanning = true;
-    controls.enableRotate = false;
-    controls.minDistance = minZoom;
-    controls.maxDistance = maxZoom;
-    controls.mouseButtons = {
-      LEFT: THREE.MOUSE.PAN,
-      MIDDLE: THREE.MOUSE.DOLLY,
-      RIGHT: THREE.MOUSE.PAN,
-    };
-    controls.minAzimuthAngle = 0;
-    controls.maxAzimuthAngle = 0;
-    controls.minPolarAngle = Math.PI / 2;
-    controls.maxPolarAngle = Math.PI / 2 + Math.PI / 6;
-
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(container.clientWidth, container.clientHeight),
-      0.3,
-      0.5,
-      0.2,
-    );
-    composer.addPass(bloomPass);
-
-    const systemGroup = new THREE.Group();
-    systemGroup.name = 'systemGroup';
-    scene.add(systemGroup);
-
-    const clock = new THREE.Clock();
-
-    const ctx: GalaxySceneContext = {
-      scene,
-      camera,
-      renderer,
-      controls,
-      composer,
-      clock,
-      systemGroup,
-    };
-    contextRef.current = ctx;
-    setContext(ctx);
-
+    const { renderer, camera, composer } = context;
     const handleResize = () => {
+      const container = containerRef.current;
+      if (!container) return;
       renderer.setSize(container.clientWidth, container.clientHeight);
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
-      composer.setSize(container.clientWidth, container.clientHeight);
-      bloomPass.setSize(container.clientWidth, container.clientHeight);
+      composer?.setSize(container.clientWidth, container.clientHeight);
+      // Aggiorna eventuali pass aggiuntivi (gestito nel setup hook)
     };
     window.addEventListener('resize', handleResize);
 
@@ -116,7 +67,6 @@ export const useGalaxyScene = ({
       }
       animationRef.current = requestAnimationFrame(renderLoop);
     };
-
     animationRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
@@ -124,13 +74,8 @@ export const useGalaxyScene = ({
         cancelAnimationFrame(animationRef.current);
       }
       window.removeEventListener('resize', handleResize);
-      controls.dispose();
-      composer?.dispose();
-      dispose();
-      contextRef.current = null;
-      setContext(null);
     };
-  }, [containerRef, minZoom, maxZoom, onFrame]);
+  }, [context, containerRef, onFrame]);
 
-  return context;
+  return context ?? null;
 };

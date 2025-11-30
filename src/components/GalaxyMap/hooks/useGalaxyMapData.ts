@@ -1,11 +1,8 @@
 import { useMemo } from 'react';
 import { useGameStore } from '@store/gameStore';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
-import {
-  buildFleetSignature,
-  buildSystemsSignature,
-  computeZoomBounds,
-} from './mapDataUtils';
+import { computeZoomBounds } from './mapDataUtils';
+import { buildFleetSignature, buildSystemsSignature } from './signatures';
 
 export interface GalaxyMapData {
   systems: StarSystem[];

@@ -43,6 +43,30 @@ const disposeObjectResources = (object: THREE.Object3D) => {
   }
 };
 
+const preserveOrbitAngles = (group: THREE.Group, planetAngleRef: Map<string, number>) => {
+  group.children.forEach((child) => {
+    const orbit = child.getObjectByName('orbits') as THREE.Group | null;
+    if (!orbit) {
+      return;
+    }
+    orbit.children.forEach((entry) => {
+      const planetId = entry.userData?.planetId as string | undefined;
+      if (planetId && typeof entry.userData?.orbitAngle === 'number') {
+        planetAngleRef.set(planetId, entry.userData.orbitAngle);
+      }
+    });
+  });
+};
+
+const disposeGroupResources = (group: THREE.Group) => {
+  group.traverse((child) => {
+    if (child !== group) {
+      disposeObjectResources(child);
+    }
+  });
+  group.clear();
+};
+
 export const useSceneRebuild = ({
   systems,
   galaxyShape,
@@ -92,28 +116,9 @@ export const useSceneRebuild = ({
       nebulaRef.current = null;
     }
 
-    group.children.forEach((child) => {
-      const orbit = child.getObjectByName('orbits') as THREE.Group | null;
-      if (!orbit) {
-        return;
-      }
-      orbit.children.forEach((entry) => {
-        const planetId = entry.userData?.planetId as string | undefined;
-        if (
-          planetId &&
-          typeof entry.userData?.orbitAngle === 'number'
-        ) {
-          planetAngleRef.current.set(planetId, entry.userData.orbitAngle);
-        }
-      });
-    });
+    preserveOrbitAngles(group, planetAngleRef.current);
 
-    group.traverse((child) => {
-      if (child !== group) {
-        disposeObjectResources(child);
-      }
-    });
-    group.clear();
+    disposeGroupResources(group);
     planetLookupRef.current.clear();
 
     const resolverForBuild =
