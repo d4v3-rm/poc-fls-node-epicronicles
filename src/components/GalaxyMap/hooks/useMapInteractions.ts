@@ -34,7 +34,13 @@ export const useMapInteractions = ({
     maxZoom,
     baseTilt,
     maxTiltDown,
-    refs: { systemGroupRef, tiltStateRef, offsetTargetRef, zoomTargetRef },
+    refs: {
+      systemGroupRef,
+      tiltStateRef,
+      offsetTargetRef,
+      zoomTargetRef,
+      zoomTargetDirtyRef,
+    },
   } = useGalaxyMapContext();
 
   useEffect(() => {
@@ -52,6 +58,9 @@ export const useMapInteractions = ({
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
       controls.enableZoom = true;
+      const distance = camera.position.distanceTo(controls.target);
+      zoomTargetRef.current = distance;
+      zoomTargetDirtyRef.current = false;
     };
 
     const handleMouseDown = (event: MouseEvent) => {
@@ -135,6 +144,7 @@ export const useMapInteractions = ({
       const kind = targetNode.userData.kind as string | undefined;
       offsetTargetRef.current.set(-worldPos.x, -worldPos.y, 0);
       zoomTargetRef.current = clamp(60, minZoom, maxZoom);
+      zoomTargetDirtyRef.current = true;
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
@@ -174,6 +184,7 @@ export const useMapInteractions = ({
     tiltStateRef,
     offsetTargetRef,
     zoomTargetRef,
+    zoomTargetDirtyRef,
     systemGroupRef,
     onSelectRef,
     onClearRef,

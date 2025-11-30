@@ -31,6 +31,7 @@ export const useMapFocus = ({
       cameraRef,
       offsetTargetRef,
       zoomTargetRef,
+      zoomTargetDirtyRef,
     },
   } = useGalaxyMapContext();
   const lastFocusSystemRef = useRef<string | null>(null);
@@ -72,6 +73,7 @@ export const useMapFocus = ({
       group.position.copy(offsetTargetRef.current);
     }
     zoomTargetRef.current = clamp(60, minZoom, maxZoom);
+    zoomTargetDirtyRef.current = true;
     if (cameraRef.current) {
       cameraRef.current.position.z = zoomTargetRef.current;
     }
@@ -89,6 +91,7 @@ export const useMapFocus = ({
     systemGroupRef,
     cameraRef,
     zoomTargetRef,
+    zoomTargetDirtyRef,
   ]);
 
   useEffect(() => {
@@ -115,6 +118,7 @@ export const useMapFocus = ({
         offsetTargetRef.current.set(-worldPos.x, -worldPos.y, 0);
       }
       zoomTargetRef.current = clamp(70, minZoom, maxZoom);
+      zoomTargetDirtyRef.current = true;
       if (cameraRef.current) {
         cameraRef.current.position.z = zoomTargetRef.current;
       }
@@ -148,5 +152,6 @@ export const useMapFocus = ({
     systemGroupRef,
     cameraRef,
     zoomTargetRef,
+    zoomTargetDirtyRef,
   ]);
 };

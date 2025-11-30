@@ -11,6 +11,7 @@ export const useGalaxyMapRefs = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const offsetTargetRef = useRef(new THREE.Vector3(0, 0, 0));
   const zoomTargetRef = useRef(170);
+  const zoomTargetDirtyRef = useRef(false);
   const tiltStateRef = useRef<{ current: number; target: number }>({
     current: Math.PI / 2,
     target: Math.PI / 2,
@@ -42,6 +43,7 @@ export const useGalaxyMapRefs = () => {
     cameraRef,
     offsetTargetRef,
     zoomTargetRef,
+    zoomTargetDirtyRef,
     tiltStateRef,
     tempSphericalRef,
     tempOffsetRef,

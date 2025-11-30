@@ -15,6 +15,7 @@ export interface FrameUpdateParams {
   maxZoom: number;
   offsetTargetRef: MutableRefObject<THREE.Vector3>;
   zoomTargetRef: MutableRefObject<number>;
+  zoomTargetDirtyRef: MutableRefObject<boolean>;
   tiltStateRef: MutableRefObject<{ current: number; target: number }>;
   tempSphericalRef: MutableRefObject<THREE.Spherical>;
   tempOffsetRef: MutableRefObject<THREE.Vector3>;
@@ -34,6 +35,7 @@ export const updateFrame = ({
   maxZoom,
   offsetTargetRef,
   zoomTargetRef,
+  zoomTargetDirtyRef,
   tiltStateRef,
   tempSphericalRef,
   tempOffsetRef,
@@ -51,6 +53,7 @@ export const updateFrame = ({
     maxZoom,
     offsetTargetRef,
     zoomTargetRef,
+    zoomTargetDirtyRef,
     tiltStateRef,
     tempSphericalRef,
     tempOffsetRef,
