@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { ScienceShip } from '@domain/types';
+import { createTravelPath } from './anchorUtils';
 
 interface ScienceAnchorParams {
   group: THREE.Group;
@@ -57,27 +58,22 @@ export const buildScienceAnchors = ({
         height: 6,
       });
       if (ship.targetSystemId && ship.targetSystemId !== ship.currentSystemId) {
-        const from = positions.get(ship.currentSystemId);
-        const to = positions.get(ship.targetSystemId);
-        if (from && to) {
-          const a = getVector().set(from.x, from.y, from.z + 0.5);
-          const b = getVector().set(to.x, to.y, to.z + 0.5);
-          const points = [a, b];
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          const lineMaterial =
-            scienceLineMaterials[status] ?? scienceLineMaterials.idle;
-          const line = new THREE.Line(geometry, lineMaterial);
-          scienceTargetGroup.add(line);
-
-          const targetMarker = new THREE.Mesh(
-            targetMarkerGeometry,
-            scienceMaterials[status] ?? scienceMaterials.idle,
-          );
-          targetMarker.position.set(to.x, to.y, to.z + 1.5);
-          scienceTargetGroup.add(targetMarker);
-          releaseVector(a);
-          releaseVector(b);
-        }
+        const lineMaterial =
+          scienceLineMaterials[status] ?? scienceLineMaterials.idle;
+        const targetMaterial =
+          scienceMaterials[status] ?? scienceMaterials.idle;
+        createTravelPath({
+          group: scienceTargetGroup,
+          positions,
+          fromSystemId: ship.currentSystemId,
+          toSystemId: ship.targetSystemId,
+          lineMaterial,
+          targetGeometry: targetMarkerGeometry,
+          targetMaterial,
+          targetHeight: 1.5,
+          getVector,
+          releaseVector,
+        });
       }
     });
     mesh.instanceMatrix.needsUpdate = true;

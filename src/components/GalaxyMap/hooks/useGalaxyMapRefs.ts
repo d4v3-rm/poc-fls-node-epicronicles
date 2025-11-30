@@ -37,6 +37,29 @@ export const useGalaxyMapRefs = () => {
     tiltStateRef.current = { current: Math.PI / 2, target: Math.PI / 2 };
   };
 
+  const cameraState = {
+    systemGroupRef,
+    cameraRef,
+    offsetTargetRef,
+    zoomTargetRef,
+    zoomTargetDirtyRef,
+    tiltStateRef,
+    tempSphericalRef,
+    tempOffsetRef,
+  };
+
+  const anchorState = {
+    systemPositionRef,
+    scienceAnchorsRef,
+    fleetAnchorsRef,
+    planetAngleRef,
+    planetLookupRef,
+    systemsSignatureRef,
+    blackHoleRef,
+    nebulaRef,
+    anchorResolverRef,
+  };
+
   return {
     containerRef,
     systemGroupRef,
@@ -56,6 +79,8 @@ export const useGalaxyMapRefs = () => {
     blackHoleRef,
     nebulaRef,
     anchorResolverRef,
+    cameraState,
+    anchorState,
     syncSceneContext,
   };
 };

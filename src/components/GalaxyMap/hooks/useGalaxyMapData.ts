@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import { useGameStore } from '@store/gameStore';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
+import {
+  buildFleetSignature,
+  buildSystemsSignature,
+  computeZoomBounds,
+} from './mapDataUtils';
 
 export interface GalaxyMapData {
   systems: StarSystem[];
@@ -90,36 +95,24 @@ export const useGalaxyMapData = (): GalaxyMapData => {
     }, 0);
   }, [systems]);
 
-  const minZoom = useMemo(
-    () => Math.max(0, Math.min(10, maxSystemRadius * 0.18)),
-    [maxSystemRadius],
-  );
-  const maxZoom = useMemo(
-    () => Math.max(220, maxSystemRadius * 1.5),
+  const { minZoom, maxZoom } = useMemo(
+    () => computeZoomBounds(maxSystemRadius),
     [maxSystemRadius],
   );
 
   const fleetSignature = useMemo(
-    () =>
-      fleets
-        .map(
-          (fleet) =>
-            `${fleet.id}:${fleet.systemId}:${fleet.targetSystemId ?? ''}:${fleet.anchorPlanetId ?? ''}:${fleet.ticksToArrival ?? 0}`,
-        )
-        .join('|'),
+    () => buildFleetSignature(fleets),
     [fleets],
   );
 
   const systemsSignature = useMemo(
     () =>
-      `${galaxyShape}:${galaxySeed}|` +
-      systems
-        .map(
-          (system) =>
-            `${system.id}:${system.visibility}:${system.ownerId ?? ''}:${system.hostilePower ?? 0}:${system.orbitingPlanets.length}:${system.hasShipyard ? 1 : 0}:${system.shipyardAnchorPlanetId ?? ''}:${system.shipyardBuild ? system.shipyardBuild.ticksRemaining : 0}`,
-        )
-        .join('|') +
-      `|F:${fleetSignature}`,
+      buildSystemsSignature({
+        systems,
+        galaxyShape,
+        galaxySeed,
+        fleetSignature,
+      }),
     [systems, galaxyShape, galaxySeed, fleetSignature],
   );
 

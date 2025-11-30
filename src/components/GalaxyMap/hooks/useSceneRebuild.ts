@@ -45,8 +45,8 @@ export const useSceneRebuild = ({
 }: UseSceneRebuildParams) => {
   const {
     sceneContext,
-    refs: {
-      systemGroupRef,
+    cameraState: { systemGroupRef },
+    anchorState: {
       systemPositionRef,
       planetAngleRef,
       planetLookupRef,

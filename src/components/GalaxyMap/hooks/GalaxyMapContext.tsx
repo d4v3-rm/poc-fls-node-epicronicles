@@ -5,6 +5,8 @@ import type { GalaxySceneContext } from './useGalaxyScene';
 import type { GalaxyMapRefs } from './useGalaxyMapRefs';
 
 export interface GalaxyMapContextValue {
+  cameraState: GalaxyMapRefs['cameraState'];
+  anchorState: GalaxyMapRefs['anchorState'];
   refs: GalaxyMapRefs;
   sceneContext: GalaxySceneContext | null;
   minZoom: number;

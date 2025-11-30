@@ -5,7 +5,7 @@ import { useGalaxyMapContext } from './GalaxyMapContext';
 export const useBlackHole = () => {
   const {
     sceneContext,
-    refs: { blackHoleRef },
+    anchorState: { blackHoleRef },
   } = useGalaxyMapContext();
 
   useEffect(() => {

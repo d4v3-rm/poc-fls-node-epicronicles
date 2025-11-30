@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Fleet } from '@domain/types';
+import { createTravelPath } from './anchorUtils';
 
 interface FleetAnchorParams {
   group: THREE.Group;
@@ -56,28 +57,22 @@ export const buildFleetAnchors = ({
         height: 5,
       });
       if (fleet.targetSystemId && fleet.targetSystemId !== fleet.systemId) {
-        const from = positions.get(fleet.systemId);
-        const to = positions.get(fleet.targetSystemId);
-        if (from && to) {
-          const a = getVector().set(from.x, from.y, from.z + 0.2);
-          const b = getVector().set(to.x, to.y, to.z + 0.2);
-          const points = [a, b];
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          const line = new THREE.Line(
-            geometry,
-            status === 'war' ? fleetMaterials.warLine : fleetMaterials.line,
-          );
-          fleetTargetGroup.add(line);
-
-          const targetMarker = new THREE.Mesh(
-            fleetTargetGeometry,
-            status === 'war' ? fleetMaterials.war : fleetMaterials.idle,
-          );
-          targetMarker.position.set(to.x, to.y, to.z + 1.5);
-          fleetTargetGroup.add(targetMarker);
-          releaseVector(a);
-          releaseVector(b);
-        }
+        const lineMaterial =
+          status === 'war' ? fleetMaterials.warLine : fleetMaterials.line;
+        const targetMaterial =
+          status === 'war' ? fleetMaterials.war : fleetMaterials.idle;
+        createTravelPath({
+          group: fleetTargetGroup,
+          positions,
+          fromSystemId: fleet.systemId,
+          toSystemId: fleet.targetSystemId,
+          lineMaterial,
+          targetGeometry: fleetTargetGeometry,
+          targetMaterial,
+          targetHeight: 1.5,
+          getVector,
+          releaseVector,
+        });
       }
     });
     mesh.instanceMatrix.needsUpdate = true;

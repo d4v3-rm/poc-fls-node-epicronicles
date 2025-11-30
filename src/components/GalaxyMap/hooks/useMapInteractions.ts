@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { useGalaxyMapContext } from './GalaxyMapContext';
-
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(Math.max(value, min), max);
+import { useCameraController } from './useCameraController';
 
 interface UseMapInteractionsParams {
   onSelectRef: MutableRefObject<
@@ -28,20 +26,13 @@ export const useMapInteractions = ({
   onPlanetSelect,
   onShipyardSelect,
 }: UseMapInteractionsParams) => {
+  const { focusOnPosition, toggleTilt, syncZoomToCurrent } = useCameraController();
   const {
     sceneContext,
-    minZoom,
-    maxZoom,
-    baseTilt,
-    maxTiltDown,
-    refs: {
-      systemGroupRef,
-      tiltStateRef,
-      offsetTargetRef,
-      zoomTargetRef,
-      zoomTargetDirtyRef,
-    },
+    cameraState: { systemGroupRef },
   } = useGalaxyMapContext();
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
 
   useEffect(() => {
     const group = systemGroupRef.current ?? sceneContext?.systemGroup ?? null;
@@ -55,23 +46,16 @@ export const useMapInteractions = ({
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
       controls.enableZoom = true;
-      const distance = camera.position.distanceTo(controls.target);
-      zoomTargetRef.current = distance;
-      zoomTargetDirtyRef.current = false;
+      syncZoomToCurrent();
     };
 
-    const handleMouseDown = (event: MouseEvent) => {
+    const handleAuxiliaryTilt = (event: MouseEvent | MouseEvent) => {
       if (event.button === 1) {
         event.preventDefault();
         event.stopPropagation();
-        const isAtMax =
-          Math.abs(tiltStateRef.current.target - maxTiltDown) < 0.01;
-        tiltStateRef.current.target = isAtMax ? baseTilt : maxTiltDown;
+        toggleTilt();
       }
     };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
 
     const handleClick = (event: MouseEvent) => {
       if (event.button !== 0 || !systemGroup.children.length) {
@@ -79,6 +63,8 @@ export const useMapInteractions = ({
       }
 
       const rect = renderer.domElement.getBoundingClientRect();
+      const mouse = mouseRef.current;
+      const raycaster = raycasterRef.current;
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
@@ -116,9 +102,7 @@ export const useMapInteractions = ({
       const systemId = targetNode.userData.systemId as string;
       const planetId = targetNode.userData.planetId as string | undefined;
       const kind = targetNode.userData.kind as string | undefined;
-      offsetTargetRef.current.set(-worldPos.x, -worldPos.y, 0);
-      zoomTargetRef.current = clamp(60, minZoom, maxZoom);
-      zoomTargetDirtyRef.current = true;
+      focusOnPosition(worldPos, { zoom: 60 });
       const projected = worldPos.clone().project(camera);
       const anchorX = ((projected.x + 1) / 2) * renderer.domElement.clientWidth;
       const anchorY = ((-projected.y + 1) / 2) * renderer.domElement.clientHeight;
@@ -136,29 +120,26 @@ export const useMapInteractions = ({
 
     renderer.domElement.addEventListener('contextmenu', handleContextMenu);
     renderer.domElement.addEventListener('wheel', handleWheel, { passive: false });
-    renderer.domElement.addEventListener('mousedown', handleMouseDown);
+    renderer.domElement.addEventListener('mousedown', handleAuxiliaryTilt);
+    renderer.domElement.addEventListener('auxclick', handleAuxiliaryTilt);
     renderer.domElement.addEventListener('click', handleClick);
 
     return () => {
       renderer.domElement.removeEventListener('wheel', handleWheel);
-      renderer.domElement.removeEventListener('mousedown', handleMouseDown);
+      renderer.domElement.removeEventListener('mousedown', handleAuxiliaryTilt);
+      renderer.domElement.removeEventListener('auxclick', handleAuxiliaryTilt);
       renderer.domElement.removeEventListener('click', handleClick);
       renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [
     sceneContext,
-    minZoom,
-    maxZoom,
-    baseTilt,
-    maxTiltDown,
-    tiltStateRef,
-    offsetTargetRef,
-    zoomTargetRef,
-    zoomTargetDirtyRef,
     systemGroupRef,
     onSelectRef,
     onClearRef,
     onPlanetSelect,
     onShipyardSelect,
+    focusOnPosition,
+    toggleTilt,
+    syncZoomToCurrent,
   ]);
 };
