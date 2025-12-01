@@ -1,5 +1,4 @@
 import { AdditiveBlending, ShaderMaterial, Vector3, Color } from 'three';
-import type { Texture } from 'three';
 import type { StarClass, StarSystem } from '@domain/types';
 import { materialCache } from '@three/materials';
 import { getStarCoreTexture } from './starTextures';

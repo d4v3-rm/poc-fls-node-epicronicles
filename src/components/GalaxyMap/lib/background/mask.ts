@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { StarSystem } from '@domain/types';
-import { toMapPosition } from '../utils';
+import { toMapPosition } from '../common/spaceMath';
 
 export const createGalaxyMaskTexture = (
   systems: StarSystem[],

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { createBlackHole } from '../lib/blackHole';
+import { createBlackHole } from '../lib/objects';
 import { useGalaxyMapContext } from '../providers/GalaxyMapContext';
 
 export const useBlackHole = () => {

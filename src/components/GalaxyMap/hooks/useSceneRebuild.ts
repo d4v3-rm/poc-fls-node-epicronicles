@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
 import { disposeNebula } from '../lib/background';
-import { rebuildSceneGraph } from '../lib/rebuildScene';
+import { rebuildSceneGraph } from '../lib/rebuild';
 import { createAnchorResolver } from '../lib/anchors';
 import { useGalaxyMapContext } from '../providers/GalaxyMapContext';
 

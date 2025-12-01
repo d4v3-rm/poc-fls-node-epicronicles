@@ -1,4 +1,4 @@
-import { makeSeededRandom } from '../utils';
+import { makeSeededRandom } from '../common/spaceMath';
 
 export type NebulaShape = 'circle' | 'spiral';
 

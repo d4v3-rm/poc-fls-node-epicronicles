@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import type { MutableRefObject } from 'react';
-import type { GalaxySceneContext } from '../hooks/useGalaxyScene';
-import type { AnchorEntry } from './anchors';
-import { updateCameraAndTilt } from './frame/camera';
-import { updateNebulaOpacity } from './frame/nebula';
-import { updateSystemNodes } from './frame/systemNodes';
-import { updateBlackHoleFrame } from './frame/blackHole';
+import type { GalaxySceneContext } from '../../hooks/useGalaxyScene';
+import type { AnchorEntry } from '../anchors';
+import { updateCameraAndTilt } from './camera';
+import { updateNebulaOpacity } from './nebula';
+import { updateSystemNodes } from './systemNodes';
+import { updateBlackHoleFrame } from './blackHole';
 
 export interface FrameUpdateParams {
   ctx: GalaxySceneContext;

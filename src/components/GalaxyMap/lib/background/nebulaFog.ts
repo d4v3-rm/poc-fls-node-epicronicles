@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { NebulaShape } from './nebulaSampling';
-import { makeSeededRandom } from '../utils';
+import { makeSeededRandom } from '../common/spaceMath';
 
 export const buildNebulaFog = ({
   radius,

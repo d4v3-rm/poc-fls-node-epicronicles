@@ -3,7 +3,7 @@ import { useGalaxyMapData } from '../hooks/useGalaxyMapData';
 import { GalaxyMapProvider } from '../providers/GalaxyMapContext';
 import { useGalaxyMapRefs } from '../hooks/useGalaxyMapRefs';
 import { useGalaxyScene, type GalaxySceneContext } from '../hooks/useGalaxyScene';
-import { updateFrame } from '../lib/frameUpdate';
+import { updateFrame } from '../lib/frame';
 import { createAnchorResolver } from '../lib/anchors';
 import { GalaxyMapScene } from './GalaxyMapScene';
 import { useGalaxyMapContextValue } from '../hooks/useGalaxyMapContextValue';

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
-import { buildNebula } from './rebuild/nebula';
-import { buildSystems } from './rebuild/systems';
-import { buildScienceAnchors } from './rebuild/scienceAnchors';
-import { buildFleetAnchors } from './rebuild/fleetAnchors';
+import { buildNebula } from './nebula';
+import { buildSystems } from './systems';
+import { buildScienceAnchors } from './scienceAnchors';
+import { buildFleetAnchors } from './fleetAnchors';
 
 export interface RebuildSceneParams {
   group: THREE.Group;
