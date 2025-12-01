@@ -1,12 +1,39 @@
 import { useMemo, useState } from 'react';
 import { useAppSelector, useGameStore } from '@store/gameStore';
-import {
-  selectEvents,
-  selectSessionTick,
-} from '@store/selectors';
+import { selectEvents, selectSessionTick } from '@store/selectors';
 import type { GameEvent, EventOption } from '@domain/types';
 import { canAffordOption, formatOptionCost } from '@domain/events/events';
 import './EventLogPanels.scss';
+import './EventPanel.scss';
+
+const kindLabel = (kind: GameEvent['kind']) =>
+  kind === 'crisis' ? 'Crisi' : kind === 'anomaly' ? 'Anomalia' : 'Evento';
+
+const OptionCard = ({
+  option,
+  affordable,
+  onSelect,
+}: {
+  option: EventOption;
+  affordable: boolean;
+  onSelect: (option: EventOption) => void;
+}) => {
+  const costLabel = formatOptionCost(option);
+  return (
+    <button
+      key={option.id}
+      className={`event-option ${affordable ? '' : 'is-disabled'}`}
+      onClick={() => onSelect(option)}
+      disabled={!affordable}
+    >
+      <div className="event-option__header">
+        <span className="event-option__title">{option.label}</span>
+        {costLabel ? <span className="event-option__cost">{costLabel}</span> : null}
+      </div>
+      <p className="event-option__desc">{option.description}</p>
+    </button>
+  );
+};
 
 export const EventPanel = () => {
   const events = useAppSelector(selectEvents);
@@ -27,84 +54,74 @@ export const EventPanel = () => {
       return;
     }
     const result = resolveActiveEvent(option.id);
-    if (result.success) {
-      setMessage('Evento risolto.');
-    } else {
-      setMessage('Azione non disponibile.');
-    }
+    setMessage(result.success ? 'Evento risolto.' : 'Azione non disponibile.');
   };
 
   return (
-    <div className="panel event-panel">
-      <header className="panel-section__header">
-        <h4>Eventi & Anomalie</h4>
-        {message ? <span className="panel-message">{message}</span> : null}
+    <div className="event-panel-modern">
+      <header className="event-panel-modern__header">
+        <div>
+          <p className="eyebrow">Eventi & Anomalie</p>
+          <h3>Gestione emergenze</h3>
+        </div>
+        <div className="event-panel-modern__meta">
+          <span className="pill">Tick {tick}</span>
+          {message ? <span className="pill pill--success">{message}</span> : null}
+        </div>
       </header>
-      {activeEvent ? (
-        <div className="event-card">
-          <div className="event-card__header">
-            <div>
-              <div className="event-card__title">{activeEvent.title}</div>
-              <p className="text-muted">{activeEvent.description}</p>
-            </div>
-            <span className="event-card__badge">
-              {activeEvent.kind === 'crisis'
-                ? 'Crisi'
-                : activeEvent.kind === 'anomaly'
-                  ? 'Anomalia'
-                  : 'Evento'}
-            </span>
-          </div>
-          <div className="event-card__options">
-            {activeEvent.options.map((option) => {
-              const affordable = canAffordOption(session, option);
-              const costLabel = formatOptionCost(option);
-              return (
-                <button
-                  key={option.id}
-                  className="panel__action"
-                  onClick={() => handleResolve(option)}
-                  disabled={!affordable}
-                >
-                  <div className="event-card__option-title">{option.label}</div>
-                  <p className="text-muted">{option.description}</p>
-                  {costLabel ? (
-                    <small className="text-muted">Costo: {costLabel}</small>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        <p className="text-muted">Nessun evento attivo.</p>
-      )}
 
-      <div className="panel-section">
-        <strong>Registro</strong>
-        <div className="event-log">
-          {log.length === 0 ? (
-            <p className="text-muted">Ancora nessun evento risolto.</p>
-          ) : (
-            <ul>
-              {log
-                .slice()
-                .reverse()
-                .map((entry) => (
-                  <li key={entry.id}>
-                    <div className="event-log__row">
-                      <span className="event-log__title">{entry.title}</span>
-                      <span className="text-muted">Tick {entry.tick}</span>
-                    </div>
-                    <div className="text-muted">{entry.result}</div>
-                  </li>
+      <div className="event-panel-modern__body">
+        <section className="event-panel-modern__active">
+          {activeEvent ? (
+            <div className="event-hero">
+              <div className="event-hero__badge">{kindLabel(activeEvent.kind)}</div>
+              <div className="event-hero__title">{activeEvent.title}</div>
+              <p className="event-hero__desc">{activeEvent.description}</p>
+              <div className="event-hero__options">
+                {activeEvent.options.map((option) => (
+                  <OptionCard
+                    key={option.id}
+                    option={option}
+                    affordable={canAffordOption(session, option)}
+                    onSelect={handleResolve}
+                  />
                 ))}
-            </ul>
+              </div>
+            </div>
+          ) : (
+            <div className="event-empty">
+              <p className="eyebrow">Nessun evento attivo</p>
+              <p className="text-muted">Attendi l’arrivo di nuove anomalie o notifiche.</p>
+            </div>
           )}
-        </div>
-      </div>
-      <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-        Tick: {tick}
+        </section>
+
+        <section className="event-panel-modern__log">
+          <header className="event-log__header">
+            <p className="eyebrow">Registro</p>
+            <h4>Eventi risolti</h4>
+          </header>
+          <div className="event-timeline">
+            {log.length === 0 ? (
+              <p className="text-muted">Ancora nessun evento risolto.</p>
+            ) : (
+              <ul>
+                {log
+                  .slice()
+                  .reverse()
+                  .map((entry) => (
+                    <li key={entry.id} className="event-timeline__item">
+                      <div className="event-timeline__meta">
+                        <span className="pill">Tick {entry.tick}</span>
+                        <span className="event-timeline__title">{entry.title}</span>
+                      </div>
+                      <p className="event-timeline__result">{entry.result}</p>
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
