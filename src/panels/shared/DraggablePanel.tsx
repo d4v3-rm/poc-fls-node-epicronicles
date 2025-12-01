@@ -15,7 +15,8 @@ interface DraggablePanelProps {
 
 const MIN_WIDTH = 240;
 const MIN_HEIGHT = 160;
-let zIndexSeed = 10;
+// Start very high to overlay any HUD stacking contexts
+let zIndexSeed = 10000;
 
 export const DraggablePanel = ({
   title,

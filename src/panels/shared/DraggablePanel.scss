@@ -2,7 +2,7 @@
 @use "../../styles/_shared" as *;
 
 .draggable-panel {
-  position: absolute;
+  position: fixed;
   min-width: 240px;
   min-height: 160px;
   @include holo-surface(0.85rem, 10px);
@@ -11,6 +11,7 @@
   flex-direction: column;
   overflow: hidden;
   @include grid-overlay(26px, 0.035, false);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.5);
 }
 
 .draggable-panel__header {
