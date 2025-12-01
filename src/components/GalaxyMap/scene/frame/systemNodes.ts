@@ -45,6 +45,19 @@ export const updateSystemNodes = ({
       }
     }
 
+    const baseRing = node.children.find(
+      (child) => child.userData?.kind === 'ownerBase',
+    );
+    const orbitRing = node.children.find(
+      (child) => child.userData?.kind === 'ownerOrbit',
+    );
+    if (baseRing) {
+      baseRing.visible = !showOrbits;
+    }
+    if (orbitRing) {
+      orbitRing.visible = showOrbits && orbitRing.userData?.orbitVisible;
+    }
+
     const orbitGroup = node.getObjectByName('orbits') as THREE.Group;
     if (orbitGroup) {
       orbitGroup.visible = showOrbits;

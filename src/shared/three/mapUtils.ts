@@ -18,7 +18,11 @@ import {
   Vector3,
   Color,
   DataTexture,
+  BufferGeometry,
   RGBFormat,
+  Line,
+  LineDashedMaterial,
+  Float32BufferAttribute,
 } from 'three';
 import type { Texture } from 'three';
 import type { OrbitingPlanet, StarClass, StarSystem } from '@domain/types';
@@ -32,7 +36,14 @@ import {
 
 const orbitPalette = ['#72fcd5', '#f9d976', '#f58ef6', '#8ec5ff', '#c7ddff'];
 const planetGeometryCache = new Map<number, SphereGeometry>();
-const ringGeometryCache = new Map<string, RingGeometry>();
+const orbitLineGeometryCache = new Map<string, BufferGeometry>();
+const orbitLineMaterial = new LineDashedMaterial({
+  color: '#4c5c7a',
+  dashSize: 1.4,
+  gapSize: 0.9,
+  transparent: true,
+  opacity: 0.45,
+});
 const starGlowTexture = (() => {
   let cache: CanvasTexture | null = null;
   return () => {
@@ -515,33 +526,43 @@ export const createOrbitingPlanets = (
     group.add(planetMesh);
 
     const ringKey = `${planet.orbitRadius.toFixed(2)}`;
-    const ringGeometry =
-      ringGeometryCache.get(ringKey) ??
+    const lineGeometry =
+      orbitLineGeometryCache.get(ringKey) ??
       (() => {
-        const geom = new RingGeometry(
-          planet.orbitRadius - 0.1,
-          planet.orbitRadius + 0.1,
-          32,
-        );
-        ringGeometryCache.set(ringKey, geom);
+        const segments = 96;
+        const positions: number[] = [];
+        let dist = 0;
+        const distances: number[] = [];
+        for (let i = 0; i <= segments; i += 1) {
+          const t = (i / segments) * Math.PI * 2;
+          const x = Math.cos(t) * planet.orbitRadius;
+          const y = Math.sin(t) * planet.orbitRadius;
+          positions.push(x, y, 0);
+          if (i > 0) {
+            const px = positions[(i - 1) * 3];
+            const py = positions[(i - 1) * 3 + 1];
+            const dx = x - px;
+            const dy = y - py;
+            dist += Math.sqrt(dx * dx + dy * dy);
+          }
+          distances.push(dist);
+        }
+        const geom = new BufferGeometry();
+        geom.setAttribute('position', new Float32BufferAttribute(positions, 3));
+        geom.setAttribute('lineDistance', new Float32BufferAttribute(distances, 1));
+        geom.computeBoundingSphere();
+        orbitLineGeometryCache.set(ringKey, geom);
         return geom;
       })();
-    const orbitRing = new Mesh(
-      ringGeometry,
-      new MeshBasicMaterial({
-        color: '#345',
-        side: DoubleSide,
-        transparent: true,
-        opacity: 0.3,
-      }),
-    );
-    orbitRing.raycast = () => null;
-    orbitRing.userData = {
-      ...orbitRing.userData,
+    const orbitLine = new Line(lineGeometry, orbitLineMaterial);
+    orbitLine.computeLineDistances();
+    orbitLine.raycast = () => null;
+    orbitLine.userData = {
+      ...orbitLine.userData,
       kind: 'ring',
       systemId,
     };
-    group.add(orbitRing);
+    group.add(orbitLine);
   });
 
   return group;
@@ -733,22 +754,42 @@ export const createSystemNode = (
     node.add(label);
   }
 
+  const maxOrbitRadius = isSurveyed
+    ? system.orbitingPlanets.reduce(
+        (max, p) => Math.max(max, p.orbitRadius + (p.size ?? 0)),
+        0,
+      )
+    : 0;
+  const orbitVisible = isSurveyed && maxOrbitRadius > 0;
+
   if (system.ownerId) {
     const ownerKey = system.ownerId === 'player' ? 'player' : 'ai';
-    const ring = new Mesh(
-      new RingGeometry(
-        baseRadius + 3.6,
-        baseRadius + 5.2,
-        32,
-      ),
+    const baseInner = baseRadius + 3.6;
+    const baseOuter = baseInner + 2.5; // spessore marcato quando i pianeti non sono visibili
+    const orbitInner = orbitVisible ? maxOrbitRadius + 1 : baseInner;
+    const orbitOuter = orbitVisible ? maxOrbitRadius + 1.6 : baseOuter;
+
+    const baseRing = new Mesh(
+      new RingGeometry(baseInner, baseOuter, 32),
       ownerMaterials[ownerKey] ?? ownerMaterials.player,
     );
-    ring.material.side = DoubleSide;
-    ring.userData.systemId = system.id;
-    ring.userData.kind = 'owner';
-    // Non estende l'area di click del sistema
-    ring.raycast = () => null;
-    node.add(ring);
+    baseRing.material.side = DoubleSide;
+    baseRing.userData.systemId = system.id;
+    baseRing.userData.kind = 'ownerBase';
+    baseRing.raycast = () => null;
+    node.add(baseRing);
+
+    const orbitRing = new Mesh(
+      new RingGeometry(orbitInner, orbitOuter, 32),
+      ownerMaterials[ownerKey] ?? ownerMaterials.player,
+    );
+    orbitRing.material.side = DoubleSide;
+    orbitRing.userData.systemId = system.id;
+    orbitRing.userData.kind = 'ownerOrbit';
+    orbitRing.userData.orbitVisible = orbitVisible;
+    orbitRing.visible = false;
+    orbitRing.raycast = () => null;
+    node.add(orbitRing);
   }
 
   if (system.hostilePower && system.hostilePower > 0) {
