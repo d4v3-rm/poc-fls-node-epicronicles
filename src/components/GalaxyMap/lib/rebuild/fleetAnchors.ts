@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { Fleet, ShipDesign } from '@domain/types';
+import type { AnchorEntry } from '../anchors';
 import { createTravelPath } from './anchorUtils';
 
 interface FleetAnchorParams {
@@ -67,14 +68,18 @@ const constructorModel = (() => {
                 normalMap: normal,
                 roughnessMap: roughness,
                 metalnessMap: metallic,
-                metalness: 0.8,
-                roughness: 0.6,
+                metalness: 0.6,
+                roughness: 0.5,
+                color: new THREE.Color('#9acfff'),
+                emissive: new THREE.Color('#18354d'),
+                emissiveIntensity: 0.25,
+                side: THREE.DoubleSide,
               });
               mesh.castShadow = false;
               mesh.receiveShadow = false;
             }
           });
-          obj.scale.set(0.015, 0.015, 0.015);
+          obj.scale.set(0.12, 0.12, 0.12);
           obj.rotation.x = Math.PI / 2;
           resolve(obj);
         },
@@ -188,24 +193,40 @@ export const buildFleetAnchors = ({
         status === 'war' ? fleetMaterials.warLine : fleetMaterials.line;
       const targetMaterial =
         status === 'war' ? fleetMaterials.war : fleetMaterials.idle;
+      const placeholderMaterial =
+        status === 'war' ? fleetMaterials.war : fleetMaterials.idle;
       constructorModel()
         .then((model) => {
           constructionFleets.forEach((fleet) => {
-            const ship = cloneConstructionShip(model);
-            ship.name = 'constructionShip';
-            const pos = positions.get(fleet.systemId);
-            if (pos) {
-              ship.position.copy(pos);
-            }
-            fleetAnchorsRef.push({
-              object: ship,
+            const placeholder = new THREE.Mesh(fleetGeometry, placeholderMaterial);
+            placeholder.scale.set(2.2, 2.2, 2.2);
+            placeholder.name = 'constructionPlaceholder';
+            const entry: AnchorEntry = {
+              object: placeholder,
               systemId: fleet.systemId,
               planetId:
                 fleet.targetSystemId && fleet.targetSystemId !== fleet.systemId
                   ? null
                   : fleet.anchorPlanetId ?? null,
-              height: 5,
+              height: 6,
+            };
+            fleetAnchorsRef.push(entry);
+            group.add(placeholder);
+
+            const ship = cloneConstructionShip(model);
+            ship.name = 'constructionShip';
+            ship.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh) {
+                (child as THREE.Mesh).castShadow = false;
+                (child as THREE.Mesh).receiveShadow = false;
+              }
             });
+            ship.position.copy(placeholder.position);
+            ship.position.z += entry.height;
+            group.add(ship);
+            group.remove(placeholder);
+            entry.object = ship;
+
             if (fleet.targetSystemId && fleet.targetSystemId !== fleet.systemId) {
               createTravelPath({
                 group: fleetTargetGroup,
@@ -220,7 +241,6 @@ export const buildFleetAnchors = ({
                 releaseVector,
               });
             }
-            group.add(ship);
           });
         })
         .catch(() => {
