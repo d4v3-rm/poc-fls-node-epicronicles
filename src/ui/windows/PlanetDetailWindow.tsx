@@ -1,7 +1,7 @@
 import { RESOURCE_TYPES, computePlanetProduction } from '@domain/economy/economy';
 import type { PopulationJobId, Planet } from '@domain/types';
 import type { EconomyConfig } from '@domain/economy/economy';
-import { formatCost, formatSigned } from './shared/formatters';
+import { formatCost, formatSigned } from './common/formatters';
 import './PlanetDetailWindow.scss';
 import { resourceLabels } from '@domain/shared/resourceMetadata';
 

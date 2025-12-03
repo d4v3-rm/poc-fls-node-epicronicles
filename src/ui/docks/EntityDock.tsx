@@ -7,20 +7,20 @@ import {
   selectScienceShips,
 } from '@store/selectors';
 import { Crosshair, Info } from 'lucide-react';
-import './SideEntityDock.scss';
+import './EntityDock.scss';
 
 type DockSelection =
   | { kind: 'colony'; planetId: string; systemId: string }
   | { kind: 'fleet'; fleetId: string; systemId: string; source?: 'fleet' | 'colonization' | 'construction' }
   | { kind: 'science'; shipId: string; systemId: string };
 
-interface SideEntityDockProps {
+interface EntityDockProps {
   variant: 'colonies' | 'fleets' | 'science' | 'colonization' | 'construction';
   onSelect: (selection: DockSelection) => void;
   onCenter: (systemId: string, planetId?: string | null) => void;
 }
 
-export const SideEntityDock = ({ variant, onSelect, onCenter }: SideEntityDockProps) => {
+export const EntityDock = ({ variant, onSelect, onCenter }: EntityDockProps) => {
   useAppSelector(selectPlanets);
   useAppSelector(selectColonizedSystems);
   const systems = useAppSelector(selectSystems);

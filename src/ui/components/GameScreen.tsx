@@ -3,16 +3,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OrbitingPlanet, Planet, StarSystem } from '@domain/types';
 import { canAffordCost } from '@domain/economy/economy';
 import { useAppSelector, useGameStore } from '@store/gameStore';
-import { DraggablePanel } from '@windows/shared/DraggablePanel';
+import { DraggablePanel } from '@windows/common/DraggablePanel';
 import { useGameLoop } from '@shared/useGameLoop';
-import { DebugConsole } from './DebugConsole';
-import { HudBottomBar } from './HudBottomBar';
-import { HudTopBar } from './HudTopBar';
+import { DebugConsoleWindow } from '@windows/DebugConsoleWindow';
+import { BottomBar } from '@hud/BottomBar';
+import { TopBar } from '@hud/TopBar';
 import { MapLayer } from './MapLayer';
 import { MapPanels } from './MapPanels';
 import { useWarEvents } from '@hooks/useWarEvents';
 import { MissionsWindow } from '@windows/MissionsWindow';
-import { SideDock } from './SideDock';
+import { MainDock } from '@docks/MainDock';
 import { DiplomacyWindow } from '@windows/DiplomacyWindow';
 import { EconomyWindow } from '@windows/EconomyWindow';
 import { EventWindow } from '@windows/EventWindow';
@@ -22,7 +22,7 @@ import { ColonizationWindow } from '@windows/ColonizationWindow';
 import { BattlesWindow } from '@windows/BattlesWindow';
 import { PlanetDetailWindow } from '@windows/PlanetDetailWindow';
 import { LogWindow } from '@windows/LogWindow';
-import { SideEntityDock } from './SideEntityDock';
+import { EntityDock } from '@docks/EntityDock';
 import { FleetDetailWindow } from '@windows/FleetDetailWindow';
 import { ConstructionDetailWindow } from '@windows/ConstructionDetailWindow';
 import { ScienceShipDetailWindow } from '@windows/ScienceShipDetailWindow';
@@ -192,7 +192,7 @@ export const GameScreen = () => {
   if (!session) {
     return (
       <div className="game-layout">
-        <HudTopBar />
+        <TopBar />
         <div className="floating-panels">
           <p className="text-muted">Nessuna sessione attiva.</p>
           <button className="panel__action" onClick={returnToMenu}>
@@ -240,8 +240,8 @@ export const GameScreen = () => {
 
   return (
     <div className="game-layout">
-      <HudTopBar />
-      <SideDock
+      <TopBar />
+      <MainDock
         onOpenMissions={() => setMissionsOpen(true)}
         onOpenEvents={() => setEventsOpen(true)}
         onOpenDiplomacy={() => setDiplomacyOpen(true)}
@@ -254,7 +254,7 @@ export const GameScreen = () => {
         showColonization={colonizationUnlocked}
       />
       <div className="side-entity-stack">
-        <SideEntityDock
+        <EntityDock
           variant="colonies"
           onCenter={(systemId, planetId) => {
             setFocusSystemId(systemId);
@@ -272,7 +272,7 @@ export const GameScreen = () => {
             }
           }}
         />
-        <SideEntityDock
+        <EntityDock
           variant="fleets"
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
@@ -287,7 +287,7 @@ export const GameScreen = () => {
             setFocusPlanetId(null);
           }}
         />
-        <SideEntityDock
+        <EntityDock
           variant="colonization"
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
@@ -302,7 +302,7 @@ export const GameScreen = () => {
             setFocusPlanetId(null);
           }}
         />
-        <SideEntityDock
+        <EntityDock
           variant="construction"
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
@@ -317,7 +317,7 @@ export const GameScreen = () => {
             setFocusPlanetId(null);
           }}
         />
-        <SideEntityDock
+        <EntityDock
           variant="science"
           onCenter={(systemId) => {
             setFocusSystemId(systemId);
@@ -388,7 +388,7 @@ export const GameScreen = () => {
           setFocusTrigger((value) => value + 1);
         }}
       />
-      <HudBottomBar
+      <BottomBar
         onToggleDebug={() => setDebugModalOpen(true)}
         debugOpen={debugModalOpen}
         onShowWars={() => {
@@ -697,7 +697,7 @@ export const GameScreen = () => {
             initialHeight={large.height}
             onClose={() => setDebugModalOpen(false)}
           >
-            <DebugConsole />
+            <DebugConsoleWindow />
           </DraggablePanel>
         ) : null}
       </div>

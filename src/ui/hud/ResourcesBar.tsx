@@ -1,10 +1,10 @@
-import type { ReactElement } from "react";
-import { useGameStore } from "@store/gameStore";
-import { RESOURCE_TYPES } from "@domain/economy/economy";
-import { resourceLabels } from "@domain/shared/resourceMetadata";
-import { Zap, Pickaxe, Sandwich, FlaskConical, Star } from "lucide-react";
+import type { ReactElement } from 'react';
+import { useGameStore } from '@store/gameStore';
+import { RESOURCE_TYPES } from '@domain/economy/economy';
+import { resourceLabels } from '@domain/shared/resourceMetadata';
+import { Zap, Pickaxe, Sandwich, FlaskConical, Star } from 'lucide-react';
 
-import "./ResourceBar.scss";
+import './ResourcesBar.scss';
 
 const resourceIcons: Record<string, ReactElement> = {
   energy: <Zap size={16} />,
@@ -22,7 +22,7 @@ const resourceDesc: Record<string, string> = {
   influence: "Influenza accumulata e produzione per tick.",
 };
 
-export const ResourceBar = () => {
+export const ResourcesBar = () => {
   const resources = useGameStore((state) => state.session?.economy.resources);
 
   if (!resources) {

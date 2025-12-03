@@ -9,9 +9,9 @@ import {
   Swords,
   ScrollText,
 } from 'lucide-react';
-import './SideDock.scss';
+import './MainDock.scss';
 
-interface SideDockProps {
+interface MainDockProps {
   onOpenMissions: () => void;
   onOpenEvents: () => void;
   onOpenDiplomacy: () => void;
@@ -24,7 +24,7 @@ interface SideDockProps {
   showColonization?: boolean;
 }
 
-export const SideDock = ({
+export const MainDock = ({
   onOpenMissions,
   onOpenEvents,
   onOpenDiplomacy,
@@ -35,7 +35,7 @@ export const SideDock = ({
   onOpenBattles,
   onOpenLog,
   showColonization = true,
-}: SideDockProps) => (
+}: MainDockProps) => (
   <aside className="side-dock">
     <div className="side-dock__items">
       <button

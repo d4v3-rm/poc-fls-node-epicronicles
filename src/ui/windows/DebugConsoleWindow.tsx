@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { ReactElement } from 'react';
 import { useGameStore } from '@store/gameStore';
 
-import './DebugConsole.scss';
+import './DebugConsoleWindow.scss';
 
-export const DebugConsole = () => {
+export const DebugConsoleWindow = () => {
   const session = useGameStore((state) => state.session);
   const rawData = session ?? null;
   const [expanded, setExpanded] = useState<Record<string, boolean>>({

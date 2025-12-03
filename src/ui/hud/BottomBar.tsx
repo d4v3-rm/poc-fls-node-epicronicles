@@ -12,22 +12,22 @@ import {
   Bug,
   LogOut,
 } from 'lucide-react';
-import './HudBottomBar.scss';
+import './BottomBar.scss';
 import { gameConfig } from '@config';
 
-interface HudBottomBarProps {
+interface BottomBarProps {
   onToggleDebug: () => void;
   debugOpen: boolean;
   onShowWars?: () => void;
   warUnread?: number;
 }
 
-export const HudBottomBar = ({
+export const BottomBar = ({
   onToggleDebug,
   debugOpen,
   onShowWars,
   warUnread = 0,
-}: HudBottomBarProps) => {
+}: BottomBarProps) => {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const session = useGameStore((state) => state.session);
   const returnToMenu = useGameStore((state) => state.returnToMenu);

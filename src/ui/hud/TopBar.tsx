@@ -1,11 +1,11 @@
 import { Pause, Play, Gauge, Clock3, Activity, PauseCircle } from 'lucide-react';
-import './HudTopBar.scss';
-import { ResourceBar } from './ResourceBar';
+import './TopBar.scss';
+import { ResourcesBar } from '@hud/ResourcesBar';
 import { useGameStore } from '@store/gameStore';
 
 const speedOptions = [0.5, 1, 2, 4];
 
-export const HudTopBar = () => {
+export const TopBar = () => {
   const session = useGameStore((state) => state.session);
   const setSimulationRunning = useGameStore(
     (state) => state.setSimulationRunning,
@@ -23,7 +23,7 @@ export const HudTopBar = () => {
   return (
     <div className="hud-top-bar">
       <div className="hud-top-bar__left">
-        <ResourceBar />
+        <ResourcesBar />
       </div>
       <div className="hud-top-bar__right">
         <div className="hud-top-bar__meta">

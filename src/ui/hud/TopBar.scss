@@ -1,6 +1,6 @@
-@use '../styles/_tokens';
-@use '../styles/_shared' as *;
-@use './ResourceBar';
+@use '../../styles/_tokens';
+@use '../../styles/_shared' as *;
+@use './ResourcesBar';
 
 .hud-top-bar {
   position: absolute;

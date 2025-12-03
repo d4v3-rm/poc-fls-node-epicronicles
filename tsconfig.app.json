@@ -13,15 +13,17 @@
       "@store": ["src/store/index"],
       "@store/*": ["src/store/*"],
       "@domain/*": ["src/engines/*"],
-      "@components/*": ["src/components/*"],
-      "@windows/*": ["src/components/windows/*"],
-      "@panels/*": ["src/components/windows/*"],
+      "@components/*": ["src/ui/components/*"],
+      "@windows/*": ["src/ui/windows/*"],
+      "@panels/*": ["src/ui/panels/*"],
+      "@hud/*": ["src/ui/hud/*"],
+      "@docks/*": ["src/ui/docks/*"],
       "@hooks/*": ["src/hooks/*"],
       "@shared/*": ["src/shared/*"],
       "@config/*": ["src/config/*"],
       "@assets/*": ["src/assets/*"],
       "@three/*": ["src/shared/three/*"],
-      "@pages/*": ["src/pages/*"]
+      "@pages/*": ["src/ui/pages/*"]
     },
 
     /* Bundler mode */

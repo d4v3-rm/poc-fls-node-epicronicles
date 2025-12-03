@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAppSelector, useGameStore } from "@store/gameStore";
 import type { ColonizationStatus, ColonizationTask } from "@domain/types";
-import { formatCost } from "./shared/formatters";
+import { formatCost } from './common/formatters';
 import {
   selectColonizationTasks,
   selectColonizedSystems,

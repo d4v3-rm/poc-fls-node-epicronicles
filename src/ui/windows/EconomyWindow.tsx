@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useAppSelector } from "@store/gameStore";
 import { resourceLabels } from "@domain/shared/resourceMetadata";
 import type { ResourceType } from "@domain/types";
-import { formatSigned } from "./shared/formatters";
+import { formatSigned } from './common/formatters';
 import { selectNetResources, selectPlanets, selectResources } from "@store/selectors";
 import "./EconomyWindow.scss";
 import "./EconomyCards.scss";
