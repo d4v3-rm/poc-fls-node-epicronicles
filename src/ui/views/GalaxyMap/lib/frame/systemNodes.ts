@@ -24,11 +24,11 @@ export const updateSystemNodes = ({
   const showOrbits = camera.position.z < 105;
   const showLabels = camera.position.z < 240 && zoomFactor < 0.9;
   const baseLabelScale = showLabels
-    ? THREE.MathUtils.clamp(120 / camera.position.z, 0.45, 2.4)
+    ? THREE.MathUtils.clamp(120 / camera.position.z, 0.45, 1.4)
     : 1;
   const starLabelScale = baseLabelScale;
   const planetLabelScale = showLabels
-    ? THREE.MathUtils.clamp(baseLabelScale * 0.75, 0.35, 1.8)
+    ? THREE.MathUtils.clamp(baseLabelScale * 0.75, 0.35, 1.0)
     : 1;
   const ringOpacity = 0.2 + zoomFactor * 0.5;
 

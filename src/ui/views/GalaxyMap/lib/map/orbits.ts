@@ -50,6 +50,7 @@ const createLabelSprite = (text: string) => {
   const material = new SpriteMaterial({
     map: texture,
     transparent: true,
+    depthTest: false,
     depthWrite: false,
   });
 
@@ -58,6 +59,8 @@ const createLabelSprite = (text: string) => {
   sprite.userData.baseHeight = canvas.height / 30;
   sprite.scale.set(sprite.userData.baseWidth, sprite.userData.baseHeight, 1);
   sprite.position.set(0, 8, 0);
+  // Keep labels above planets and other meshes
+  sprite.renderOrder = 20;
   sprite.raycast = () => null;
   sprite.name = 'label';
   return sprite;
