@@ -24,6 +24,7 @@ import { PlanetDetail } from '@panels/PlanetDetail';
 import { LogPanel } from '@panels/LogPanel';
 import { SideEntityDock } from './SideEntityDock';
 import { FleetDetailPanel } from '@panels/fleet/FleetDetailPanel';
+import { ConstructionDetailPanel } from '@panels/fleet/ConstructionDetailPanel';
 import { ScienceShipDetailPanel } from '@panels/fleet/ScienceShipDetailPanel';
 import { selectScienceShips, selectResearch } from '@store/selectors';
 import {
@@ -226,6 +227,8 @@ export const GameScreen = () => {
     dockSelection?.kind === 'fleet'
       ? session.fleets.find((fleet) => fleet.id === dockSelection.fleetId) ?? null
       : null;
+  const isConstructionSelection =
+    dockSelection?.kind === 'fleet' && dockSelection.source === 'construction';
   const selectedScienceShip =
     dockSelection?.kind === 'science'
       ? session.scienceShips.find((ship) => ship.id === dockSelection.shipId) ?? null
@@ -584,41 +587,78 @@ export const GameScreen = () => {
           </DraggablePanel>
         ) : null}
         {dockSelection && dockSelection.kind === 'fleet' ? (
-          <div className="dock-detail-modal">
-            {selectedFleet ? (
-              <FleetDetailPanel
-                fleet={selectedFleet}
-                fleets={session.fleets}
-                systems={systems}
-                scienceShips={scienceShips}
-                designs={shipDesigns}
-                completedTechs={completedTechs}
-                onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
-                onAnchorChange={(fleetId, planetId) =>
-                  setFleetPosition(fleetId, planetId)
-                }
-                onCenter={(systemId) => {
-                  setFocusSystemId(systemId);
-                  setFocusPlanetId(null);
-                  setSelectedSystemId(null);
-                  setSelectedPlanetId(null);
-                  setFocusTrigger((value) => value + 1);
-                }}
-                onStop={(fleetId) => stopFleet(fleetId)}
-                onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
-                onSplit={(fleetId) => splitFleet(fleetId)}
-                showConstructionActions={dockSelection?.source === 'construction'}
-                onBuildShipyard={(systemId, anchorPlanetId) => {
-                  return buildShipyard(systemId, anchorPlanetId);
-                }}
-                onClose={() => setDockSelection(null)}
-              />
-            ) : (
-              <div className="dock-detail__content">
-                <p className="text-muted">Flotta non trovata.</p>
-              </div>
-            )}
-          </div>
+          isConstructionSelection ? (
+            <DraggablePanel
+              title="Nave costruttrice"
+              initialX={large.initialX}
+              initialY={large.initialY}
+              initialWidth={large.width}
+              initialHeight={large.height}
+              onClose={() => setDockSelection(null)}
+            >
+              {selectedFleet ? (
+                <ConstructionDetailPanel
+                  fleet={selectedFleet}
+                  systems={systems}
+                  designs={shipDesigns}
+                  completedTechs={completedTechs}
+                  onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
+                  onAnchorChange={(fleetId, planetId) => setFleetPosition(fleetId, planetId)}
+                  onBuildShipyard={(systemId, anchorPlanetId) =>
+                    buildShipyard(systemId, anchorPlanetId)
+                  }
+                  onCenter={(systemId) => {
+                    setFocusSystemId(systemId);
+                    setFocusPlanetId(null);
+                    setSelectedSystemId(null);
+                    setSelectedPlanetId(null);
+                    setFocusTrigger((value) => value + 1);
+                  }}
+                  onStop={(fleetId) => stopFleet(fleetId)}
+                />
+              ) : (
+                <div className="dock-detail__content">
+                  <p className="text-muted">Flotta non trovata.</p>
+                </div>
+              )}
+            </DraggablePanel>
+          ) : (
+            <div className="dock-detail-modal">
+              {selectedFleet ? (
+                <FleetDetailPanel
+                  fleet={selectedFleet}
+                  fleets={session.fleets}
+                  systems={systems}
+                  scienceShips={scienceShips}
+                  designs={shipDesigns}
+                  completedTechs={completedTechs}
+                  onOrder={(fleetId, systemId) => orderFleetMove(fleetId, systemId)}
+                  onAnchorChange={(fleetId, planetId) =>
+                    setFleetPosition(fleetId, planetId)
+                  }
+                  onCenter={(systemId) => {
+                    setFocusSystemId(systemId);
+                    setFocusPlanetId(null);
+                    setSelectedSystemId(null);
+                    setSelectedPlanetId(null);
+                    setFocusTrigger((value) => value + 1);
+                  }}
+                  onStop={(fleetId) => stopFleet(fleetId)}
+                  onMerge={(sourceId, targetId) => mergeFleets(sourceId, targetId)}
+                  onSplit={(fleetId) => splitFleet(fleetId)}
+                  showConstructionActions={dockSelection?.source === 'construction'}
+                  onBuildShipyard={(systemId, anchorPlanetId) => {
+                    return buildShipyard(systemId, anchorPlanetId);
+                  }}
+                  onClose={() => setDockSelection(null)}
+                />
+              ) : (
+                <div className="dock-detail__content">
+                  <p className="text-muted">Flotta non trovata.</p>
+                </div>
+              )}
+            </div>
+          )
         ) : null}
         {dockSelection && dockSelection.kind === 'science' ? (
           <div className="dock-detail-modal">
