@@ -9,6 +9,12 @@ interface MainMenuLayoutProps {
   children: ReactNode;
 }
 
+const asset = (path: string) => {
+  const base = (import.meta.env.BASE_URL ?? '/').replace(/\/+$/, '');
+  const rel = path.replace(/^\/+/, '');
+  return `${base}/${rel}`;
+};
+
 export const MainMenuLayout = ({
   background,
   showBrand = true,
@@ -24,7 +30,7 @@ export const MainMenuLayout = ({
     {showBrand ? (
       <header className="main-menu__brand">
         <img
-          src="/pages/main-menu/logo-full.png"
+          src={asset('/pages/main-menu/logo-full.png')}
           alt="FLS Node Epicronicles logo"
           className="main-menu__logo"
         />
