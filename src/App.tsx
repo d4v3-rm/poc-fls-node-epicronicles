@@ -5,6 +5,9 @@ import { MainMenu } from '@pages/MainMenu';
 import { useGameStore } from '@store/gameStore';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
+const HOME_PATH = '/';
+const GAME_PATH = '/game';
+
 export const App = () => {
   const view = useGameStore((state) => state.view);
   const autoStart = useGameStore((state) => state.config.debug.autoStart);
@@ -20,9 +23,9 @@ export const App = () => {
 
   useEffect(() => {
     if (view === 'simulation') {
-      navigate('/game', { replace: true });
+      navigate(GAME_PATH, { replace: true });
     } else {
-      navigate('/', { replace: true });
+      navigate(HOME_PATH, { replace: true });
     }
   }, [view, navigate]);
 
@@ -31,14 +34,14 @@ export const App = () => {
   return (
     <div className={`app-shell ${isMenu ? 'app-shell--menu' : ''}`}>
       <Routes>
-        <Route path="/" element={<MainMenu />} />
+        <Route path={HOME_PATH} element={<MainMenu />} />
         <Route
-          path="/game"
-          element={view === 'simulation' ? <GameScreen /> : <Navigate to="/" replace />}
+          path={GAME_PATH}
+          element={view === 'simulation' ? <GameScreen /> : <Navigate to={HOME_PATH} replace />}
         />
         <Route
           path="*"
-          element={<Navigate to={isMenu ? '/' : '/game'} replace />}
+          element={<Navigate to={isMenu ? HOME_PATH : GAME_PATH} replace />}
         />
       </Routes>
     </div>
