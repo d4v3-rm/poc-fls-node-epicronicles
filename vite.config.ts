@@ -4,13 +4,14 @@ import path from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, 'env'), '')
+  const envDir = path.resolve(__dirname, 'env')
+  const env = loadEnv(mode, envDir, '')
   const base = env.VITE_BASE_PATH || '/'
 
   return {
-    // Base path configurable via env; defaults to root in dev, repo path in prod.
+    // Base path configurable via env files in /env (development/production).
     base,
-    envDir: path.resolve(__dirname, 'env'),
+    envDir,
     plugins: [react()],
     resolve: {
       alias: {
