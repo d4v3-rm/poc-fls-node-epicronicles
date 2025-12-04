@@ -1,9 +1,14 @@
-import { useEffect } from 'react';
-import './styles/main.scss';
-import { GameScreen } from '@components/GameScreen';
-import { MainMenu } from '@pages/MainMenu';
-import { useGameStore } from '@store/gameStore';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { GameScreen } from "@components/GameScreen";
+import { MainMenu } from "@pages/MainMenu";
+import { useGameStore } from "@store/gameStore";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import "./styles/main.scss";
+
+const ROUTES = {
+  mainMenu: "/",
+  game: "/game",
+} as const;
 
 export const App = () => {
   const view = useGameStore((state) => state.view);
@@ -19,26 +24,32 @@ export const App = () => {
   }, [autoStart, hasSession, startNewSession]);
 
   useEffect(() => {
-    if (view === 'simulation') {
-      navigate('/game', { replace: true });
+    if (view === "simulation") {
+      navigate(ROUTES.game, { replace: true });
     } else {
-      navigate('/', { replace: true });
+      navigate(ROUTES.mainMenu, { replace: true });
     }
   }, [view, navigate]);
 
-  const isMenu = view === 'mainMenu';
+  const isMenu = view === "mainMenu";
 
   return (
-    <div className={`app-shell ${isMenu ? 'app-shell--menu' : ''}`}>
+    <div className={`app-shell ${isMenu ? "app-shell--menu" : ""}`}>
       <Routes>
-        <Route path="/" element={<MainMenu />} />
+        <Route path={ROUTES.mainMenu} element={<MainMenu />} />
         <Route
-          path="/game"
-          element={view === 'simulation' ? <GameScreen /> : <Navigate to="/" replace />}
+          path={ROUTES.game}
+          element={
+            view === "simulation" ? (
+              <GameScreen />
+            ) : (
+              <Navigate to={ROUTES.mainMenu} replace />
+            )
+          }
         />
         <Route
           path="*"
-          element={<Navigate to={isMenu ? '/' : '/game'} replace />}
+          element={<Navigate to={isMenu ? "/" : "/game"} replace />}
         />
       </Routes>
     </div>
