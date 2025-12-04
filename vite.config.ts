@@ -4,14 +4,13 @@ import path from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  const base =
-    env.BASE_PATH ||
-    (env.CI === 'true' ? `/${env.VITE_REPO_NAME || 'fls-node-epicronicles'}/` : '/')
+  const env = loadEnv(mode, path.resolve(__dirname, 'env'), '')
+  const base = env.VITE_BASE_PATH || '/'
 
   return {
-    // Base path configurable via env; defaults to repo name on CI (Pages) and root locally.
+    // Base path configurable via env; defaults to root in dev, repo path in prod.
     base,
+    envDir: path.resolve(__dirname, 'env'),
     plugins: [react()],
     resolve: {
       alias: {
