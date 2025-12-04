@@ -4,8 +4,8 @@ import path from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Explicit base for GitHub Pages project site; override with BASE_PATH if needed.
-  base: process.env.BASE_PATH || '/fls-node-epicronicles/',
+  // Base path: use repo prefix on CI (GitHub Pages), keep root locally unless overridden.
+  base: process.env.BASE_PATH || (process.env.CI ? '/fls-node-epicronicles/' : '/'),
   plugins: [react()],
   resolve: {
     alias: {
