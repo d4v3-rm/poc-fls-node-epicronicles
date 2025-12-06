@@ -68,7 +68,7 @@ const preserveStarRotations = (group: THREE.Group) => {
     }
     const starGroup = child.getObjectByName('starVisual') as THREE.Group | null;
     if (starGroup) {
-      map.set(systemId, starGroup.rotation.z);
+      map.set(systemId, starGroup.rotation.y);
     }
   });
   return map;

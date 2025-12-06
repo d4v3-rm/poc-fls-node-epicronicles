@@ -32,7 +32,7 @@ export const updateStarVisuals = (
   }
   if (starVisualGroup) {
     const spin = 0.15 * timeSpeed;
-    starVisualGroup.rotation.z += delta * spin;
+    starVisualGroup.rotation.y += delta * spin;
   }
   if (starGlow) {
     const t = elapsed + pulseSeed * 0.1;

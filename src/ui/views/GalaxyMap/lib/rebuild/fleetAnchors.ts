@@ -80,7 +80,7 @@ const constructorModel = (() => {
             }
           });
           obj.scale.set(1.8, 1.8, 1.8);
-          obj.rotation.x = Math.PI / 2;
+          obj.rotation.x = 0;
           resolve(obj);
         },
         undefined,
@@ -222,7 +222,7 @@ export const buildFleetAnchors = ({
               }
             });
             ship.position.copy(placeholder.position);
-            ship.position.z += entry.height;
+            ship.position.y += entry.height;
             group.add(ship);
             group.remove(placeholder);
             entry.object = ship;

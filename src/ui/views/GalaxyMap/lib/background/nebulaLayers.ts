@@ -18,6 +18,7 @@ export const createNebulaLayer = ({
 }): THREE.Group => {
   const group = new THREE.Group();
   group.name = 'nebula';
+  group.rotation.x = -Math.PI / 2;
   const maskTexture = mask ?? createFallbackMask();
   group.userData.maskTexture = maskTexture;
   group.userData.maskOwned = Boolean(mask);

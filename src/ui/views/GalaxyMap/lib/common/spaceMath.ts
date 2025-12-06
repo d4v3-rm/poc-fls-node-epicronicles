@@ -14,8 +14,8 @@ export const makeSeededRandom = (seed: string) => {
 
 export const toMapPosition = (system: StarSystem) => ({
   x: system.mapPosition?.x ?? system.position.x,
-  y: system.mapPosition?.y ?? system.position.y,
-  z: system.mapPosition?.z ?? 0,
+  y: 0,
+  z: system.mapPosition?.y ?? system.position.y ?? 0,
 });
 
 export const clamp = (value: number, min: number, max: number) =>

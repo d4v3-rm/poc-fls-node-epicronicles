@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { createAnchorResolver, type AnchorEntry } from '../lib/anchors';
+import { BASE_TILT } from '../lib/config';
 import type { GalaxySceneContext } from './useGalaxyScene';
 
 export type GalaxyMapRefs = ReturnType<typeof useGalaxyMapRefs>;
@@ -13,8 +14,8 @@ export const useGalaxyMapRefs = () => {
   const zoomTargetRef = useRef(170);
   const zoomTargetDirtyRef = useRef(false);
   const tiltStateRef = useRef<{ current: number; target: number }>({
-    current: Math.PI / 2,
-    target: Math.PI / 2,
+    current: BASE_TILT,
+    target: BASE_TILT,
   });
   const tempSphericalRef = useRef(new THREE.Spherical());
   const tempOffsetRef = useRef(new THREE.Vector3());

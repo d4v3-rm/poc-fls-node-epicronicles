@@ -113,8 +113,8 @@ const createOrbitingPlanets = (
     };
     planetMesh.position.set(
       Math.cos(initialAngle) * planet.orbitRadius,
-      Math.sin(initialAngle) * planet.orbitRadius,
       0,
+      Math.sin(initialAngle) * planet.orbitRadius,
     );
     planetLookup.set(planet.id, planetMesh);
 
@@ -123,7 +123,7 @@ const createOrbitingPlanets = (
     const label = createLabelSprite(displayName);
     if (label) {
       label.name = 'planetLabel';
-      label.position.set(0, planet.size + 2.5, 0.2);
+      label.position.set(0, planet.size + 2.5, 0);
       label.raycast = () => null;
       planetMesh.add(label);
     }
@@ -136,15 +136,15 @@ const createOrbitingPlanets = (
           transparent: true,
           opacity: 0.08,
           depthWrite: false,
-          side: DoubleSide,
-        }),
-      );
-      ring.raycast = () => null;
-      ring.rotation.set(0, 0, 0);
-      ring.userData = {
-        planetId: planet.id,
-        systemId,
-      };
+        side: DoubleSide,
+      }),
+    );
+    ring.raycast = () => null;
+    ring.rotation.set(-Math.PI / 2, 0, 0);
+    ring.userData = {
+      planetId: planet.id,
+      systemId,
+    };
       ring.raycast = () => null;
       planetMesh.add(ring);
 
@@ -180,20 +180,21 @@ const createOrbitingPlanets = (
         const geom = new BufferGeometry();
         geom.setAttribute('position', new Float32BufferAttribute(positions, 3));
         geom.setAttribute('lineDistance', new Float32BufferAttribute(distances, 1));
-        geom.computeBoundingSphere();
-        orbitLineGeometryCache.set(ringKey, geom);
-        return geom;
-      })();
-    const orbitLine = new Line(lineGeometry, orbitLineMaterial);
-    orbitLine.computeLineDistances();
-    orbitLine.raycast = () => null;
-    orbitLine.userData = {
-      ...orbitLine.userData,
-      kind: 'ring',
-      systemId,
-    };
-    group.add(orbitLine);
-  });
+    geom.computeBoundingSphere();
+    orbitLineGeometryCache.set(ringKey, geom);
+    return geom;
+  })();
+  const orbitLine = new Line(lineGeometry, orbitLineMaterial);
+  orbitLine.computeLineDistances();
+  orbitLine.raycast = () => null;
+  orbitLine.userData = {
+    ...orbitLine.userData,
+    kind: 'ring',
+    systemId,
+  };
+  orbitLine.rotation.x = -Math.PI / 2;
+  group.add(orbitLine);
+});
 
   return group;
 };

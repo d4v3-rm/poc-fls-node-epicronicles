@@ -48,7 +48,7 @@ export const useCameraController = () => {
         const currentTarget = sceneContext?.controls?.target ?? targetVector;
         const offset = camera.position.clone().sub(currentTarget);
         if (offset.lengthSq() === 0) {
-          offset.set(0, 0, targetZoom);
+          offset.set(0, targetZoom, 0);
         } else {
           offset.setLength(targetZoom);
         }
@@ -86,10 +86,18 @@ export const useCameraController = () => {
       zoomTargetRef.current = next;
       zoomTargetDirtyRef.current = !immediate;
       if (immediate && cameraRef.current) {
-        cameraRef.current.position.z = next;
+        const camera = cameraRef.current;
+        const target = sceneContext?.controls?.target ?? new THREE.Vector3();
+        const offset = camera.position.clone().sub(target);
+        if (offset.lengthSq() === 0) {
+          offset.set(0, next, 0);
+        } else {
+          offset.setLength(next);
+        }
+        camera.position.copy(offset.add(target));
       }
     },
-    [clampZoom, zoomTargetRef, zoomTargetDirtyRef, cameraRef],
+    [clampZoom, zoomTargetRef, zoomTargetDirtyRef, cameraRef, sceneContext],
   );
 
   const syncZoomToCurrent = useCallback(() => {

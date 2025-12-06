@@ -42,12 +42,12 @@ export const createAnchorResolver = (
         const world = getVector();
         planetObj.getWorldPosition(world);
         group.worldToLocal(world);
-        world.z += entry.height;
+        world.y += entry.height;
         return world;
       }
     }
     const pos = getVector().copy(systemPos);
-    pos.z += entry.height;
+    pos.y += entry.height;
     return pos;
   };
 

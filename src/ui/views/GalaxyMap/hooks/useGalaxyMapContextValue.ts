@@ -3,6 +3,7 @@ import type { GalaxySceneContext } from './useGalaxyScene';
 import type { useGalaxyMapData } from './useGalaxyMapData';
 import type { GalaxyMapContextValue } from '../providers/GalaxyMapContext';
 import type { GalaxyMapRefs } from './useGalaxyMapRefs';
+import { BASE_TILT, MAX_TILT_DOWN } from '../lib/config';
 
 type UseGalaxyMapContextValueParams = {
   data: ReturnType<typeof useGalaxyMapData>;
@@ -25,8 +26,8 @@ export const useGalaxyMapContextValue = ({
       sceneContext,
       minZoom: data.minZoom,
       maxZoom: data.maxZoom,
-      baseTilt: Math.PI / 2,
-      maxTiltDown: Math.PI / 2 + Math.PI / 6,
+      baseTilt: BASE_TILT,
+      maxTiltDown: MAX_TILT_DOWN,
     }),
     [anchorState, cameraState, refs, sceneContext, data.minZoom, data.maxZoom],
   );

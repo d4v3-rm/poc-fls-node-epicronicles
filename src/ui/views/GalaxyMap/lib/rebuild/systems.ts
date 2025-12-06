@@ -46,7 +46,7 @@ export const buildSystems = ({
     if (preservedSpin !== undefined) {
       const starGroup = node.getObjectByName('starVisual') as THREE.Group | null;
       if (starGroup) {
-        starGroup.rotation.z = preservedSpin;
+        starGroup.rotation.y = preservedSpin;
       }
     }
     group.add(node);

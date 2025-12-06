@@ -30,15 +30,15 @@ export const createTravelPath = ({
   if (!from || !to) {
     return;
   }
-  const a = getVector().set(from.x, from.y, from.z + 0.2);
-  const b = getVector().set(to.x, to.y, to.z + 0.2);
+  const a = getVector().set(from.x, from.y + 0.2, from.z);
+  const b = getVector().set(to.x, to.y + 0.2, to.z);
   const points = [a, b];
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const line = new THREE.Line(geometry, lineMaterial);
   group.add(line);
 
   const targetMarker = new THREE.Mesh(targetGeometry, targetMaterial);
-  targetMarker.position.set(to.x, to.y, to.z + targetHeight);
+  targetMarker.position.set(to.x, to.y + targetHeight, to.z);
   group.add(targetMarker);
 
   releaseVector(a);

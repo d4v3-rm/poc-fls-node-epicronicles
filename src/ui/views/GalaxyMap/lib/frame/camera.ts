@@ -10,6 +10,8 @@ export interface CameraUpdateParams {
   delta: number;
   minZoom: number;
   maxZoom: number;
+  minTilt: number;
+  maxTilt: number;
   offsetTargetRef: MutableRefObject<THREE.Vector3>;
   zoomTargetRef: MutableRefObject<number>;
   zoomTargetDirtyRef: MutableRefObject<boolean>;
@@ -23,6 +25,8 @@ export const updateCameraAndTilt = ({
   delta,
   minZoom,
   maxZoom,
+  minTilt,
+  maxTilt,
   offsetTargetRef,
   zoomTargetRef,
   zoomTargetDirtyRef,
@@ -39,8 +43,8 @@ export const updateCameraAndTilt = ({
   if (controls) {
     controls.minDistance = minZoom;
     controls.maxDistance = maxZoom;
-    controls.minPolarAngle = Math.PI / 2;
-    controls.maxPolarAngle = Math.PI / 2 + Math.PI / 6;
+    controls.minPolarAngle = minTilt;
+    controls.maxPolarAngle = maxTilt;
   }
 
   const tilt = tiltStateRef.current;
@@ -48,11 +52,13 @@ export const updateCameraAndTilt = ({
   if (Math.abs(deltaTilt) > 0.0005) {
     tilt.current += deltaTilt * 0.18;
   }
-  const appliedTilt = clamp(tilt.current, Math.PI / 2, Math.PI / 2 + Math.PI / 6);
+  const appliedTilt = clamp(tilt.current, minTilt, maxTilt);
   const tempOffset = tempOffsetRef.current;
   const tempSpherical = tempSphericalRef.current;
   tempOffset.copy(camera.position).sub(target);
   tempSpherical.setFromVector3(tempOffset);
+  // Force orbit around Y so the camera stays on the XZ map plane
+  tempSpherical.theta = 0;
   tempSpherical.phi = appliedTilt;
   const currentRadius = tempSpherical.radius;
   if (zoomTargetDirtyRef.current) {
@@ -73,11 +79,8 @@ export const updateCameraAndTilt = ({
   camera.lookAt(target);
   controls?.update();
 
-  const zoomFactor = THREE.MathUtils.clamp(
-    (camera.position.z - minZoom) / Math.max(1, maxZoom - minZoom),
-    0,
-    1,
-  );
+  const radius = camera.position.distanceTo(target);
+  const zoomFactor = THREE.MathUtils.clamp((radius - minZoom) / Math.max(1, maxZoom - minZoom), 0, 1);
 
   return { zoomFactor, deltaFactor: delta > 0 ? Math.min(4, delta * 60) : 1 };
 };

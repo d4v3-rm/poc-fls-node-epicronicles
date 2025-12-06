@@ -66,7 +66,8 @@ export const useMapFocus = ({
     }
     const pos = {
       x: target.mapPosition?.x ?? target.position.x,
-      y: target.mapPosition?.y ?? target.position.y,
+      y: 0,
+      z: target.mapPosition?.y ?? target.position.y ?? 0,
     };
     focusOnPosition(pos, { zoom: 60, immediate: true });
     lastFocusSystemRef.current = focusSystemId;
@@ -101,7 +102,8 @@ export const useMapFocus = ({
     if (system) {
       const pos = {
         x: system.mapPosition?.x ?? system.position.x,
-        y: system.mapPosition?.y ?? system.position.y,
+        y: 0,
+        z: system.mapPosition?.y ?? system.position.y ?? 0,
       };
       focusOnPosition(pos, { zoom: 60, immediate: true });
     }

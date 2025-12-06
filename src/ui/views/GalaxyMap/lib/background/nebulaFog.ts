@@ -99,8 +99,8 @@ export const buildNebulaFog = ({
   );
   fog.name = 'nebulaFog';
   fog.userData.baseOpacity = 0.12;
-  fog.position.set(0, 0, -6);
-  fog.rotation.z = shape === 'spiral' ? fogSeed() * 0.6 : 0;
+  fog.position.set(0, 0, 6);
+  fog.rotation.y = shape === 'spiral' ? fogSeed() * 0.6 : 0;
   fog.renderOrder = -20;
   return fog;
 };

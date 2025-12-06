@@ -3,6 +3,7 @@ import * as THREE from 'three';
 export const createBlackHole = () => {
   const group = new THREE.Group();
   group.name = 'blackHole';
+  group.rotation.x = -Math.PI / 2;
 
   const shaderMaterials: THREE.ShaderMaterial[] = [];
 

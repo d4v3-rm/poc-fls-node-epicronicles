@@ -21,10 +21,10 @@ export const updateSystemNodes = ({
   camera,
   deltaFactor,
 }: SystemNodesParams) => {
-  const showOrbits = camera.position.z < 105;
-  const showLabels = camera.position.z < 240 && zoomFactor < 0.9;
+  const showOrbits = camera.position.y < 105;
+  const showLabels = camera.position.y < 240 && zoomFactor < 0.9;
   const baseLabelScale = showLabels
-    ? THREE.MathUtils.clamp(120 / camera.position.z, 0.45, 1.4)
+    ? THREE.MathUtils.clamp(120 / Math.max(1, camera.position.y), 0.45, 1.4)
     : 1;
   const starLabelScale = baseLabelScale;
   const planetLabelScale = showLabels
@@ -68,13 +68,13 @@ export const updateSystemNodes = ({
             (orbitData?.kind === 'planet' || orbitData?.kind === 'colonized') &&
             typeof orbitData.orbitRadius === 'number'
           ) {
-            const orbitSpeed = orbitData.orbitSpeed ?? 0;
-            const nextAngle =
-              (orbitData.orbitAngle ?? 0) + orbitSpeed * deltaFactor;
-            orbitData.orbitAngle = nextAngle;
-            const targetX = Math.cos(nextAngle) * orbitData.orbitRadius;
-            const targetY = Math.sin(nextAngle) * orbitData.orbitRadius;
-            child.position.set(targetX, targetY, 0);
+          const orbitSpeed = orbitData.orbitSpeed ?? 0;
+          const nextAngle =
+            (orbitData.orbitAngle ?? 0) + orbitSpeed * deltaFactor;
+          orbitData.orbitAngle = nextAngle;
+          const targetX = Math.cos(nextAngle) * orbitData.orbitRadius;
+          const targetZ = Math.sin(nextAngle) * orbitData.orbitRadius;
+          child.position.set(targetX, 0, targetZ);
 
             if (orbitData.kind === 'planet') {
               planetAngleRef.current.set(

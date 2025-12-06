@@ -13,6 +13,8 @@ export interface FrameUpdateParams {
   elapsed: number;
   minZoom: number;
   maxZoom: number;
+  baseTilt: number;
+  maxTiltDown: number;
   offsetTargetRef: MutableRefObject<THREE.Vector3>;
   zoomTargetRef: MutableRefObject<number>;
   zoomTargetDirtyRef: MutableRefObject<boolean>;
@@ -34,6 +36,8 @@ export const updateFrame = (params: FrameUpdateParams) => {
       delta: params.delta,
       minZoom: params.minZoom,
       maxZoom: params.maxZoom,
+      minTilt: params.baseTilt,
+      maxTilt: params.maxTiltDown,
       offsetTargetRef: params.offsetTargetRef,
       zoomTargetRef: params.zoomTargetRef,
       zoomTargetDirtyRef: params.zoomTargetDirtyRef,

@@ -36,6 +36,7 @@ const addOwnerRings = ({
   baseRing.userData.systemId = systemId;
   baseRing.userData.kind = 'ownerBase';
   baseRing.raycast = () => null;
+  baseRing.rotation.x = -Math.PI / 2;
   node.add(baseRing);
   const orbitRing = new Mesh(new RingGeometry(orbitInner, orbitOuter, 32), ownerMaterials[ownerKey] ?? ownerMaterials.player);
   orbitRing.material.side = DoubleSide;
@@ -44,6 +45,7 @@ const addOwnerRings = ({
   orbitRing.userData.orbitVisible = orbitVisible;
   orbitRing.visible = false;
   orbitRing.raycast = () => null;
+  orbitRing.rotation.x = -Math.PI / 2;
   node.add(orbitRing);
 };
 const addHostileIndicator = (node: Group, system: StarSystem, baseRadius: number) => {
@@ -53,6 +55,7 @@ const addHostileIndicator = (node: Group, system: StarSystem, baseRadius: number
   ring.userData.systemId = system.id;
   ring.userData.kind = 'hostile';
   ring.raycast = () => null;
+  ring.rotation.x = -Math.PI / 2;
   node.add(ring);
 };
 const addCombatIndicator = (
@@ -67,6 +70,7 @@ const addCombatIndicator = (
   ring.userData.systemId = systemId;
   ring.userData.kind = 'combat';
   ring.raycast = () => null;
+  ring.rotation.x = -Math.PI / 2;
   node.add(ring);
 };
 const addBattleIndicator = (
@@ -77,12 +81,13 @@ const addBattleIndicator = (
 ) => {
   if (!activeBattles.has(systemId)) return;
   const cross = new Mesh(new PlaneGeometry((baseRadius + 3) * 1.6, (baseRadius + 3) * 1.6), battleIconMaterial);
-  cross.position.z = 0.5;
+  cross.position.y = 0.5;
   cross.material.side = DoubleSide;
   cross.userData.systemId = systemId;
   battleIconMaterial.depthWrite = false;
   cross.scale.set(1, 0.2, 1);
   cross.raycast = () => null;
+  cross.rotation.x = -Math.PI / 2;
   node.add(cross);
 };
 const addShipyardMarker = ({
@@ -101,21 +106,22 @@ const addShipyardMarker = ({
   square.userData.systemId = system.id;
   square.userData.kind = 'shipyard';
   square.rotation.z = Math.PI / 4;
+  square.rotation.x = -Math.PI / 2;
   const anchorPlanet =
     system.shipyardAnchorPlanetId && planetLookup
       ? planetLookup.get(system.shipyardAnchorPlanetId)
       : null;
-  if (anchorPlanet) {
-    const planetMesh = anchorPlanet as Mesh;
-    if (planetMesh.geometry && !planetMesh.geometry.boundingSphere) {
-      planetMesh.geometry.computeBoundingSphere();
+    if (anchorPlanet) {
+      const planetMesh = anchorPlanet as Mesh;
+      if (planetMesh.geometry && !planetMesh.geometry.boundingSphere) {
+        planetMesh.geometry.computeBoundingSphere();
+      }
+      const radius = planetMesh.geometry?.boundingSphere?.radius ?? 2.5;
+      square.position.set(0, radius + 1.5, 0);
+      anchorPlanet.add(square);
+      return;
     }
-    const radius = planetMesh.geometry?.boundingSphere?.radius ?? 2.5;
-    square.position.set(0, radius + 1.5, 0.6);
-    anchorPlanet.add(square);
-    return;
-  }
-  square.position.set(0, baseRadius + 2.5, 1);
+  square.position.set(0, baseRadius + 2.5, 0);
   node.add(square);
 };
 const createSystemNode = (
@@ -133,7 +139,8 @@ const createSystemNode = (
   node.userData.systemId = system.id;
   node.userData.visibility = system.visibility;
   const pos = system.mapPosition ?? system.position;
-  node.position.set(pos.x, pos.y, 0);
+  const depth = pos.y ?? 0;
+  node.position.set(pos.x, 0, depth);
 
   const isRevealed = system.visibility !== 'unknown';
   const isSurveyed = system.visibility === 'surveyed';

@@ -91,7 +91,8 @@ export const useGalaxyMapData = (): GalaxyMapData => {
     }
     return systems.reduce((max, system) => {
       const pos = system.mapPosition ?? system.position;
-      const r = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
+      const depth = pos.y ?? 0;
+      const r = Math.sqrt(pos.x * pos.x + depth * depth);
       return Math.max(max, r);
     }, 0);
   }, [systems]);

@@ -6,6 +6,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { createScene } from '@three/scene';
+import { BASE_TILT, MAX_TILT_DOWN } from '../lib/config';
 import type { GalaxySceneContext } from './useGalaxyScene';
 
 interface UseGalaxySceneSetupOptions {
@@ -45,10 +46,12 @@ export const useGalaxySceneSetup = ({
       MIDDLE: THREE.MOUSE.ROTATE, // click centrale gestito a mano, nessun drag
       RIGHT: THREE.MOUSE.PAN,
     };
-    controls.minAzimuthAngle = 0;
-    controls.maxAzimuthAngle = 0;
-    controls.minPolarAngle = Math.PI / 2;
-    controls.maxPolarAngle = Math.PI / 2 + Math.PI / 6;
+    controls.minAzimuthAngle = -Math.PI;
+    controls.maxAzimuthAngle = Math.PI;
+    // controls.target.set(0, 0, 0);
+    // controls.update();
+    controls.minPolarAngle = BASE_TILT;
+    controls.maxPolarAngle = MAX_TILT_DOWN;
 
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));

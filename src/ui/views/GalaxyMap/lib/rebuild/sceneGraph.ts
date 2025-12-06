@@ -116,27 +116,41 @@ export const rebuildSceneGraph = (params: RebuildSceneParams) => {
         return;
       }
       const planetId = entry.planetId;
-      let target = pos;
+      let target: THREE.Vector3 | null = null;
+      if (!planetId) {
+        const base = getVector().copy(pos);
+        base.y += entry.height;
+        target = base;
+      }
       if (planetId) {
         const obj = planetLookupRef.get(planetId);
         if (obj) {
           const world = getVector();
           obj.getWorldPosition(world);
           group.worldToLocal(world);
-          world.z += entry.height;
+          world.y += entry.height;
           target = world;
         }
       }
+      const resolvedTarget = target ?? pos;
       if (entry.mesh && typeof entry.index === 'number') {
-        const matrix = getMatrix().setPosition(target.x, target.y, target.z);
+        const matrix = getMatrix().setPosition(
+          resolvedTarget.x,
+          resolvedTarget.y,
+          resolvedTarget.z,
+        );
         entry.mesh.setMatrixAt(entry.index, matrix);
         entry.mesh.instanceMatrix.needsUpdate = true;
         releaseMatrix(matrix);
       } else if (entry.object) {
-        entry.object.position.set(target.x, target.y, target.z);
+        entry.object.position.set(
+          resolvedTarget.x,
+          resolvedTarget.y,
+          resolvedTarget.z,
+        );
       }
-      if (target !== pos) {
-        releaseVector(target);
+      if (resolvedTarget !== pos) {
+        releaseVector(resolvedTarget);
       }
     };
     scienceAnchorsRef.forEach(updateEntry);

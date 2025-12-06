@@ -7,6 +7,7 @@ import { updateFrame } from '../lib/frame';
 import { createAnchorResolver } from '../lib/anchors';
 import { GalaxyMapScene } from './GalaxyMapScene';
 import { useGalaxyMapContextValue } from '../hooks/useGalaxyMapContextValue';
+import { BASE_TILT, MAX_TILT_DOWN } from '../lib/config';
 import './GalaxyMap.scss';
 
 interface GalaxyMapProps {
@@ -84,6 +85,8 @@ export const GalaxyMap = ({
         elapsed,
         minZoom: data.minZoom,
         maxZoom: data.maxZoom,
+        baseTilt: BASE_TILT,
+        maxTiltDown: MAX_TILT_DOWN,
         offsetTargetRef,
         zoomTargetRef,
         tiltStateRef,
@@ -116,6 +119,8 @@ export const GalaxyMap = ({
       scienceAnchorsRef,
       fleetAnchorsRef,
       systemGroupRef,
+      BASE_TILT,
+      MAX_TILT_DOWN,
     ],
   );
 
@@ -155,4 +160,3 @@ export const GalaxyMap = ({
     </GalaxyMapProvider>
   );
 };
-

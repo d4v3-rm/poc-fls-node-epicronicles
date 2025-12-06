@@ -24,7 +24,6 @@ export const createScene = (container: HTMLDivElement): SceneSetup => {
     0.1,
     1000,
   );
-  camera.position.set(0, 0, 170);
 
   const renderer = new WebGLRenderer({ antialias: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
