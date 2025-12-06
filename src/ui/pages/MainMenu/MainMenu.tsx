@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import type { GalaxyShape } from '@domain/galaxy/galaxy';
 import { useGameStore } from '@store/gameStore';
 import { MainMenuLanding } from '../MainMenuLanding';
 import { MainMenuSetup } from '../MainMenuSetup';
@@ -12,44 +13,28 @@ export const MainMenu = () => {
   const hasSavedSession = useGameStore((state) => state.hasSavedSession);
   const config = useGameStore((state) => state.config);
   const [seed, setSeed] = useState(config.defaultGalaxy.seed);
-  const availableShapes =
+  const defaultShapes: GalaxyShape[] = ['circle', 'spiral', 'ring', 'bar', 'ellipse', 'cluster'];
+  const availableShapes: GalaxyShape[] =
     config.galaxyShapes && config.galaxyShapes.length > 0
-      ? config.galaxyShapes
-      : Array.from(
-          new Set(
-            config.galaxyPresets.map((preset) => preset.galaxyShape ?? 'circle'),
-          ),
-        );
-  const [galaxyShape, setGalaxyShape] = useState(
-    config.defaultGalaxy.galaxyShape ?? availableShapes[0] ?? 'circle',
+      ? (config.galaxyShapes as GalaxyShape[])
+      : defaultShapes;
+  const [galaxyShape, setGalaxyShape] = useState<GalaxyShape>(
+    (config.defaultGalaxy.galaxyShape as GalaxyShape) ?? availableShapes[0],
   );
   const availableSystemCounts =
     config.galaxySystemCounts && config.galaxySystemCounts.length > 0
       ? config.galaxySystemCounts
-      : Array.from(
-          new Set(
-            config.galaxyPresets.map((preset) => preset.systemCount ?? config.defaultGalaxy.systemCount),
-          ),
-        ).filter((val): val is number => typeof val === 'number');
+      : [8, 16, 32, 64, 128, 256];
   const availableRadii =
     config.galaxyRadii && config.galaxyRadii.length > 0
       ? config.galaxyRadii
-      : Array.from(
-          new Set(
-            config.galaxyPresets.map((preset) => preset.galaxyRadius ?? config.defaultGalaxy.galaxyRadius),
-          ),
-        ).filter((val): val is number => typeof val === 'number');
+      : [128, 256, 512, 1024, 1536, 2048];
   const [systemCount, setSystemCount] = useState(
-    config.defaultGalaxy.systemCount ?? availableSystemCounts[0] ?? 18,
+    config.defaultGalaxy.systemCount ?? availableSystemCounts[0],
   );
   const [galaxyRadius, setGalaxyRadius] = useState(
-    config.defaultGalaxy.galaxyRadius ?? availableRadii[0] ?? 256,
+    config.defaultGalaxy.galaxyRadius ?? availableRadii[0],
   );
-  const defaultPresetId =
-    config.galaxyPresets.find((preset) => preset.id === 'standard')?.id ??
-    config.galaxyPresets[0]?.id ??
-    'standard';
-  const [presetId, setPresetId] = useState(defaultPresetId);
   const [stage, setStage] = useState<MenuStage>('landing');
   const [message, setMessage] = useState<string | null>(null);
   const [backgroundIndex] = useState(() =>
@@ -71,13 +56,12 @@ export const MainMenu = () => {
   const handleStart = useCallback(() => {
     startNewSession({
       seed,
-      presetId,
       galaxyShape,
       systemCount,
       galaxyRadius,
     });
     setMessage(null);
-  }, [startNewSession, seed, presetId, galaxyShape, systemCount, galaxyRadius]);
+  }, [startNewSession, seed, galaxyShape, systemCount, galaxyRadius]);
 
   return stage === 'landing' ? (
     <MainMenuLanding
@@ -94,8 +78,6 @@ export const MainMenu = () => {
     <MainMenuSetup
       background={background}
       seed={seed}
-      presetId={presetId}
-      presets={config.galaxyPresets}
       galaxyShape={galaxyShape}
       galaxyShapes={availableShapes}
       systemCount={systemCount}
@@ -103,7 +85,6 @@ export const MainMenu = () => {
       galaxyRadius={galaxyRadius}
       galaxyRadii={availableRadii}
       onSeedChange={setSeed}
-      onPresetChange={setPresetId}
       onShapeChange={setGalaxyShape}
       onSystemCountChange={setSystemCount}
       onRadiusChange={setGalaxyRadius}

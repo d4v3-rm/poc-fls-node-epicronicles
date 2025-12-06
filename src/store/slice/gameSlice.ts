@@ -5,7 +5,6 @@ import type { GameSession } from '@domain/types';
 export interface StartSessionArgs {
   seed?: string;
   label?: string;
-  presetId?: string;
   galaxyShape?: import('@domain/galaxy/galaxy').GalaxyShape;
   systemCount?: number;
   galaxyRadius?: number;

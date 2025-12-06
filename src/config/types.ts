@@ -117,7 +117,6 @@ export interface MilitaryConfig {
 export interface GameConfig {
   ticksPerSecond: number;
   defaultGalaxy: GalaxyGenerationParams;
-  galaxyPresets: Array<GalaxyGenerationParams & { id: string; label: string }>;
   galaxyShapes?: GalaxyShape[];
   galaxyRadii?: number[];
   galaxySystemCounts?: number[];

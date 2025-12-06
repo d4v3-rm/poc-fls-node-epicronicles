@@ -1,4 +1,3 @@
-import type { GameConfig } from '@config';
 import { MainMenuLayout } from '../MainMenuLayout';
 
 import './MainMenuSetup.scss';
@@ -6,8 +5,6 @@ import './MainMenuSetup.scss';
 interface MainMenuSetupProps {
   background: string;
   seed: string;
-  presetId: string;
-  presets: GameConfig['galaxyPresets'];
   galaxyShape: import('@domain/galaxy/galaxy').GalaxyShape;
   galaxyShapes: import('@domain/galaxy/galaxy').GalaxyShape[];
   systemCount: number;
@@ -15,7 +12,6 @@ interface MainMenuSetupProps {
   galaxyRadius: number;
   galaxyRadii: number[];
   onSeedChange: (value: string) => void;
-  onPresetChange: (value: string) => void;
   onShapeChange: (value: import('@domain/galaxy/galaxy').GalaxyShape) => void;
   onSystemCountChange: (value: number) => void;
   onRadiusChange: (value: number) => void;
@@ -26,8 +22,6 @@ interface MainMenuSetupProps {
 export const MainMenuSetup = ({
   background,
   seed,
-  presetId,
-  presets,
   galaxyShape,
   galaxyShapes,
   systemCount,
@@ -35,7 +29,6 @@ export const MainMenuSetup = ({
   galaxyRadius,
   galaxyRadii,
   onSeedChange,
-  onPresetChange,
   onShapeChange,
   onSystemCountChange,
   onRadiusChange,
@@ -71,21 +64,6 @@ export const MainMenuSetup = ({
               onChange={(event) => onSeedChange(event.target.value)}
               aria-label="Galaxy seed"
             />
-          </label>
-
-          <label className="setup-card__field">
-            <span>Galaxy preset</span>
-            <select
-              value={presetId}
-              onChange={(event) => onPresetChange(event.target.value)}
-              aria-label="Galaxy preset"
-            >
-              {presets.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.label} ({preset.systemCount} sistemi)
-                </option>
-              ))}
-            </select>
           </label>
 
           <label className="setup-card__field">

@@ -88,16 +88,13 @@ export const startNewSession =
   (args?: StartSessionArgs): ThunkAction<void, RootState, unknown, AnyAction> =>
   (dispatch, getState) => {
     const cfg = getState().game.config;
-    const preset =
-      cfg.galaxyPresets.find((entry) => entry.id === (args?.presetId ?? '')) ??
-      cfg.galaxyPresets.find((entry) => entry.id === 'standard');
-    const seed = args?.seed ?? preset?.seed ?? cfg.defaultGalaxy.seed;
+    const seed = args?.seed ?? cfg.defaultGalaxy.seed;
     const systemCount =
-      args?.systemCount ?? preset?.systemCount ?? cfg.defaultGalaxy.systemCount;
+      args?.systemCount ?? cfg.defaultGalaxy.systemCount;
     const galaxyRadius =
-      args?.galaxyRadius ?? preset?.galaxyRadius ?? cfg.defaultGalaxy.galaxyRadius;
+      args?.galaxyRadius ?? cfg.defaultGalaxy.galaxyRadius;
     const galaxyShape =
-      args?.galaxyShape ?? preset?.galaxyShape ?? cfg.defaultGalaxy.galaxyShape;
+      args?.galaxyShape ?? cfg.defaultGalaxy.galaxyShape;
     const session = createSession({
       seed,
       starClasses: cfg.starClasses,
