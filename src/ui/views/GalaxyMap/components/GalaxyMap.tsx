@@ -119,8 +119,6 @@ export const GalaxyMap = ({
       scienceAnchorsRef,
       fleetAnchorsRef,
       systemGroupRef,
-      BASE_TILT,
-      MAX_TILT_DOWN,
     ],
   );
 

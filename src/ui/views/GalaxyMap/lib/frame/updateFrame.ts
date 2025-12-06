@@ -57,7 +57,7 @@ export const updateFrame = (params: FrameUpdateParams) => {
       camera: params.ctx.camera,
       deltaFactor,
     });
-    updateBlackHoleFrame(params.blackHoleRef, params.delta, params.elapsed);
+    updateBlackHoleFrame(params.blackHoleRef, params.elapsed, params.ctx.camera);
   };
 
   const anchorsStep = () => {

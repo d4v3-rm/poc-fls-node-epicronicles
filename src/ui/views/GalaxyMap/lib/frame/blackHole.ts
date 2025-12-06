@@ -1,33 +1,33 @@
 import * as THREE from 'three';
 import type { MutableRefObject } from 'react';
 
+type ShaderMat = THREE.ShaderMaterial & {
+  uniforms: Record<string, { value: unknown }>;
+};
+
 export const updateBlackHoleFrame = (
   blackHoleRef: MutableRefObject<THREE.Group | null>,
-  delta: number,
   elapsed: number,
+  camera?: THREE.Camera,
 ) => {
-  const blackHole = blackHoleRef.current;
-  const outer = blackHole?.getObjectByName('accretionOuter') as THREE.Mesh | null;
-  const glow = blackHole?.getObjectByName('glow') as THREE.Mesh | null;
-  const innerDisk = blackHole?.getObjectByName('accretionInner') as THREE.Mesh | null;
-  const shaderMats =
-    (blackHole?.userData.shaderMaterials as THREE.ShaderMaterial[]) ?? [];
+  const group = blackHoleRef.current;
+  if (!group) {
+    return;
+  }
 
-  shaderMats.forEach((mat) => {
-    if (mat.uniforms.uTime) {
-      mat.uniforms.uTime.value = elapsed;
+  const materials = group.userData?.shaderMaterials as ShaderMat[] | undefined;
+  if (!materials?.length) {
+    return;
+  }
+
+  materials.forEach((material) => {
+    if (material.uniforms?.uTime) {
+      // animate shader-driven pieces like the accretion disk and horizon glow
+      material.uniforms.uTime.value = elapsed;
+    }
+    if (material.uniforms?.uCameraPosition && camera) {
+      const target = material.uniforms.uCameraPosition.value as THREE.Vector3;
+      target.copy(camera.position);
     }
   });
-  if (blackHole) {
-    blackHole.rotation.z += delta * 0.12;
-  }
-  if (outer) {
-    outer.rotation.z += delta * 0.35;
-  }
-  if (innerDisk) {
-    innerDisk.rotation.z -= delta * 0.28;
-  }
-  if (glow) {
-    glow.rotation.z -= delta * 0.25;
-  }
 };
