@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { Fleet, ShipDesign } from '@domain/types';
 import type { AnchorEntry } from './Anchors';
 import { SpaceshipsBase } from './SpaceshipsBase';
@@ -14,6 +15,29 @@ interface ConstructorAnchorParams {
   releaseVector: (v: THREE.Vector3) => void;
   shipDesignLookup: Map<string, ShipDesign>;
 }
+
+const constructorAssets = {
+  obj: new URL(
+    '../../../../assets/scene/spaceships-constructor/base.obj',
+    import.meta.url,
+  ).href,
+  diffuse: new URL(
+    '../../../../assets/scene/spaceships-constructor/texture_diffuse.png',
+    import.meta.url,
+  ).href,
+  normal: new URL(
+    '../../../../assets/scene/spaceships-constructor/texture_normal.png',
+    import.meta.url,
+  ).href,
+  roughness: new URL(
+    '../../../../assets/scene/spaceships-constructor/texture_roughness.png',
+    import.meta.url,
+  ).href,
+  metalness: new URL(
+    '../../../../assets/scene/spaceships-constructor/texture_metallic.png',
+    import.meta.url,
+  ).href,
+};
 
 const buildDefaultConstructorModel = () => {
   const body = new THREE.Mesh(
@@ -50,7 +74,55 @@ const constructorModel = (() => {
     if (cache) {
       return cache;
     }
-    cache = Promise.resolve(buildDefaultConstructorModel());
+    const objLoader = new OBJLoader();
+    const textureLoader = new THREE.TextureLoader();
+    cache = Promise.all([
+      objLoader.loadAsync(constructorAssets.obj),
+      textureLoader.loadAsync(constructorAssets.diffuse),
+      textureLoader.loadAsync(constructorAssets.normal),
+      textureLoader.loadAsync(constructorAssets.roughness),
+      textureLoader.loadAsync(constructorAssets.metalness),
+    ])
+      .then(([object, diffuse, normal, roughness, metalness]) => {
+        diffuse.encoding = THREE.sRGBEncoding;
+        const baseMaterial = new THREE.MeshStandardMaterial({
+          map: diffuse,
+          normalMap: normal,
+          roughnessMap: roughness,
+          metalnessMap: metalness,
+          metalness: 0.85,
+          roughness: 0.4,
+        });
+
+        const root = new THREE.Group();
+        root.add(object);
+
+        object.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            mesh.material = baseMaterial.clone();
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
+          }
+        });
+
+        // Normalize scale and pivot so the base rests at y=0
+        const bbox = new THREE.Box3().setFromObject(root);
+        const size = bbox.getSize(new THREE.Vector3());
+        const targetHeight = 3.6;
+        const scale = size.y > 0 ? targetHeight / size.y : 1;
+        root.scale.setScalar(scale);
+
+        const scaledBox = new THREE.Box3().setFromObject(root);
+        const center = scaledBox.getCenter(new THREE.Vector3());
+        root.position.set(-center.x, -scaledBox.min.y, -center.z);
+
+        return root;
+      })
+      .catch((error) => {
+        console.error('Failed to load constructor ship model, using fallback.', error);
+        return buildDefaultConstructorModel();
+      });
     return cache;
   };
 })();
@@ -60,6 +132,9 @@ const cloneConstructionShip = (base: THREE.Object3D) => {
   clone.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh;
+      if (mesh.geometry) {
+        mesh.geometry = mesh.geometry.clone();
+      }
       if (Array.isArray(mesh.material)) {
         mesh.material = mesh.material.map((mat) => mat.clone());
       } else if (mesh.material) {
