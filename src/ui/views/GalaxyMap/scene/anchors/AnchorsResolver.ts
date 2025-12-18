@@ -21,31 +21,19 @@ export class AnchorsResolver {
     this.systemPositions = systemPositions;
   }
 
-  getVector() {
-    return this.vectorPool.pop() ?? new THREE.Vector3();
-  }
+  getVector = () => this.vectorPool.pop() ?? new THREE.Vector3();
 
-  releaseVector(vec: THREE.Vector3) {
+  releaseVector = (vec: THREE.Vector3) => {
     vec.set(0, 0, 0);
     this.vectorPool.push(vec);
-  }
+  };
 
-  getMatrix() {
-    return this.matrixPool.pop() ?? new THREE.Matrix4();
-  }
+  getMatrix = () => this.matrixPool.pop() ?? new THREE.Matrix4();
 
-  releaseMatrix(m: THREE.Matrix4) {
+  releaseMatrix = (m: THREE.Matrix4) => {
     m.identity();
     this.matrixPool.push(m);
-  }
-
-  rebuild() {
-    // nothing to build for resolver
-  }
-
-  update() {
-    // resolver has no per-frame logic
-  }
+  };
 
   updateAnchors = (_group: THREE.Group, entries: AnchorEntry[]) => {
     entries.forEach((entry) => {

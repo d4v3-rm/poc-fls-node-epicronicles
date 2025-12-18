@@ -2,6 +2,10 @@ import * as THREE from 'three';
 import type { ScienceShip } from '@domain/types';
 import { SceneEntityBase } from './SceneEntityBase';
 import type { AnchorEntry } from './anchors/AnchorsResolver';
+import {
+  SCIENCE_SHIP_ANCHOR_HEIGHT,
+  TRAVEL_TARGET_HEIGHT,
+} from './entityConstants';
 
 interface ScienceSpaceshipParams {
   group: THREE.Group;
@@ -55,7 +59,7 @@ export class ScienceSpaceships extends SceneEntityBase {
           mesh,
           index: idx,
           systemId: ship.currentSystemId,
-          height: 6,
+          height: SCIENCE_SHIP_ANCHOR_HEIGHT,
         });
         if (ship.targetSystemId && ship.targetSystemId !== ship.currentSystemId) {
           const lineMaterial =
@@ -69,7 +73,7 @@ export class ScienceSpaceships extends SceneEntityBase {
             lineMaterial,
             targetGeometry: targetMarkerGeometry,
             targetMaterial,
-            targetHeight: 1.5,
+            targetHeight: TRAVEL_TARGET_HEIGHT,
           });
         }
       });

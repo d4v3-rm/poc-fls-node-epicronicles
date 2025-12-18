@@ -7,6 +7,10 @@ import {
   getConstructionShipModel,
 } from './constructionShipModel';
 import { isConstructionFleet } from './fleetRoles';
+import {
+  CONSTRUCTION_SHIP_ANCHOR_HEIGHT,
+  TRAVEL_TARGET_HEIGHT,
+} from './entityConstants';
 
 interface ConstructorAnchorParams {
   group: THREE.Group;
@@ -82,7 +86,7 @@ export class ConstructionSpaceships extends SceneEntityBase {
         mesh: placeholderMesh,
         index: idx,
         systemId: fleet.systemId,
-        height: 3,
+        height: CONSTRUCTION_SHIP_ANCHOR_HEIGHT,
       };
       entriesForBuild.push(entry);
       this.fleetAnchorsRef.push(entry);
@@ -100,7 +104,7 @@ export class ConstructionSpaceships extends SceneEntityBase {
           lineMaterial,
           targetGeometry,
           targetMaterial,
-          targetHeight: 1.5,
+          targetHeight: TRAVEL_TARGET_HEIGHT,
         });
       }
     });

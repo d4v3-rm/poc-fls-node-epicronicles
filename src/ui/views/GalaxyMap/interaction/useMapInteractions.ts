@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { useGalaxyMapContext } from '../context/GalaxyMapContext';
 import { useCameraController } from '../scene/useCameraController';
 import { computeAnchor, resolveHitObject } from './raycast';
+import { MAP_FOCUS_ZOOM } from './constants';
 
 interface UseMapInteractionsParams {
   onSelectRef: MutableRefObject<
@@ -41,8 +42,7 @@ export const useMapInteractions = ({
     const handleContextMenu = (event: MouseEvent) => event.preventDefault();
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      const target = controls.target ?? new THREE.Vector3();
-      const distance = sceneContext.camera.position.distanceTo(target);
+      const distance = camera.position.distanceTo(controls.target);
       const step = Math.max(20, distance * 0.35);
       const delta = Math.sign(event.deltaY) * step;
       const next = clampZoom(distance + delta);
@@ -86,7 +86,7 @@ export const useMapInteractions = ({
           y: 0,
           z: systemPos?.z ?? worldPos.z,
         },
-        { zoom: 60 },
+        { zoom: MAP_FOCUS_ZOOM },
       );
       const anchor = computeAnchor(worldPos, camera, {
         width: renderer.domElement.clientWidth,

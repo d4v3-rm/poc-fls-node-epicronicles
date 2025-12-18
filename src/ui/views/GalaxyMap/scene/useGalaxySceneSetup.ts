@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -21,7 +21,6 @@ export const useGalaxySceneSetup = ({
   minZoom,
   maxZoom,
 }: UseGalaxySceneSetupOptions) => {
-  const contextRef = useRef<GalaxySceneContext | null>(null);
   const [context, setContext] = useState<GalaxySceneContext | null>(null);
 
   useEffect(() => {
@@ -79,7 +78,6 @@ export const useGalaxySceneSetup = ({
       clock,
       systemGroup,
     };
-    contextRef.current = ctx;
     setContext(ctx);
 
     const handleResize = () => {
@@ -96,7 +94,6 @@ export const useGalaxySceneSetup = ({
       controls.dispose();
       composer?.dispose();
       dispose();
-      contextRef.current = null;
       setContext(null);
     };
   }, [containerRef, minZoom, maxZoom]);

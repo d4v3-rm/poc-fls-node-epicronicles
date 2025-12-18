@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useGalaxyMapContext } from '../context/GalaxyMapContext';
 import { useCameraController } from '../scene/useCameraController';
+import { MAP_FOCUS_ZOOM } from './constants';
 
 export interface MapFocusParams {
   focusSystemId: string | null;
@@ -56,7 +57,7 @@ export const useMapFocus = ({
       y: 0,
       z: target.mapPosition?.y ?? target.position.y ?? 0,
     };
-    focusOnPosition(pos, { zoom: 60, immediate: true });
+    focusOnPosition(pos, { zoom: MAP_FOCUS_ZOOM, immediate: true });
     lastFocusAppliedRef.current = { id: focusSystemId, trigger: focusTrigger };
   }, [
     focusSystemId,

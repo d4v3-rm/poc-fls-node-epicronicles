@@ -7,6 +7,7 @@ import type { GalaxySceneContext } from '../scene/useGalaxyScene';
 export type GalaxyMapRefs = ReturnType<typeof useGalaxyMapRefs>;
 
 export const useGalaxyMapRefs = () => {
+  const initialSystemPositions = useMemo(() => new Map<string, THREE.Vector3>(), []);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const systemGroupRef = useRef<THREE.Group | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -19,11 +20,11 @@ export const useGalaxyMapRefs = () => {
   });
   const tempSphericalRef = useRef(new THREE.Spherical());
   const tempOffsetRef = useRef(new THREE.Vector3());
-  const systemPositionRef = useRef(new Map<string, THREE.Vector3>());
+  const systemPositionRef = useRef(initialSystemPositions);
   const scienceAnchorsRef = useRef<AnchorEntry[]>([]);
   const fleetAnchorsRef = useRef<AnchorEntry[]>([]);
   const sceneSignatureRef = useRef<string>('');
-  const anchorResolverRef = useRef<AnchorsResolver | null>(null);
+  const anchorResolverRef = useRef(new AnchorsResolver(initialSystemPositions));
 
   const syncSceneContext = useCallback((sceneContext: GalaxySceneContext | null) => {
     if (!sceneContext) {

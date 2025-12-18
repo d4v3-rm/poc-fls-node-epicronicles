@@ -1,7 +1,6 @@
-import { useGalaxyMapData } from './state/useGalaxyMapData';
-import { useGalaxyMapContext } from './context/GalaxyMapContext';
-import { useMapFocus } from './interaction/useMapFocus';
-import { useMapInteractions } from './interaction/useMapInteractions';
+import type { GalaxyMapData } from './state';
+import { useGalaxyMapContext } from './context';
+import { useMapFocus, useMapInteractions } from './interaction';
 import { useSceneRebuild } from './scene/useSceneRebuild';
 import type { MutableRefObject } from 'react';
 import {
@@ -11,7 +10,7 @@ import {
 } from '@three/materials';
 
 type GalaxyMapCanvasProps = {
-  data: ReturnType<typeof useGalaxyMapData>;
+  data: GalaxyMapData;
   focusSystemId: string | null;
   focusTrigger: number;
   onShipyardSelect?: (

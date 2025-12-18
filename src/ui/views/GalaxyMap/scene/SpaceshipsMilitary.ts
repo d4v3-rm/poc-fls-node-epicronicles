@@ -3,6 +3,7 @@ import type { Fleet, ShipDesign } from '@domain/types';
 import type { AnchorEntry } from './anchors/AnchorsResolver';
 import { SceneEntityBase } from './SceneEntityBase';
 import { isConstructionFleet } from './fleetRoles';
+import { FLEET_ANCHOR_HEIGHT, TRAVEL_TARGET_HEIGHT } from './entityConstants';
 
 interface FleetAnchorParams {
   group: THREE.Group;
@@ -61,7 +62,7 @@ export class MilitarySpaceships extends SceneEntityBase {
           mesh,
           index: idx,
           systemId: fleet.systemId,
-          height: 5,
+          height: FLEET_ANCHOR_HEIGHT,
         });
         if (fleet.targetSystemId && fleet.targetSystemId !== fleet.systemId) {
           const targetMaterial = statusMaterials.ship ?? this.fleetMaterials.idle;
@@ -73,7 +74,7 @@ export class MilitarySpaceships extends SceneEntityBase {
             lineMaterial,
             targetGeometry: fleetTargetGeometry,
             targetMaterial,
-            targetHeight: 1.5,
+            targetHeight: TRAVEL_TARGET_HEIGHT,
           });
         }
       });

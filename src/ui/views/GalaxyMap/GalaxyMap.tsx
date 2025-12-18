@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { GalaxyMapProvider } from './context/GalaxyMapContext';
-import { useGalaxyMapContextValue } from './context/useGalaxyMapContextValue';
-import { useGalaxyMapRefs } from './context/useGalaxyMapRefs';
-import { AnchorsResolver } from './scene/anchors/AnchorsResolver';
-import { updateScene } from './scene/Scene';
-import { useGalaxyMapData } from './state/useGalaxyMapData';
-import { useGalaxyScene, type GalaxySceneContext } from './scene/useGalaxyScene';
+import {
+  GalaxyMapProvider,
+  useGalaxyMapContextValue,
+  useGalaxyMapRefs,
+} from './context';
+import {
+  updateScene,
+  useGalaxyScene,
+  type GalaxySceneContext,
+} from './scene';
+import { useGalaxyMapData } from './state';
 import { GalaxyMapCanvas } from './GalaxyMapCanvas';
 
 import './GalaxyMap.scss';
@@ -42,14 +46,12 @@ export const GalaxyMap = ({
   const data = useGalaxyMapData();
   const {
     containerRef,
-    systemGroupRef,
     offsetTargetRef,
     zoomTargetRef,
     zoomTargetDirtyRef,
     tiltStateRef,
     tempSphericalRef,
     tempOffsetRef,
-    systemPositionRef,
     scienceAnchorsRef,
     fleetAnchorsRef,
     anchorResolverRef,
@@ -58,14 +60,6 @@ export const GalaxyMap = ({
 
   const handleFrame = useCallback(
     (ctx: GalaxySceneContext, delta: number, elapsed: number) => {
-      if (!anchorResolverRef.current) {
-        anchorResolverRef.current = new AnchorsResolver(
-          systemPositionRef.current,
-        );
-      }
-      if (!anchorResolverRef.current || !systemGroupRef.current) {
-        return;
-      }
       updateScene({
         ctx,
         delta,
@@ -87,7 +81,6 @@ export const GalaxyMap = ({
       data.maxZoom,
       data.minZoom,
       anchorResolverRef,
-      systemPositionRef,
       offsetTargetRef,
       zoomTargetRef,
       zoomTargetDirtyRef,
@@ -96,7 +89,6 @@ export const GalaxyMap = ({
       tempOffsetRef,
       scienceAnchorsRef,
       fleetAnchorsRef,
-      systemGroupRef,
     ],
   );
 

@@ -1,0 +1,6 @@
+export const SCIENCE_SHIP_ANCHOR_HEIGHT = 6;
+export const FLEET_ANCHOR_HEIGHT = 5;
+export const CONSTRUCTION_SHIP_ANCHOR_HEIGHT = 3;
+
+export const TRAVEL_TARGET_HEIGHT = 1.5;
+

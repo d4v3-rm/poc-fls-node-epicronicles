@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
 import { rebuildScene } from './Scene';
-import { AnchorsResolver } from './anchors/AnchorsResolver';
 import { useGalaxyMapContext } from '../context/GalaxyMapContext';
 import { disposeGroupResources } from './dispose';
 
@@ -78,9 +77,7 @@ export const useSceneRebuild = ({
 
     disposeGroupResources(group);
 
-    const resolverForBuild =
-      anchorResolverRef.current ??
-      new AnchorsResolver(systemPositionRef.current);
+    const resolverForBuild = anchorResolverRef.current;
 
     const { positions, updateAnchorInstances } = rebuildScene({
       group,
@@ -97,16 +94,16 @@ export const useSceneRebuild = ({
       fleetMaterials,
       scienceAnchorsRef: scienceAnchorsRef.current,
       fleetAnchorsRef: fleetAnchorsRef.current,
-      getVector: resolverForBuild.getVector.bind(resolverForBuild),
-      releaseVector: resolverForBuild.releaseVector.bind(resolverForBuild),
-      getMatrix: resolverForBuild.getMatrix.bind(resolverForBuild),
-      releaseMatrix: resolverForBuild.releaseMatrix.bind(resolverForBuild),
+      getVector: resolverForBuild.getVector,
+      releaseVector: resolverForBuild.releaseVector,
+      getMatrix: resolverForBuild.getMatrix,
+      releaseMatrix: resolverForBuild.releaseMatrix,
       shipDesignLookup,
       starRotations,
     });
 
     systemPositionRef.current = positions;
-    anchorResolverRef.current = new AnchorsResolver(systemPositionRef.current);
+    anchorResolverRef.current.setup(systemPositionRef.current);
 
     updateAnchorInstances();
   }, [
