@@ -1,2 +1,1 @@
-export { GalaxyMap } from './components/GalaxyMap';
-export * from './hooks';
+export { GalaxyMap } from './GalaxyMap';

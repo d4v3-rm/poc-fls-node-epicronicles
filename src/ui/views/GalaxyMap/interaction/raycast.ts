@@ -1,0 +1,69 @@
+import * as THREE from 'three';
+
+// Raycast helpers used by map interaction hooks.
+type HitResult =
+  | {
+      systemId: string;
+      kind?: string;
+      visibility?: string;
+      worldPos: THREE.Vector3;
+    }
+  | null;
+
+export const resolveHitObject = (
+  intersects: THREE.Intersection[],
+): HitResult => {
+  const hit = intersects.find((intersect) => {
+    let obj: THREE.Object3D | null = intersect.object;
+    while (obj && !obj.userData.systemId && !obj.userData.kind) {
+      obj = obj.parent;
+    }
+    return Boolean(obj?.userData.systemId);
+  });
+  if (!hit) {
+    return null;
+  }
+  let targetNode: THREE.Object3D | null = hit.object;
+  while (
+    targetNode &&
+    !targetNode.userData.systemId &&
+    !targetNode.userData.kind
+  ) {
+    targetNode = targetNode.parent;
+  }
+  if (!targetNode) {
+    return null;
+  }
+  const systemId = targetNode.userData.systemId as string;
+  const kind = targetNode.userData.kind as string | undefined;
+  let visibility = targetNode.userData.visibility as string | undefined;
+  if (!visibility) {
+    let node: THREE.Object3D | null = targetNode;
+    while (node) {
+      const maybeVisibility = node.userData.visibility as string | undefined;
+      if (maybeVisibility) {
+        visibility = maybeVisibility;
+        break;
+      }
+      node = node.parent;
+      const parentSystemId = node?.userData.systemId as string | undefined;
+      if (parentSystemId && parentSystemId !== systemId) {
+        break;
+      }
+    }
+  }
+  const worldPos = new THREE.Vector3();
+  targetNode.getWorldPosition(worldPos);
+  return { systemId, kind, visibility, worldPos };
+};
+
+export const computeAnchor = (
+  worldPos: THREE.Vector3,
+  camera: THREE.Camera,
+  viewport: { width: number; height: number },
+) => {
+  const projected = worldPos.clone().project(camera);
+  const anchorX = ((projected.x + 1) / 2) * viewport.width;
+  const anchorY = ((-projected.y + 1) / 2) * viewport.height;
+  return { x: anchorX, y: anchorY };
+};
