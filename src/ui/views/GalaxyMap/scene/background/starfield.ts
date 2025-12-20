@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { markDisposableMaterial } from '../dispose';
 import type { RandomFn } from './random';
 import { createStarfieldTexture } from './textures';
+import { galaxyTextureUrls } from './assets';
+import { loadAssetTexture } from './assetLoader';
 
 export interface BuildStarfieldParams {
   group: THREE.Group;
@@ -13,7 +15,12 @@ export const buildStarfield = ({ group, random, radius }: BuildStarfieldParams) 
   const root = new THREE.Group();
   root.name = 'starfield';
 
-  const texture = createStarfieldTexture(random, 1024, 512);
+  const texture =
+    loadAssetTexture(galaxyTextureUrls.starfield, {
+      colorSpace: THREE.SRGBColorSpace,
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.ClampToEdgeWrapping,
+    }) ?? createStarfieldTexture(random, 1024, 512);
   const material = markDisposableMaterial(
     new THREE.MeshBasicMaterial({
       map: texture ?? undefined,
@@ -39,4 +46,3 @@ export const buildStarfield = ({ group, random, radius }: BuildStarfieldParams) 
     },
   };
 };
-

@@ -4,6 +4,8 @@ import { markDisposableMaterial } from '../dispose';
 import type { RandomFn } from './random';
 import { randomGaussian, randomInRange } from './random';
 import { createSoftCircleTexture } from './textures';
+import { galaxyTextureUrls } from './assets';
+import { loadAssetTexture } from './assetLoader';
 import { getSpiralParams } from './layout';
 
 const clamp = (value: number, min: number, max: number) =>
@@ -123,7 +125,13 @@ export const buildGalaxyDust = ({
   const root = new THREE.Group();
   root.name = 'galaxyDust';
 
-  const dotTexture = createSoftCircleTexture(64);
+  const dotTexture =
+    loadAssetTexture(galaxyTextureUrls.dustSprite, {
+      colorSpace: THREE.SRGBColorSpace,
+      wrapS: THREE.ClampToEdgeWrapping,
+      wrapT: THREE.ClampToEdgeWrapping,
+      flipY: false,
+    }) ?? createSoftCircleTexture(64);
   const systemEntries = [...systemPositions.values()];
   const systemRadii = systemEntries.map((p) => Math.sqrt(p.x * p.x + p.z * p.z));
   const meanSystemRadius =
@@ -363,4 +371,3 @@ export const buildGalaxyDust = ({
     },
   };
 };
-

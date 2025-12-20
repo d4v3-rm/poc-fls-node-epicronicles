@@ -5,6 +5,8 @@ import type { RandomFn } from './random';
 import { randomGaussian, randomInRange } from './random';
 import { createNebulaTexture } from './textures';
 import { getSpiralParams } from './layout';
+import { galaxyTextureUrls } from './assets';
+import { loadAssetTexture } from './assetLoader';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
@@ -112,8 +114,15 @@ export const buildGalaxyNebula = ({
   const root = new THREE.Group();
   root.name = 'galaxyNebula';
 
-  const nebulaTexture = createNebulaTexture(random, 384);
-  if (!nebulaTexture) {
+  const nebulaAlpha = createNebulaTexture(random, 384);
+  const nebulaMaps = galaxyTextureUrls.nebulae.map((url) =>
+    loadAssetTexture(url, {
+      colorSpace: THREE.SRGBColorSpace,
+      wrapS: THREE.ClampToEdgeWrapping,
+      wrapT: THREE.ClampToEdgeWrapping,
+    }),
+  );
+  if (!nebulaAlpha && nebulaMaps.length === 0) {
     group.add(root);
     return { update: () => undefined };
   }
@@ -165,9 +174,12 @@ export const buildGalaxyNebula = ({
 
     const colorHex = palette[Math.floor(random() * palette.length)] ?? '#6bd2ff';
     const opacity = 0.08 + random() * 0.12;
+    const mapTexture =
+      nebulaMaps[Math.floor(random() * nebulaMaps.length)] ?? nebulaAlpha ?? undefined;
     const material = markDisposableMaterial(
       new THREE.SpriteMaterial({
-        map: nebulaTexture,
+        map: mapTexture,
+        alphaMap: nebulaAlpha ?? undefined,
         color: new THREE.Color(colorHex),
         transparent: true,
         opacity,
@@ -258,4 +270,3 @@ export const buildGalaxyNebula = ({
     },
   };
 };
-

@@ -3,6 +3,8 @@ import type { GalaxyShape } from '@domain/galaxy/galaxy';
 import { markDisposableMaterial } from '../dispose';
 import type { RandomFn } from './random';
 import { createGalaxyDiscTexture } from './galaxyDiscTexture';
+import { galaxyTextureUrls } from './assets';
+import { loadAssetTexture } from './assetLoader';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
@@ -59,6 +61,30 @@ export const buildGalaxyDisc = ({
   const discRadius = outerRadius * 1.14;
   const geometry = new THREE.PlaneGeometry(discRadius * 2, discRadius * 2, 1, 1);
 
+  const usePhotoDisc = shape === 'circle' || shape === 'spiral';
+  const photoTexture = usePhotoDisc
+    ? loadAssetTexture(galaxyTextureUrls.disc, {
+        colorSpace: THREE.SRGBColorSpace,
+        wrapS: THREE.ClampToEdgeWrapping,
+        wrapT: THREE.ClampToEdgeWrapping,
+      })
+    : null;
+
+  const photoMaterial = photoTexture
+    ? markDisposableMaterial(
+        new THREE.MeshBasicMaterial({
+          map: photoTexture,
+          alphaMap: baseTexture ?? undefined,
+          transparent: true,
+          opacity: 0.6,
+          depthWrite: false,
+          depthTest: true,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        }),
+      )
+    : null;
+
   const baseMaterial = markDisposableMaterial(
     new THREE.MeshBasicMaterial({
       map: baseTexture ?? undefined,
@@ -82,6 +108,15 @@ export const buildGalaxyDisc = ({
       side: THREE.DoubleSide,
     }),
   ) as THREE.MeshBasicMaterial;
+
+  if (photoMaterial) {
+    const photoPlane = new THREE.Mesh(geometry, photoMaterial);
+    photoPlane.name = 'discPhoto';
+    photoPlane.rotation.x = -Math.PI / 2;
+    photoPlane.position.y = -outerRadius * 0.095;
+    photoPlane.renderOrder = -8;
+    root.add(photoPlane);
+  }
 
   const basePlane = new THREE.Mesh(geometry, baseMaterial);
   basePlane.name = 'discBase';
@@ -122,6 +157,7 @@ export const buildGalaxyDisc = ({
   group.add(root);
 
   const base = {
+    photoOpacity: photoMaterial?.opacity ?? 0,
     baseOpacity: baseMaterial.opacity,
     lanesOpacity: lanesMaterial.opacity,
     veilOpacity: veilMaterial.opacity,
@@ -130,6 +166,9 @@ export const buildGalaxyDisc = ({
   return {
     update: (elapsed: number, zoomFactor = 1) => {
       const visibility = clamp(0.22 + zoomFactor * 0.78, 0, 1);
+      if (photoMaterial) {
+        photoMaterial.opacity = base.photoOpacity * visibility;
+      }
       baseMaterial.opacity = base.baseOpacity * visibility;
       lanesMaterial.opacity = base.lanesOpacity * visibility;
       veilMaterial.opacity = base.veilOpacity * visibility;
@@ -140,4 +179,3 @@ export const buildGalaxyDisc = ({
     },
   };
 };
-
