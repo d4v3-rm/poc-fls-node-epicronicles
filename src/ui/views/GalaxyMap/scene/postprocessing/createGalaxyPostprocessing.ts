@@ -8,6 +8,10 @@ import { FilmShader } from 'three/examples/jsm/shaders/FilmShader.js';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import { RGBShiftShader } from 'three/examples/jsm/shaders/RGBShiftShader.js';
 import { VignetteShader } from 'three/examples/jsm/shaders/VignetteShader.js';
+import {
+  createBlackHoleLensingPass,
+  type BlackHoleLensingData,
+} from './blackHoleLensingPass';
 
 const BLOOM = {
   strength: 0.55,
@@ -32,7 +36,7 @@ const CHROMA = {
 export interface GalaxyPostprocessing {
   composer: EffectComposer;
   resize: (width: number, height: number, pixelRatio: number) => void;
-  update: (elapsed: number) => void;
+  update: (elapsed: number, lensing?: BlackHoleLensingData) => void;
 }
 
 export const createGalaxyPostprocessing = ({
@@ -55,6 +59,9 @@ export const createGalaxyPostprocessing = ({
   composer.setSize(width, height);
 
   composer.addPass(new RenderPass(scene, camera));
+
+  const lensingPass = createBlackHoleLensingPass({ width, height });
+  composer.addPass(lensingPass.pass);
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(width, height),
@@ -85,6 +92,7 @@ export const createGalaxyPostprocessing = ({
   const resize = (nextWidth: number, nextHeight: number, nextPixelRatio: number) => {
     composer.setPixelRatio(nextPixelRatio);
     composer.setSize(nextWidth, nextHeight);
+    lensingPass.resize(nextWidth, nextHeight);
     bloomPass.setSize(nextWidth, nextHeight);
     fxaaPass.uniforms.resolution.value.set(
       1 / Math.max(1, nextWidth * nextPixelRatio),
@@ -97,10 +105,10 @@ export const createGalaxyPostprocessing = ({
   return {
     composer,
     resize,
-    update: (elapsed: number) => {
+    update: (elapsed: number, lensing?: BlackHoleLensingData) => {
+      lensingPass.update(elapsed, lensing);
       filmPass.uniforms.time.value = elapsed * 0.75;
       rgbShiftPass.uniforms.angle.value = CHROMA.angle + Math.sin(elapsed * 0.06) * 0.25;
     },
   };
 };
-

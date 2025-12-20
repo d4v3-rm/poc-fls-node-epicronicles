@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { markDisposableMaterial, markDisposableTexture } from '../dispose';
 import type { RandomFn } from './random';
-import { createSoftCircleTexture } from './textures';
+import { galaxyTextureUrls } from './assets';
+import { loadAssetTexture } from './assetLoader';
+import { createAccretionNoiseTexture, createSoftCircleTexture } from './textures';
 
 const diskVertexShader = `
 varying vec2 vUv;
@@ -18,51 +20,68 @@ uniform float uTime;
 uniform float uInnerRadius;
 uniform float uOuterRadius;
 uniform vec3 uInnerColor;
+uniform vec3 uMidColor;
 uniform vec3 uOuterColor;
+uniform sampler2D uNoiseTex;
+uniform vec2 uViewDir;
 
 varying vec2 vUv;
 
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 345.45));
-  p += dot(p, p + 34.345);
-  return fract(p.x * p.y);
-}
-
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  float a = hash(i);
-  float b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0));
-  float d = hash(i + vec2(1.0, 1.0));
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+vec3 temperatureRamp(float t) {
+  vec3 cool = uOuterColor;
+  vec3 mid = uMidColor;
+  vec3 hot = uInnerColor;
+  if (t < 0.5) {
+    return mix(cool, mid, t * 2.0);
+  }
+  return mix(mid, hot, (t - 0.5) * 2.0);
 }
 
 void main() {
   vec2 uv = vUv * 2.0 - 1.0;
   float r = length(uv);
+
+  float ring = smoothstep(uOuterRadius, uOuterRadius - 0.06, r)
+    * smoothstep(uInnerRadius, uInnerRadius + 0.05, r);
+  if (ring < 0.001) {
+    discard;
+  }
+
+  float gradient = clamp(
+    (r - uInnerRadius) / max(0.0001, (uOuterRadius - uInnerRadius)),
+    0.0,
+    1.0
+  );
   float angle = atan(uv.y, uv.x);
+  float speed = mix(2.9, 0.7, gradient);
+  float swirl = angle + uTime * speed;
 
-  float outerEdge = smoothstep(uOuterRadius, uOuterRadius - 0.04, r);
-  float innerEdge = smoothstep(uInnerRadius, uInnerRadius + 0.05, r);
-  float ring = outerEdge * innerEdge;
-  if (ring < 0.001) discard;
+  vec2 swirlUv = vec2(cos(swirl), sin(swirl)) * (1.8 + gradient * 4.6);
+  vec2 noiseUv = swirlUv * 0.18 + vec2(uTime * 0.025, -uTime * 0.018);
+  vec3 noise = texture2D(uNoiseTex, noiseUv).rgb;
+  vec3 noiseFine = texture2D(
+    uNoiseTex,
+    noiseUv * 2.6 + vec2(-uTime * 0.04, uTime * 0.033)
+  ).rgb;
 
-  float t = uTime * 0.25;
-  float swirl = sin(angle * 12.0 + r * 22.0 - t * 9.0);
-  float n = noise(vec2(angle * 1.8, r * 3.2 + t * 0.9));
-  float turb = noise(vec2(angle * 4.2 - t * 1.4, r * 10.0 + t * 0.6));
-  float gradient = clamp((r - uInnerRadius) / max(0.001, (uOuterRadius - uInnerRadius)), 0.0, 1.0);
+  float filament = smoothstep(0.18, 0.95, noise.r) * (0.6 + 0.4 * noiseFine.g);
+  float clump = smoothstep(0.3, 0.9, noise.b);
 
-  vec3 base = mix(uInnerColor, uOuterColor, gradient);
-  base *= 0.85 + 0.25 * turb;
-  float doppler = 0.62 + 0.38 * sin(angle - t * 2.35);
-  float filaments = (0.22 + 0.78 * abs(swirl)) * (0.7 + 0.3 * n) * (0.75 + 0.25 * turb);
-  float innerGlow = smoothstep(uInnerRadius + 0.07, uInnerRadius, r);
-  float intensity = ring * filaments * doppler;
-  intensity += ring * innerGlow * (1.05 - gradient) * 0.55;
-  intensity = clamp(intensity, 0.0, 1.0);
+  vec2 viewDir = normalize(uViewDir);
+  vec2 tangent = normalize(vec2(-uv.y, uv.x));
+  float doppler = clamp(dot(tangent, viewDir), -1.0, 1.0);
+  float beaming = pow(1.0 + 0.55 * doppler, 2.1);
+
+  float radial = mix(0.65, 1.35, pow(1.0 - gradient, 1.65));
+  float flicker = 0.9 + 0.1 * sin(uTime * 1.4 + angle * 6.0 + r * 14.0);
+  float intensity = ring * radial * filament * beaming * (0.7 + 0.3 * clump) * flicker;
+
+  float innerGlow = smoothstep(uInnerRadius + 0.035, uInnerRadius, r);
+  intensity += innerGlow * 0.55;
+
+  float heat = pow(1.0 - gradient, 0.35);
+  vec3 base = temperatureRamp(heat);
+  base *= 0.8 + 0.2 * noiseFine.r;
 
   gl_FragColor = vec4(base * intensity, intensity);
 }
@@ -83,9 +102,10 @@ export const buildBlackHole = ({
   root.name = 'blackHole';
 
   const horizonRadius = Math.max(14, innerVoidRadius * 0.18);
-  const diskOuterWorld = Math.max(horizonRadius * 4.6, innerVoidRadius * 0.7);
-  const diskInnerWorld = horizonRadius * 1.35;
+  const diskOuterWorld = Math.max(horizonRadius * 4.8, innerVoidRadius * 0.72);
+  const diskInnerWorld = horizonRadius * 1.32;
   const innerRadius = diskInnerWorld / diskOuterWorld;
+  const lensingRadius = Math.min(horizonRadius * 7.2, diskOuterWorld * 0.65);
 
   const horizonMaterial = markDisposableMaterial(
     new THREE.MeshStandardMaterial({
@@ -96,7 +116,7 @@ export const buildBlackHole = ({
     }),
   );
   const horizon = new THREE.Mesh(
-    new THREE.SphereGeometry(horizonRadius, 32, 32),
+    new THREE.SphereGeometry(horizonRadius, 48, 48),
     horizonMaterial,
   );
   horizon.name = 'eventHorizon';
@@ -104,14 +124,21 @@ export const buildBlackHole = ({
   horizon.receiveShadow = false;
   root.add(horizon);
 
+  const noiseTexture = createAccretionNoiseTexture(random, 512);
+  const viewDir = new THREE.Vector2(0, 1);
+  const tempCameraLocal = new THREE.Vector3();
+
   const diskMaterial = markDisposableMaterial(
     new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uInnerRadius: { value: innerRadius },
         uOuterRadius: { value: 0.98 },
-        uInnerColor: { value: new THREE.Color('#d6f3ff') },
-        uOuterColor: { value: new THREE.Color('#ffb36b') },
+        uInnerColor: { value: new THREE.Color('#d9f7ff') },
+        uMidColor: { value: new THREE.Color('#ffe2b8') },
+        uOuterColor: { value: new THREE.Color('#ff8b5c') },
+        uNoiseTex: { value: noiseTexture },
+        uViewDir: { value: viewDir },
       },
       vertexShader: diskVertexShader,
       fragmentShader: diskFragmentShader,
@@ -122,7 +149,7 @@ export const buildBlackHole = ({
       side: THREE.DoubleSide,
     }),
   ) as THREE.ShaderMaterial;
-  const baseDiskOpacity = 1;
+  const baseDiskOpacity = 0.95;
 
   const disk = new THREE.Mesh(
     new THREE.PlaneGeometry(diskOuterWorld * 2, diskOuterWorld * 2, 1, 1),
@@ -130,17 +157,35 @@ export const buildBlackHole = ({
   );
   disk.name = 'accretionDisk';
   disk.rotation.x = -Math.PI / 2;
-  disk.position.y = 0.25;
+  disk.position.y = 0.22;
   disk.renderOrder = 8;
+  disk.onBeforeRender = (_renderer, _scene, camera) => {
+    tempCameraLocal.copy(camera.position);
+    disk.worldToLocal(tempCameraLocal);
+    viewDir.set(tempCameraLocal.x, tempCameraLocal.y);
+    if (viewDir.lengthSq() < 0.001) {
+      viewDir.set(0, 1);
+    } else {
+      viewDir.normalize();
+    }
+    diskMaterial.uniforms.uViewDir.value.copy(viewDir);
+  };
   root.add(disk);
 
   const glowTexture = createSoftCircleTexture(256);
-  const haloBaseOpacity = 0.18;
-  if (glowTexture) {
+  const haloTexture =
+    loadAssetTexture(galaxyTextureUrls.dustSprite, {
+      colorSpace: THREE.SRGBColorSpace,
+      wrapS: THREE.ClampToEdgeWrapping,
+      wrapT: THREE.ClampToEdgeWrapping,
+      flipY: false,
+    }) ?? glowTexture;
+  const haloBaseOpacity = 0.22;
+  if (haloTexture) {
     const haloMaterial = markDisposableMaterial(
       new THREE.SpriteMaterial({
-        map: glowTexture,
-        color: new THREE.Color('#6bd2ff'),
+        map: haloTexture,
+        color: new THREE.Color('#8bdcff'),
         transparent: true,
         opacity: haloBaseOpacity,
         depthWrite: false,
@@ -150,37 +195,39 @@ export const buildBlackHole = ({
     ) as THREE.SpriteMaterial;
     const halo = new THREE.Sprite(haloMaterial);
     halo.name = 'lensingHalo';
-    const haloSize = diskOuterWorld * 3.2;
+    const haloSize = diskOuterWorld * 3.6;
     halo.scale.set(haloSize, haloSize, 1);
     halo.position.y = 8 + innerVoidRadius * 0.02;
     halo.renderOrder = 6;
     root.add(halo);
   }
 
+  const coronaTexture = glowTexture ?? haloTexture;
+  const coronaBaseOpacity = 0.24;
+  if (coronaTexture) {
+    const coronaMaterial = markDisposableMaterial(
+      new THREE.SpriteMaterial({
+        map: coronaTexture,
+        color: new THREE.Color('#ffd7b4'),
+        transparent: true,
+        opacity: coronaBaseOpacity,
+        depthWrite: false,
+        depthTest: true,
+        blending: THREE.AdditiveBlending,
+      }),
+    ) as THREE.SpriteMaterial;
+    const corona = new THREE.Sprite(coronaMaterial);
+    corona.name = 'coronaGlow';
+    const coronaSize = diskOuterWorld * 1.6;
+    corona.scale.set(coronaSize, coronaSize, 1);
+    corona.position.y = 1.6;
+    corona.renderOrder = 7;
+    root.add(corona);
+  }
+
   const rimMaterial = markDisposableMaterial(
     new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#ff7b6b'),
-      transparent: true,
-      opacity: 0.09,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-    }),
-  );
-  const baseRimOpacity = rimMaterial.opacity;
-  const rim = new THREE.Mesh(
-    new THREE.RingGeometry(diskOuterWorld * 0.92, diskOuterWorld * 1.2, 72),
-    rimMaterial,
-  );
-  rim.name = 'diskRim';
-  rim.rotation.x = -Math.PI / 2;
-  rim.position.y = 0.2;
-  rim.renderOrder = 5;
-  root.add(rim);
-
-  const ringMaterial = markDisposableMaterial(
-    new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#cfeaff'),
+      color: new THREE.Color('#ffc38c'),
       transparent: true,
       opacity: 0.12,
       depthWrite: false,
@@ -188,14 +235,35 @@ export const buildBlackHole = ({
       side: THREE.DoubleSide,
     }),
   );
+  const baseRimOpacity = rimMaterial.opacity;
+  const rim = new THREE.Mesh(
+    new THREE.RingGeometry(diskOuterWorld * 0.88, diskOuterWorld * 1.25, 96),
+    rimMaterial,
+  );
+  rim.name = 'diskRim';
+  rim.rotation.x = -Math.PI / 2;
+  rim.position.y = 0.16;
+  rim.renderOrder = 5;
+  root.add(rim);
+
+  const ringMaterial = markDisposableMaterial(
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color('#fff1d8'),
+      transparent: true,
+      opacity: 0.2,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+    }),
+  );
   const basePhotonOpacity = ringMaterial.opacity;
   const photonRing = new THREE.Mesh(
-    new THREE.RingGeometry(horizonRadius * 1.02, horizonRadius * 1.3, 60),
+    new THREE.RingGeometry(horizonRadius * 1.06, horizonRadius * 1.55, 96),
     ringMaterial,
   );
   photonRing.name = 'photonRing';
   photonRing.rotation.x = -Math.PI / 2;
-  photonRing.position.y = 0.28;
+  photonRing.position.y = 0.24;
   photonRing.renderOrder = 9;
   root.add(photonRing);
 
@@ -209,9 +277,9 @@ export const buildBlackHole = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
     g.addColorStop(0, 'rgba(255,255,255,0)');
-    g.addColorStop(0.18, 'rgba(255,255,255,0.55)');
-    g.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-    g.addColorStop(0.82, 'rgba(255,255,255,0.55)');
+    g.addColorStop(0.2, 'rgba(200,230,255,0.55)');
+    g.addColorStop(0.5, 'rgba(150,210,255,0.16)');
+    g.addColorStop(0.8, 'rgba(200,230,255,0.55)');
     g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -238,12 +306,13 @@ export const buildBlackHole = ({
   };
 
   const jetTexture = createJetTexture();
-  const jetBaseOpacity = 0.22;
+  const jetBaseOpacity = 0.18;
+  let jetMaterial: THREE.MeshBasicMaterial | null = null;
   if (jetTexture) {
-    const jetMaterial = markDisposableMaterial(
+    jetMaterial = markDisposableMaterial(
       new THREE.MeshBasicMaterial({
         map: jetTexture,
-        color: new THREE.Color('#6bd2ff'),
+        color: new THREE.Color('#88d8ff'),
         transparent: true,
         opacity: jetBaseOpacity,
         depthWrite: false,
@@ -253,8 +322,8 @@ export const buildBlackHole = ({
       }),
     ) as THREE.MeshBasicMaterial;
 
-    const jetLength = Math.max(diskOuterWorld * 3.2, innerVoidRadius * 1.25);
-    const jetRadius = Math.max(horizonRadius * 0.55, diskOuterWorld * 0.12);
+    const jetLength = Math.max(diskOuterWorld * 3.8, innerVoidRadius * 1.4);
+    const jetRadius = Math.max(horizonRadius * 0.5, diskOuterWorld * 0.1);
     const jetGeometry = new THREE.ConeGeometry(jetRadius, jetLength, 18, 1, true);
 
     const jetUp = new THREE.Mesh(jetGeometry, jetMaterial);
@@ -275,35 +344,37 @@ export const buildBlackHole = ({
 
   group.add(root);
 
+  const halo = root.getObjectByName('lensingHalo') as THREE.Sprite | null;
+  const corona = root.getObjectByName('coronaGlow') as THREE.Sprite | null;
+
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = Math.min(1, Math.max(0, 0.28 + zoomFactor * 0.72));
+      const visibility = Math.min(1, Math.max(0, 0.6 + (1 - zoomFactor) * 0.4));
       diskMaterial.uniforms.uTime.value = elapsed;
       diskMaterial.opacity = baseDiskOpacity * visibility;
-      disk.rotation.z = elapsed * 0.08;
-      rim.rotation.z = elapsed * -0.03;
+      disk.rotation.z = elapsed * 0.04;
+      rim.rotation.z = elapsed * -0.018;
       rimMaterial.opacity = baseRimOpacity * visibility;
-      photonRing.rotation.z = elapsed * 0.05;
+      photonRing.rotation.z = elapsed * 0.06;
       ringMaterial.opacity = basePhotonOpacity * visibility;
-      const halo = root.getObjectByName('lensingHalo') as THREE.Sprite | null;
-      if (halo) {
+
+      if (halo?.material instanceof THREE.SpriteMaterial) {
         halo.material.opacity =
-          (0.14 + Math.sin(elapsed * 0.8 + root.rotation.y) * 0.03) *
-          visibility *
-          (haloBaseOpacity / 0.18);
+          (haloBaseOpacity + Math.sin(elapsed * 0.6 + root.rotation.y) * 0.03) *
+          visibility;
       }
-      const jetUp = root.getObjectByName('jetUp') as THREE.Mesh | null;
-      const jetDown = root.getObjectByName('jetDown') as THREE.Mesh | null;
-      if (jetUp?.material instanceof THREE.MeshBasicMaterial) {
-        const pulse = jetBaseOpacity + Math.sin(elapsed * 0.9) * 0.04;
-        jetUp.material.opacity = pulse * visibility;
-        if (jetDown?.material instanceof THREE.MeshBasicMaterial) {
-          jetDown.material.opacity = pulse * visibility;
-        }
+      if (corona?.material instanceof THREE.SpriteMaterial) {
+        corona.material.opacity =
+          (coronaBaseOpacity + Math.sin(elapsed * 0.85) * 0.03) * visibility;
+      }
+      if (jetMaterial) {
+        const pulse = jetBaseOpacity + Math.sin(elapsed * 0.9) * 0.035;
+        jetMaterial.opacity = pulse * visibility;
       }
     },
     horizonRadius,
     diskOuterWorld,
+    lensingRadius,
+    object: root,
   };
 };
-

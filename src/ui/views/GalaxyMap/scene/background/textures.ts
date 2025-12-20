@@ -1,9 +1,12 @@
 import {
   CanvasTexture,
   ClampToEdgeWrapping,
+  DataTexture,
+  LinearFilter,
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three';
+import { createNoise2D } from 'simplex-noise';
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import { markDisposableTexture } from '../dispose';
 import type { RandomFn } from './random';
@@ -96,6 +99,50 @@ export const createNebulaTexture = (random: RandomFn, size = 256) => {
   return texture;
 };
 
+export const createAccretionNoiseTexture = (random: RandomFn, size = 512) => {
+  const noise2D = createNoise2D(random);
+  const data = new Uint8Array(size * size * 4);
+  const baseScale = 1 / Math.max(1, size);
+
+  const fbm = (x: number, y: number, baseFrequency: number, octaves = 4) => {
+    let amplitude = 1;
+    let frequency = baseFrequency;
+    let value = 0;
+    let norm = 0;
+    for (let i = 0; i < octaves; i += 1) {
+      value += amplitude * noise2D(x * frequency, y * frequency);
+      norm += amplitude;
+      amplitude *= 0.5;
+      frequency *= 2;
+    }
+    return norm > 0 ? value / norm : 0;
+  };
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const nx = (x - size * 0.5) * baseScale;
+      const ny = (y - size * 0.5) * baseScale;
+      const coarse = 0.5 + 0.5 * fbm(nx, ny, 1.6, 4);
+      const fine = 0.5 + 0.5 * fbm(nx, ny, 5.2, 3);
+      const ridge = 1 - Math.abs(fine * 2 - 1);
+
+      const idx = (y * size + x) * 4;
+      data[idx] = Math.round(Math.min(1, Math.max(0, coarse)) * 255);
+      data[idx + 1] = Math.round(Math.min(1, Math.max(0, fine)) * 255);
+      data[idx + 2] = Math.round(Math.min(1, Math.max(0, ridge)) * 255);
+      data[idx + 3] = 255;
+    }
+  }
+
+  const texture = markDisposableTexture(new DataTexture(data, size, size));
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.minFilter = LinearFilter;
+  texture.magFilter = LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+};
+
 export const createStarfieldTexture = (
   random: RandomFn,
   width = 1024,
@@ -176,4 +223,3 @@ export const createStarfieldTexture = (
   texture.needsUpdate = true;
   return texture;
 };
-

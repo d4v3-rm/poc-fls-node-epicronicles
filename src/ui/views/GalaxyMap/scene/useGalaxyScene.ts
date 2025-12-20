@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { useGalaxySceneSetup } from './useGalaxySceneSetup';
+import type { BlackHoleLensingData } from './postprocessing/blackHoleLensingPass';
 
 // Hook that owns the render loop for the Three.js scene.
 export interface GalaxySceneContext {
@@ -15,7 +16,7 @@ export interface GalaxySceneContext {
   clock: THREE.Clock;
   backgroundGroup: THREE.Group;
   systemGroup: THREE.Group;
-  postprocessingUpdate?: (elapsed: number) => void;
+  postprocessingUpdate?: (elapsed: number, lensing?: BlackHoleLensingData) => void;
 }
 
 interface UseGalaxySceneOptions {

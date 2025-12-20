@@ -81,6 +81,11 @@ export const buildGalaxyBackground = ({
   });
 
   group.userData = group.userData ?? {};
+  group.userData.blackHole = {
+    object: blackHole.object,
+    lensingRadius: blackHole.lensingRadius,
+    horizonRadius: blackHole.horizonRadius,
+  };
   group.userData.update = (elapsed: number, zoomFactor = 1) => {
     starfield.update(elapsed);
     disc.update(elapsed, zoomFactor);
@@ -90,4 +95,3 @@ export const buildGalaxyBackground = ({
     nebula.update(elapsed, zoomFactor);
   };
 };
-
