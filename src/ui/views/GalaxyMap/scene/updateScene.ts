@@ -72,15 +72,18 @@ const getBlackHoleLensing = (
     return undefined;
   }
 
-  const zoomIntensity = Math.max(0, 1 - zoomFactor);
-  const strength = 0.2 + 0.55 * zoomIntensity;
+  const zoomFade = THREE.MathUtils.smoothstep(zoomFactor, 0.45, 0.9);
+  if (zoomFade <= 0.02) {
+    return undefined;
+  }
+  const strength = 0.1 + 0.65 * zoomFade;
 
   const edgeMargin = 0.2;
   const edgeDistance = Math.max(
     Math.max(0, Math.abs(lensingNdc.x) - 1),
     Math.max(0, Math.abs(lensingNdc.y) - 1),
   );
-  const opacity = 1 - Math.min(1, edgeDistance / edgeMargin);
+  const opacity = (1 - Math.min(1, edgeDistance / edgeMargin)) * zoomFade;
   if (opacity <= 0) {
     return undefined;
   }
