@@ -79,7 +79,7 @@ const BlackHoleLensingShader = {
       warped.g = texture2D(tDiffuse, warpedUv).g;
       warped.b = texture2D(tDiffuse, warpedUv - chroma).b;
 
-      float shadow = smoothstep(horizon * 1.05, horizon * 0.85, dist);
+      float shadow = smoothstep(horizon * 0.92, horizon * 1.05, dist);
       warped *= shadow;
 
       float ring = smoothstep(radius * 0.86, radius * 0.96, dist)
@@ -89,7 +89,8 @@ const BlackHoleLensingShader = {
 
       vec3 ringGlow = uRingColor * ring * (1.2 + 0.2 * sin(uTime * 0.9));
       vec3 photonGlow = uPhotonColor * photon * (1.4 + 0.2 * sin(uTime * 1.3));
-      vec3 effect = warped + ringGlow + photonGlow;
+      vec3 effect = mix(base, warped, lensMask);
+      effect += ringGlow + photonGlow;
 
       vec3 finalColor = mix(base, effect, clamp(uOpacity, 0.0, 1.0));
       gl_FragColor = vec4(finalColor, 1.0);

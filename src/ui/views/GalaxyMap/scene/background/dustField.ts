@@ -60,18 +60,6 @@ const createDustFieldTexture = ({
     ctx.fill();
   }
 
-  const blurCanvas = document.createElement('canvas');
-  blurCanvas.width = size;
-  blurCanvas.height = size;
-  const blurCtx = blurCanvas.getContext('2d');
-  if (blurCtx) {
-    blurCtx.filter = `blur(${Math.round(size * 0.012)}px)`;
-    blurCtx.drawImage(canvas, 0, 0);
-    ctx.globalCompositeOperation = 'copy';
-    ctx.filter = 'none';
-    ctx.drawImage(blurCanvas, 0, 0);
-  }
-
   const holeRadiusPx = clamp((innerVoidRadius / extent) * half, 0, half);
   if (holeRadiusPx > 1) {
     ctx.globalCompositeOperation = 'destination-out';
@@ -193,4 +181,3 @@ export const buildDustField = ({
     },
   };
 };
-

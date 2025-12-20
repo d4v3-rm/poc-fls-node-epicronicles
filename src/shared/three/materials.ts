@@ -1,17 +1,15 @@
 import * as THREE from 'three';
 
 export const materialCache = {
-  friendly: new THREE.MeshStandardMaterial({ color: 0x74b0ff }),
-  hostile: new THREE.MeshStandardMaterial({ color: 0xff6b6b }),
-  revealed: new THREE.MeshStandardMaterial({
+  friendly: new THREE.MeshBasicMaterial({ color: 0x74b0ff }),
+  hostile: new THREE.MeshBasicMaterial({ color: 0xff6b6b }),
+  revealed: new THREE.MeshBasicMaterial({
     color: 0x4c5e82,
-    emissive: 0x05070d,
     transparent: true,
     opacity: 0.8,
   }),
-  fogged: new THREE.MeshStandardMaterial({
+  fogged: new THREE.MeshBasicMaterial({
     color: 0x1a2132,
-    emissive: 0x05070d,
     transparent: true,
     opacity: 0.5,
   }),
