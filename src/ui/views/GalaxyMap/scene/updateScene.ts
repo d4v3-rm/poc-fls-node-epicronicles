@@ -54,5 +54,15 @@ export const updateScene = (params: SceneUpdateParams) => {
 
   params.updateAnchors(params.ctx.systemGroup, params.scienceAnchors);
   params.updateAnchors(params.ctx.systemGroup, params.fleetAnchors);
-};
 
+  const updateBackground = (params.ctx.backgroundGroup.userData as {
+    update?: (elapsed: number, zoomFactor: number) => void;
+  }).update;
+  if (typeof updateBackground === 'function') {
+    updateBackground(params.elapsed, zoomFactor);
+  }
+
+  if (typeof params.ctx.postprocessingUpdate === 'function') {
+    params.ctx.postprocessingUpdate(params.elapsed);
+  }
+};

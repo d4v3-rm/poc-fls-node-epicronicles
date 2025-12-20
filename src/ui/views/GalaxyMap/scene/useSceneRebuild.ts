@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import type { StarSystem, ScienceShip, Fleet } from '@domain/types';
 import { rebuildScene } from './Scene';
 import { useGalaxyMapContext } from '../context/GalaxyMapContext';
 import { disposeGroupResources } from './dispose';
+import { buildGalaxyBackground } from './background/buildGalaxyBackground';
+import type { GalaxyShape } from '@domain/galaxy/galaxy';
 
 export interface UseSceneRebuildParams {
   systems: StarSystem[];
@@ -15,6 +17,9 @@ export interface UseSceneRebuildParams {
   fleets: Fleet[];
   empireWar: boolean;
   sceneSignature: string;
+  galaxyShape: GalaxyShape;
+  galaxySeed: string;
+  maxSystemRadius: number;
   scienceMaterials: Record<string, THREE.Material>;
   scienceLineMaterials: Record<string, THREE.Material>;
   fleetMaterials: Record<string, THREE.Material>;
@@ -46,6 +51,9 @@ export const useSceneRebuild = ({
   fleets,
   empireWar,
   sceneSignature,
+  galaxyShape,
+  galaxySeed,
+  maxSystemRadius,
   scienceMaterials,
   scienceLineMaterials,
   fleetMaterials,
@@ -62,6 +70,7 @@ export const useSceneRebuild = ({
       anchorResolverRef,
     },
   } = useGalaxyMapContext();
+  const backgroundSignatureRef = useRef<string>('');
   useEffect(() => {
     const group = systemGroupRef.current ?? sceneContext?.systemGroup ?? null;
     if (!sceneContext || !group) {
@@ -106,6 +115,20 @@ export const useSceneRebuild = ({
     anchorResolverRef.current.setup(systemPositionRef.current);
 
     updateAnchorInstances();
+
+    const backgroundGroup = sceneContext.backgroundGroup;
+    const nextBackgroundSignature = `${galaxySeed}:${galaxyShape}:${systems.length}:${Math.round(maxSystemRadius)}`;
+    if (backgroundSignatureRef.current !== nextBackgroundSignature) {
+      backgroundSignatureRef.current = nextBackgroundSignature;
+      disposeGroupResources(backgroundGroup);
+      buildGalaxyBackground({
+        group: backgroundGroup,
+        galaxyShape,
+        galaxySeed,
+        systemPositions: positions,
+        maxSystemRadius,
+      });
+    }
   }, [
     sceneContext,
     systems,
@@ -118,6 +141,9 @@ export const useSceneRebuild = ({
     shipDesignLookup,
     empireWar,
     sceneSignature,
+    galaxyShape,
+    galaxySeed,
+    maxSystemRadius,
     scienceMaterials,
     scienceLineMaterials,
     fleetMaterials,
@@ -127,5 +153,6 @@ export const useSceneRebuild = ({
     sceneSignatureRef,
     scienceAnchorsRef,
     fleetAnchorsRef,
+    backgroundSignatureRef,
   ]);
 };

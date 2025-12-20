@@ -1,10 +1,11 @@
 import {
   Scene,
-  Color,
   PerspectiveCamera,
   WebGLRenderer,
   AmbientLight,
   PointLight,
+  SRGBColorSpace,
+  ACESFilmicToneMapping,
 } from 'three';
 
 export interface SceneSetup {
@@ -16,16 +17,19 @@ export interface SceneSetup {
 
 export const createScene = (container: HTMLDivElement): SceneSetup => {
   const scene = new Scene();
-  scene.background = new Color(0x050a12);
 
   const camera = new PerspectiveCamera(
     45,
     container.clientWidth / container.clientHeight,
     0.1,
-    1000,
+    20000,
   );
 
-  const renderer = new WebGLRenderer({ antialias: true });
+  const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = SRGBColorSpace;
+  renderer.toneMapping = ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 

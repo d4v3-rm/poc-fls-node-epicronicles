@@ -13,7 +13,9 @@ export interface GalaxySceneContext {
   controls: OrbitControls;
   composer: EffectComposer | null;
   clock: THREE.Clock;
+  backgroundGroup: THREE.Group;
   systemGroup: THREE.Group;
+  postprocessingUpdate?: (elapsed: number) => void;
 }
 
 interface UseGalaxySceneOptions {

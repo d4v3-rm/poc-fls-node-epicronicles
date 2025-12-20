@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { createScene } from '@three/scene';
 import { BASE_TILT, MAX_TILT_DOWN } from './constants';
 import type { GalaxySceneContext } from './useGalaxyScene';
+import { createGalaxyPostprocessing } from './postprocessing/createGalaxyPostprocessing';
 
 interface UseGalaxySceneSetupOptions {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -30,7 +28,8 @@ export const useGalaxySceneSetup = ({
     }
 
     const { scene, camera, renderer, dispose } = createScene(container);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 2));
+    const pixelRatio = Math.min(window.devicePixelRatio ?? 1, 2);
+    renderer.setPixelRatio(pixelRatio);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -48,20 +47,30 @@ export const useGalaxySceneSetup = ({
     };
     controls.minAzimuthAngle = -Math.PI;
     controls.maxAzimuthAngle = Math.PI;
-    // controls.target.set(0, 0, 0);
-    // controls.update();
     controls.minPolarAngle = BASE_TILT;
     controls.maxPolarAngle = MAX_TILT_DOWN;
 
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(container.clientWidth, container.clientHeight),
-      0.3,
-      0.5,
-      0.2,
+    controls.target.set(0, 0, 0);
+    const initialDistance = Math.min(
+      maxZoom,
+      Math.max(minZoom, Math.max(170, maxZoom * 0.65)),
     );
-    composer.addPass(bloomPass);
+    camera.position.set(0, initialDistance, 0);
+    camera.lookAt(controls.target);
+    controls.update();
+
+    const postprocessing = createGalaxyPostprocessing({
+      renderer,
+      scene,
+      camera,
+      width: container.clientWidth,
+      height: container.clientHeight,
+      pixelRatio,
+    });
+
+    const backgroundGroup = new THREE.Group();
+    backgroundGroup.name = 'backgroundGroup';
+    scene.add(backgroundGroup);
 
     const systemGroup = new THREE.Group();
     systemGroup.name = 'systemGroup';
@@ -74,25 +83,32 @@ export const useGalaxySceneSetup = ({
       camera,
       renderer,
       controls,
-      composer,
+      composer: postprocessing.composer,
       clock,
+      backgroundGroup,
       systemGroup,
+      postprocessingUpdate: postprocessing.update,
     };
     setContext(ctx);
 
     const handleResize = () => {
+      const nextPixelRatio = Math.min(window.devicePixelRatio ?? 1, 2);
+      renderer.setPixelRatio(nextPixelRatio);
       renderer.setSize(container.clientWidth, container.clientHeight);
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
-      composer?.setSize(container.clientWidth, container.clientHeight);
-      bloomPass.setSize(container.clientWidth, container.clientHeight);
+      postprocessing.resize(
+        container.clientWidth,
+        container.clientHeight,
+        nextPixelRatio,
+      );
     };
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
       controls.dispose();
-      composer?.dispose();
+      postprocessing.composer.dispose();
       dispose();
       setContext(null);
     };
