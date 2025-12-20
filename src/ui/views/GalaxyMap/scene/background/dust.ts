@@ -240,7 +240,7 @@ export const buildGalaxyDust = ({
     count: ambientCount,
     radiusMin: innerVoidRadius,
     radiusMax: outerRadius * 1.35,
-    opacity: 0.22,
+    opacity: 0.35,
     size: 1.2,
     colorMode: 'ambient',
     name: 'ambientStars',
@@ -251,7 +251,7 @@ export const buildGalaxyDust = ({
     count: dustCount,
     radiusMin: innerVoidRadius,
     radiusMax: outerRadius,
-    opacity: 0.5,
+    opacity: 0.72,
     size: 1.8,
     colorMode: 'dust',
     name: 'shapeDust',
@@ -262,7 +262,7 @@ export const buildGalaxyDust = ({
     count: wideDustCount,
     radiusMin: innerVoidRadius,
     radiusMax: outerRadius,
-    opacity: 0.22,
+    opacity: 0.34,
     size: 2.8,
     colorMode: 'dust',
     name: 'shapeDustWide',
@@ -311,7 +311,7 @@ export const buildGalaxyDust = ({
         size: 2.1,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.65,
+        opacity: 0.8,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         vertexColors: true,
@@ -345,7 +345,7 @@ export const buildGalaxyDust = ({
 
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = clamp(0.18 + zoomFactor * 0.82, 0, 1);
+      const visibility = clamp(0.85 + zoomFactor * 0.15, 0, 1);
       ambientMaterial.opacity = clamp(
         (base.ambient + Math.sin(elapsed * 0.12) * 0.03) * visibility,
         0,

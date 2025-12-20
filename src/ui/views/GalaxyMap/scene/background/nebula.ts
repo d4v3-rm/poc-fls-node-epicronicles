@@ -173,7 +173,7 @@ export const buildGalaxyNebula = ({
     });
 
     const colorHex = palette[Math.floor(random() * palette.length)] ?? '#6bd2ff';
-    const opacity = 0.08 + random() * 0.12;
+    const opacity = 0.16 + random() * 0.18;
     const mapTexture =
       nebulaMaps[Math.floor(random() * nebulaMaps.length)] ?? nebulaAlpha ?? undefined;
     const material = markDisposableMaterial(
@@ -205,7 +205,7 @@ export const buildGalaxyNebula = ({
     new THREE.MeshBasicMaterial({
       color: new THREE.Color('#0b1d3a'),
       transparent: true,
-      opacity: 0.18,
+      opacity: 0.28,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
@@ -226,7 +226,7 @@ export const buildGalaxyNebula = ({
     new THREE.MeshBasicMaterial({
       color: new THREE.Color('#2b0b45'),
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.2,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
@@ -247,7 +247,7 @@ export const buildGalaxyNebula = ({
 
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = clamp(0.22 + zoomFactor * 0.78, 0, 1);
+      const visibility = clamp(0.85 + zoomFactor * 0.15, 0, 1);
       root.rotation.y = Math.sin(elapsed * 0.03) * 0.06;
       (hazeMaterial as THREE.MeshBasicMaterial).opacity = clamp(
         baseHazeOpacity * visibility,

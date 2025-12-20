@@ -142,14 +142,14 @@ export const buildDustField = ({
 
   const layerA = makeLayer({
     color: '#6bd2ff',
-    opacity: 0.18,
+    opacity: 0.32,
     scale: 1.05,
     y: -outerRadius * 0.065,
     renderOrder: -2,
   });
   const layerB = makeLayer({
     color: '#d08bff',
-    opacity: 0.12,
+    opacity: 0.24,
     scale: 1.12,
     y: -outerRadius * 0.07 - 6,
     renderOrder: -3,
@@ -167,7 +167,7 @@ export const buildDustField = ({
 
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = clamp(0.22 + zoomFactor * 0.78, 0, 1);
+      const visibility = clamp(0.85 + zoomFactor * 0.15, 0, 1);
       layerAMat.opacity = clamp(
         (base.a + Math.sin(elapsed * 0.06) * 0.025) * visibility,
         0,

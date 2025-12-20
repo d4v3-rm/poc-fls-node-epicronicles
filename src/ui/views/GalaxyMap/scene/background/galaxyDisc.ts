@@ -76,7 +76,7 @@ export const buildGalaxyDisc = ({
           map: photoTexture,
           alphaMap: baseTexture ?? undefined,
           transparent: true,
-          opacity: 0.6,
+          opacity: 0.75,
           depthWrite: false,
           depthTest: true,
           blending: THREE.AdditiveBlending,
@@ -89,7 +89,7 @@ export const buildGalaxyDisc = ({
     new THREE.MeshBasicMaterial({
       map: baseTexture ?? undefined,
       transparent: true,
-      opacity: 0.68,
+      opacity: 0.85,
       depthWrite: false,
       depthTest: true,
       blending: THREE.AdditiveBlending,
@@ -101,7 +101,7 @@ export const buildGalaxyDisc = ({
     new THREE.MeshBasicMaterial({
       map: lanesTexture ?? undefined,
       transparent: true,
-      opacity: 0.44,
+      opacity: 0.6,
       depthWrite: false,
       depthTest: true,
       blending: THREE.AdditiveBlending,
@@ -137,7 +137,7 @@ export const buildGalaxyDisc = ({
     new THREE.MeshBasicMaterial({
       color: new THREE.Color('#152b5a'),
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.22,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
@@ -165,7 +165,7 @@ export const buildGalaxyDisc = ({
 
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = clamp(0.22 + zoomFactor * 0.78, 0, 1);
+      const visibility = clamp(0.85 + zoomFactor * 0.15, 0, 1);
       if (photoMaterial) {
         photoMaterial.opacity = base.photoOpacity * visibility;
       }

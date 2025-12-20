@@ -6,8 +6,8 @@ export const SYSTEM_LABELS_SCALE_BASE_HEIGHT = 120;
 export const SYSTEM_LABELS_SCALE_MIN = 0.45;
 export const SYSTEM_LABELS_SCALE_MAX = 1.4;
 
-export const SYSTEM_RING_OPACITY_BASE = 0.2;
-export const SYSTEM_RING_OPACITY_FACTOR = 0.5;
+export const SYSTEM_RING_OPACITY_BASE = 0.9;
+export const SYSTEM_RING_OPACITY_FACTOR = 0.1;
 
 export const SYSTEM_LABEL_FONT_SIZE = 48;
 export const SYSTEM_LABEL_FONT_FAMILY = 'Inter';
@@ -17,4 +17,3 @@ export const SYSTEM_LABEL_CANVAS_INSET_X = 20;
 export const SYSTEM_LABEL_COLOR = '#e5ecff';
 export const SYSTEM_LABEL_TEXTURE_SCALE = 30;
 export const SYSTEM_LABEL_RENDER_ORDER = 20;
-

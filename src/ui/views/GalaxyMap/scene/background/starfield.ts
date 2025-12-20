@@ -24,11 +24,12 @@ export const buildStarfield = ({ group, random, radius }: BuildStarfieldParams) 
   const material = markDisposableMaterial(
     new THREE.MeshBasicMaterial({
       map: texture ?? undefined,
+      color: new THREE.Color('#dbe9ff'),
       side: THREE.BackSide,
       depthWrite: false,
       depthTest: false,
       transparent: true,
-      opacity: 0.92,
+      opacity: 1,
     }),
   );
 

@@ -11,39 +11,19 @@ const constructorAssets = {
     '../../../../assets/scene/spaceships-constructor/texture_diffuse.png',
     import.meta.url,
   ).href,
-  normal: new URL(
-    '../../../../assets/scene/spaceships-constructor/texture_normal.png',
-    import.meta.url,
-  ).href,
-  roughness: new URL(
-    '../../../../assets/scene/spaceships-constructor/texture_roughness.png',
-    import.meta.url,
-  ).href,
-  metalness: new URL(
-    '../../../../assets/scene/spaceships-constructor/texture_metallic.png',
-    import.meta.url,
-  ).href,
 };
 
 const buildDefaultConstructorModel = () => {
   const body = new THREE.Mesh(
     new THREE.CapsuleGeometry(1.2, 2.4, 4, 6),
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshBasicMaterial({
       color: '#9acfff',
-      emissive: '#18354d',
-      emissiveIntensity: 0.25,
-      metalness: 0.5,
-      roughness: 0.4,
     }),
   );
   const dish = new THREE.Mesh(
     new THREE.ConeGeometry(1.2, 1.4, 10),
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshBasicMaterial({
       color: '#d2e6ff',
-      emissive: '#1a324a',
-      emissiveIntensity: 0.2,
-      metalness: 0.4,
-      roughness: 0.35,
     }),
   );
   dish.position.y = 1.4;
@@ -65,19 +45,11 @@ export const getConstructionShipModel = (() => {
     cache = Promise.all([
       objLoader.loadAsync(constructorAssets.obj),
       textureLoader.loadAsync(constructorAssets.diffuse),
-      textureLoader.loadAsync(constructorAssets.normal),
-      textureLoader.loadAsync(constructorAssets.roughness),
-      textureLoader.loadAsync(constructorAssets.metalness),
     ])
-      .then(([object, diffuse, normal, roughness, metalness]) => {
+      .then(([object, diffuse]) => {
         diffuse.colorSpace = THREE.SRGBColorSpace;
-        const baseMaterial = new THREE.MeshStandardMaterial({
+        const baseMaterial = new THREE.MeshBasicMaterial({
           map: diffuse,
-          normalMap: normal,
-          roughnessMap: roughness,
-          metalnessMap: metalness,
-          metalness: 0.85,
-          roughness: 0.4,
         });
 
         const root = new THREE.Group();
@@ -137,4 +109,3 @@ export const cloneConstructionShip = (base: THREE.Object3D) => {
   });
   return clone;
 };
-
