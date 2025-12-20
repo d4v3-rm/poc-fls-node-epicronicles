@@ -66,6 +66,24 @@ const createRandom = (seed: string) => {
   };
 };
 
+const coreVoidFractionByShape: Record<GalaxyShape, number> = {
+  circle: 0.18,
+  spiral: 0.14,
+  ring: 0.55,
+  bar: 0.12,
+  ellipse: 0.16,
+  cluster: 0.1,
+};
+
+const applyCoreVoid = (value: number, shape: GalaxyShape) => {
+  if (shape === 'ring') {
+    return value;
+  }
+  const core = coreVoidFractionByShape[shape] ?? 0.15;
+  const t = Math.pow(value, 0.85);
+  return core + (1 - core) * t;
+};
+
 const generatePoissonPositions = (
   random: () => number,
   count: number,
@@ -129,7 +147,17 @@ const generatePoissonPositions = (
       py = target.y + (py - target.y) * 0.35 + (random() - 0.5) * 0.12;
     }
 
-    const rNorm = Math.max(0.02, Math.sqrt(px * px + py * py));
+    const dist = Math.sqrt(px * px + py * py);
+    if (dist > 1) {
+      const scale = 1 / Math.max(0.0001, dist);
+      px *= scale;
+      py *= scale;
+    }
+
+    const rNorm = Math.max(
+      0.02,
+      applyCoreVoid(Math.sqrt(px * px + py * py), shape),
+    );
     let baseAngle = Math.atan2(py, px);
 
     if (shape === 'spiral') {
