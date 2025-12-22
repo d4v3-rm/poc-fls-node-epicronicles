@@ -72,7 +72,7 @@ const getBlackHoleLensing = (
     return undefined;
   }
 
-  const zoomFade = THREE.MathUtils.smoothstep(zoomFactor, 0.45, 0.9);
+  const zoomFade = THREE.MathUtils.smoothstep(zoomFactor, 0.65, 0.95);
   if (zoomFade <= 0.02) {
     return undefined;
   }

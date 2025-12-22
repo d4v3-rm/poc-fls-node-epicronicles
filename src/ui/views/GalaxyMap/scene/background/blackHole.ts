@@ -108,13 +108,14 @@ export const buildBlackHole = ({
   const lensingRadius = Math.min(horizonRadius * 7.2, diskOuterWorld * 0.65);
 
   const horizonMaterial = markDisposableMaterial(
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshBasicMaterial({
       color: 0x000000,
-      roughness: 0.9,
-      metalness: 0,
-      emissive: new THREE.Color(0x000000),
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
     }),
-  );
+  ) as THREE.MeshBasicMaterial;
+  const baseHorizonOpacity = horizonMaterial.opacity;
   const horizon = new THREE.Mesh(
     new THREE.SphereGeometry(horizonRadius, 48, 48),
     horizonMaterial,
@@ -349,7 +350,8 @@ export const buildBlackHole = ({
 
   return {
     update: (elapsed: number, zoomFactor = 1) => {
-      const visibility = Math.min(1, Math.max(0, 0.6 + (1 - zoomFactor) * 0.4));
+      const visibility = THREE.MathUtils.smoothstep(zoomFactor, 0.6, 0.95);
+      horizonMaterial.opacity = baseHorizonOpacity * visibility;
       diskMaterial.uniforms.uTime.value = elapsed;
       diskMaterial.opacity = baseDiskOpacity * visibility;
       disk.rotation.z = elapsed * 0.04;
