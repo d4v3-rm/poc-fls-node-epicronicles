@@ -1,5 +1,5 @@
 {
-  "name": "fls-node-epicronicles",
+  "name": "poc-fls-node-epicronicles",
   "private": true,
   "version": "0.135.319",
   "description": "A management-focused space sim with a 3D galaxy map (Vite + React + Three.js + Redux Toolkit).",
@@ -8,7 +8,7 @@
   "homepage": ".",
   "repository": {
     "type": "git",
-    "url": "https://github.com/5h1ngy/fls-node-epicronicles.git"
+    "url": "https://github.com/5h1ngy/poc-fls-node-epicronicles.git"
   },
   "engines": {
     "node": ">=18"
@@ -69,3 +69,4 @@
     "vite": "^7.2.2"
   }
 }
+

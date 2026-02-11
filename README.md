@@ -1,4 +1,4 @@
-# 🌌 fls-node-epicronicles
+# 🌌 poc-fls-node-epicronicles
 
 [![Vite](https://img.shields.io/badge/Bundler-Vite-646CFF?logo=vite&logoColor=fff)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=fff)](https://react.dev/)
@@ -48,4 +48,5 @@ npm run preview   # preview the build
 
 ## 📜 License
 Distributed under the [MIT](LICENSE) license.
+
 
