@@ -5,7 +5,7 @@
   "description": "A management-focused space sim with a 3D galaxy map (Vite + React + Three.js + Redux Toolkit).",
   "license": "MIT",
   "author": "5h1ngy",
-  "homepage": ".",
+  "homepage": "https://d4v3-rm.github.io/poc-fls-node-epicronicles/",
   "repository": {
     "type": "git",
     "url": "https://github.com/5h1ngy/fls-node-epicronicles.git"

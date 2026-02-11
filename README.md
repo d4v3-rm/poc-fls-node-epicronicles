@@ -8,6 +8,8 @@
 
 A management-focused space sim with a 3D galaxy map, Three.js renderer, and a Redux Toolkit game state. The project ships with a dockable HUD, modular panels, and generative assets (nebulae, starfield, black hole).
 
+Live Site: https://d4v3-rm.github.io/poc-fls-node-epicronicles/
+
 ![Galaxy preview](assets/preview.png)
 
 ## ✨ Features
